@@ -4,3 +4,6 @@
 [submodule "WIN16"]
 	path = WIN16
 	url = https://github.com/osfree-project/WIN16
+[submodule "Server"]
+	path = Server
+	url = https://github.com/osfree-project/MVM.git
