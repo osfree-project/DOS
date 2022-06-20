@@ -1,17 +1,16 @@
 #
-# A Makefile for APPEND
+# A Makefile for EXIT_VDM
 # (c) osFree project,
 # author, date
 #
 
 PROJ      = exit_vdm
-TRGT      = $(PROJ).exe
-DESC      = Binary comparison of files
+TRGT      = $(PROJ).com
+DESC      = Exit VDM
 srcfiles  = $(p)exit_vdm$(e)
+COM =1
 
 ADD_COPT  = -i=$(MYDIR)..$(SEP)..$(SEP)include
 ADD_LINKOPT = lib $(BLD)lib$(SEP)dos_shared.lib
 
 !include $(%ROOT)/mk/appsdos.mk
-
-$(PATH)append.exe: .symbolic

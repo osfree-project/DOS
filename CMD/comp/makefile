@@ -10,6 +10,7 @@ DESC      = Binary comparison of files
 #defines object file names in format objname.$(O)
 srcfiles  = $(p)comp$(e)
 COM = 1
+NOLIBS = 1
 
 !include $(%ROOT)/mk/appsdos.mk
 

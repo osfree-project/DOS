@@ -7,12 +7,13 @@
 PROJ      = debug
 TRGT      = $(PROJ).com
 DESC      = DOS debugger
-#defines object file names in format objname.$(O)
+#defines object file names in format $(p)objname$(e)
 srcfiles  = $(p)debug$(e)
 # defines additional options for C compiler
 ADD_ASMOPT  = -dPM=0 -dNASM=0
 ADD_LINKOPT = lib $(%WATCOM)$(SEP)lib286$(SEP)noemu87.lib
 COM = 1
+NOLIBS = 1
 
 !include $(%ROOT)/mk/appsdos.mk
 
@@ -24,4 +25,3 @@ COM = 1
 # rem nasmw debug.asm -D PM=1 -D NASM=1 -O 2 -o debugx.com -l debugx.lst 
 # yasm debug.asm -D PM=1 -D NASM=0 -o debugx.com -l debugx.lst 
 
-$(PATH)debug.exe: .symbolic
