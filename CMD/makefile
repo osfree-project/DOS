@@ -20,9 +20,8 @@ DIRS =   shared    &
          debug     &
          comp      &
          append    &
-         exit_vdm
+         exit_vdm  &
+         edlin
 
 !include $(%ROOT)/mk/all.mk
 
-#TARGETS=subdirs
-#TARGET=all
