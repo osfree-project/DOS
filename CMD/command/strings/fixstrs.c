@@ -875,6 +875,7 @@ srcfiles = ", fdmake);
                 fputs("\n\n\
 # defines additional options for C compiler\n\
 ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
+PLATFORM = host$(SEP)$(%HOST)$(SEP)\n\
 \n\
 !include $(%ROOT)/mk/libsdos.mk\n\
 \n\

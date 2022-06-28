@@ -128,7 +128,9 @@ $(p)err9$(e)
 
 !include $(%ROOT)/mk/libsdos.mk
 
-ADD_COPT   = -ml -dMODEL=l -d2 -db -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
+ADD_COPT   = -ml -dMODEL=l -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) -i=$(MYDIR) -i=$(MYDIR).. &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include &
+  -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
 ADD_ASMOPT = -ml -dMODEL=l -d2 -db  -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)lib.lib

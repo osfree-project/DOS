@@ -11,6 +11,7 @@ LNG = $(MYDIR)..$(SEP)$(LANG).err
 
 DEST = os2
 TARGETS = $(PATH)strings.err
+PLATFORM =
 
 .SUFFIXES: .err
 

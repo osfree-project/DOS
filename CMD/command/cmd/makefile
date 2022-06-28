@@ -19,7 +19,10 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
 
 !include $(%ROOT)/mk/libsdos.mk
 
-ADD_COPT = -ml -d2 -db  -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH) -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include
+ADD_COPT = -ml -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH) &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include &
+  -i=$(MYDIR)..$(SEP)..$(SEP)include
+
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)cmd.lib
 
