@@ -102,10 +102,12 @@ void *malloc(size_t length)
 }
 
 #ifdef __WATCOMC__
+#if 0
 void *_nmalloc(unsigned length) 
 {
   return malloc(length);
 }
+#endif
 #endif
 
 /**
