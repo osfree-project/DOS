@@ -65,7 +65,7 @@ add: version number of strings and logfile entries
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifndef __LINUX_
+#ifndef __LINUX__
 #include <direct.h>
 #endif
 #undef DEBUG
