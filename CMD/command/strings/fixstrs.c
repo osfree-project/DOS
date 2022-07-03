@@ -878,16 +878,15 @@ srcfiles = ", fdmake);
                 fputs("\n\n\
 # defines additional options for C compiler\n\
 ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
-PLATFORM = host$(SEP)$(%HOST)$(SEP)\n\
 \n\
 !include $(%ROOT)/mk/libsdos.mk\n\
 \n\
 TARGETS  = lib\n\
 \n\
-lib: $(PATH)$(TRGT) .symbolic\n\
+lib: $(BLD)$(RELDIR)$(TRGT) .symbolic\n\
 \n\
-$(PATH)$(TRGT): $(OBJS)\n\
- @$(MAKE) $(MAKEOPT) -f $(PATH)makefile.mk library=$(PATH)$(TRGT) library # install\n\
+$(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\
+ @$(MAKE) $(MAKEOPT) -f $(BLD)$(RELDIR)makefile.mk library=$(BLD)$(RELDIR)$(TRGT) library # install\n\
 \n\
 \n", fdmake);
 

@@ -20,10 +20,10 @@ $(PATH)$(PROJ).lnk: .symbolic
 
 $(PATH)$(PROJ).com: $(PATH)shell$(SEP)$(PROJ).exe $(PATH)infores
 !ifneq ENV LINUX
-  @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.exe + $(PATH)criter$(SEP)criter.exe + $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
+  @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.exe + $(PATH)criter$(SEP)criter.exe + $(BLD)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
   @copy $(PATH)command.com $(DEST)
 !else
-  @cat $(PATH)shell$(SEP)command.exe $(PATH)infores $(PATH)criter$(SEP)criter1$(SEP)criter1.exe $(PATH)criter$(SEP)criter.exe $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings$(SEP)strings.dat >$(PATH)command.com
+  @cat $(PATH)shell$(SEP)command.exe $(PATH)infores $(PATH)criter$(SEP)criter1$(SEP)criter1.exe $(PATH)criter$(SEP)criter.exe $(BLD)$(RELDIR)strings$(SEP)strings.dat >$(PATH)command.com
   @cp $(PATH)command.com $(DEST)
 !endif
 
