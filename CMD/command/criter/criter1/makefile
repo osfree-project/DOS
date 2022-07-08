@@ -5,7 +5,7 @@
 #
 
 PROJ = criter1
-TRGT = $(PROJ).exe
+#TRGT = $(PROJ).exe
 DESC = Critical Error & Dummy ^Break handler & Kernel Swap Context
 #defines object file names in format objname.$(O)
 srcfiles = $(p)..$(SEP)criter$(e)
@@ -18,7 +18,7 @@ DEST = none
 
 !include $(%ROOT)/mk/appsdos.mk
 
-TARGETS = $(PATH)context.def
+TARGETS = $(PATH)context.def $(PATH)$(PROJ).exe
 
 .SUFFIXES: .def .x
 

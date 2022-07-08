@@ -5,7 +5,7 @@
 #
 
 PROJ = criter
-TRGT = $(PROJ).exe
+#TRGT = $(PROJ).exe
 DESC = Critical Error & Dummy ^Break handler & Kernel Swap Context
 DIRS = criter1
 #defines object file names in format objname.$(O)
@@ -18,7 +18,7 @@ ADD_LINKOPT = lib suppl.lib
 
 !include $(%ROOT)/mk/appsdos.mk
 
-TARGETS = $(PATH)context.def subdirs
+TARGETS = $(PATH)context.def subdirs $(PATH)$(PROJ).exe
 
 .SUFFIXES: .def .x
 

@@ -6,7 +6,7 @@
 
 32_BITS = 0
 PROJ      = command
-TRGT      = $(PROJ).com
+#TRGT      = $(PROJ).com
 DESC      = DOS command interpreter
 
 DIRS = strings criter cmd suppl lib shell utils
@@ -14,7 +14,7 @@ DEST = os2$(SEP)mdos
 
 !include $(%ROOT)/mk/all.mk
 
-#TARGETS=$(PATH)$(PROJ).com
+TARGETS=$(PATH)$(PROJ).com
 
 $(PATH)$(PROJ).lnk: .symbolic
 
