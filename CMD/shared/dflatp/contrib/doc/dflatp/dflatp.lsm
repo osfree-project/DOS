@@ -1,0 +1,15 @@
+Begin3
+Title:          FreeDOS DFlat+
+Version:        1.0.0
+Entered-date:   04/sep/2008
+Description:    Text user interface programming libraries for FreeDOS
+Keywords:       FreeDOS TUI interface library
+Author:         Dr. Dobb's Journal
+Maintained-by:  Aitor Santamar¡a-Merino <aitor.sm (#) gmail.com>
+Primary-site:   http://www.freedos.org/
+Alternate-site: http://www.freedos.org/
+Original-site:  
+Platforms:      DOS (Borland C / OpenWatcom C/C++)
+Copying-policy: GPL or special L-GPL
+End
+

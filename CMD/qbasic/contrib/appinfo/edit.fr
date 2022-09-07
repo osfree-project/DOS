@@ -1,0 +1,7 @@
+Begin3
+Language:    FR, 850, French (Standard)
+Title:       FreeDOS Edit
+Description: L'Çditeur de texte de FreeDOS
+Summary:     L'Çditeur de texte de FreeDOS.
+Keywords:    êditer êditeur
+End

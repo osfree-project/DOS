@@ -1,0 +1,198 @@
+     FreeDOS DFlat+ Source Reference and ClassChart
+     ==============================================
+
+  ===========================================================================
+
+   Enumeration of DFlat+ code, and Class chart (tree)
+
+   Copyright (C) 2008 by Aitor SANTAMARIA_MERINO
+   aitor.sm@gmail.com
+
+   Version  : 1.00
+   Last edit: 2007-12-29 (ASM)
+   Size     : 
+
+  ===========================================================================
+
+   DISCLAIMER:
+
+   THIS MATERIAL IS PROVIDED "AS IS"! USE AT YOUR OWN RISK! NO WARRANTIES,
+   NEITHER EXPRESSED NOR IMPLIED! I cannot be held responsible for any
+   problems caused by use or misuse of the software and/or information!
+
+
+   INDEX
+   1.- Compiling DFlat+
+   2.- Source files
+   3.- Class chart
+   
+   
+   1.- Compiling DFlat+
+   =====================
+   
+DFlat+ can be dual compiled with either a Borland C (Borland C/C++, TurboC/C++)
+or the Open Watcom C/C++ compiler.
+
+Before you can use the included BUILD utility, you must:
+
+   1.- Check that you have either a Borland C/C++ compiler installed, or the
+       OpenWatcom C/C++ compiler installed.
+   2.- Check that you have a MAKE utility installed (OWC brings one).
+   3.- Tune the MAKEFILE (DFLATP.MAK or DFLATP.WMK)
+   4.- Tune the BUILD utility (BUILD.BAT)
+   
+In order to tune the MAKEFILE, you must edit the initial entries of the file
+(Programmer Customizable Values section), including paths to where your tools
+are.
+
+For each compiler, the Makefile allows you to include a two-letter library ID,
+that will help you to have different compilers of the library.
+
+The output is the place where the LIB and the corresponding .H files will be
+created.
+
+--- Example:
+We have a Borland family compiler, we fill in the variables in the makefile
+like this:
+
+# Borland family compiler
+DRIVE = \borlandc
+CC = $(DRIVE)\bin\bcc
+LINKER= $(DRIVE)\bin\tlink
+LIB = $(DRIVE)\bin\tlib
+
+# Placement for the LIBraries, INCludes and BINaries
+OUTPATH_LIB = \FreeDOS\SOURCE\LIB
+OUTPATH_INC = \FreeDOS\SOURCE\INC
+OUTPATH_BIN = \FreeDOS\BIN
+
+And at the BUILD.BAT:
+
+SET BMAKETOOL=\borlandc\bin\make
+--- End of example
+
+In order to run the makefile we do:
+
+BUILD [<target>]
+
+or for OWC:
+
+BUILD <target> OWC
+
+Our makefile will therefore create the following files at C:\FREEDOS\LIB:
+
+Case of BorlandC:
+
+DFLATPLB.LIB    -  Main DFlat+ library file
+DTOOLSLB.LIB    -  DFlat+ Tools
+DDNLOGLB.LIB    -  DFlat+ DEBUG: No log
+DDLOGLB.LIB     -  DFlat+ DEBUG: legacy logging
+DDLOGRLB.LIB    -  DFlat+ DEBUG: new logger
+
+Case of OpenWatcom C/C++:
+
+DFLATPLO.LIB    -  Main DFlat+ library file
+DTOOLSLO.LIB    -  DFlat+ Tools
+DDNLOGLO.LIB    -  DFlat+ DEBUG: No log
+DDLOGLO.LIB     -  DFlat+ DEBUG: legacy logging
+DDLOGRLO.LIB    -  DFlat+ DEBUG: new logger
+
+and will also create in either case the required include files
+at C:\FREEDOS\INC:
+
+DFLATP.H        -  DFlat+ API include
+RESOURCE.H      -  DFlat+ Resource include
+DFPTOOLS.H      -  DFlat+ Tools include
+KEYS.H          -  DFlat+ keys naming reference
+COMMANDS.H      -  DFlat+ COMMANDs reference
+CLASSES.H       -  DFlat+ Classes reference
+DFLATMSG.H      -  DFlat+ Message reference
+DFPCORE.H       -  Other includes
+SYSTEM.H
+PORTAB.H
+DIALBOX.H
+MENU.H
+
+
+   2.- SOURCE FILES
+   ================
+
+The following are the source files for DFlat+:
+
+Buliding tools:
+  DFLATP.MAK    - Makefile for Borland C/C++
+  DFLATP.WMC    - Makefile for OpenWatcom C/C++
+  BUILD.BAT     - Build utility
+
+DFlat+ compiling includes:
+  DFPCOMP.H     - Main DFlat+ compiling include
+  SYSINT.H      - System routines include (internal)
+  VIDEO.H       - Video routines include
+
+System sources:
+  VIDEO.C       - Video adapter interface routines
+  CONSOLE.C     - Console interface routines
+  KEYS.C        - Keys name strings
+  MOUSE.C       - Mouse interface routines
+
+User interface sources:
+  MAIN.C        - DFlat+ application main entry point hook
+  DFALLOC.C     - User Interface allocation
+  MESSAGE.C     - Message and event management
+  WINDOW.C      - Generic Window routines
+  LISTS.C       - Window lists manipulation
+  RECT.C        - Window and Rect interoperation
+  MENU.C        - Menu routines
+  SYSMENU.C     - Window menu
+  COMMDLG.C     - Common dialogs: file open/save, display properties, etc.
+  DIRECT.C      - Common dialogs helper for directory retrieval
+  CLIPBRD.C     - Clipboard routines
+  SYSHELP.C     - Help routines installation hook
+  
+
+DFlat+ Resources:
+  SYSTEMRS.RS   - System resources: system menu, common dialogs, etc.
+
+User interface classes (see next section):
+  
+
+   3.- CLASSCHART
+   ==============
+   
+                       -------------
+                       | NORMAL    |
+                       | (normal.c)|
+                       -------------
+                             |
+      /--------------------------------------------------------\
+      |             |              |               |           |
+ -------------   --------------  -------------  ---------- -------------
+ |TEXTBOX    |   | APPLICATION|  | MENUBAR   |  |  BOX   | |DIALOG     |
+ |(textbox.c)|   |(applicat.c)|  |(menubar.c)|  |(box.c) | |(dialbox.c)|
+ -------------   --------------  -------------  ---------- -------------
+       |                                                         |
+       |---------------------------\      /-------------------------\
+       |          |                |      |                         |
+       |   --------------- ------------  -------------    --------------
+       |   | PICTUREBOX  | | BUTTON   |  |ERRORBOX   |    |MESSAGEBOX  |
+       |   |(pictbox.c)  | |(button.c)|  |(msgbox.c) |    |(msgbox.c)  |
+       |   --------------- ------------  -------------    --------------
+       |
+ /-----------------------------------------------------------------------\
+ |             |              |              |              |            |
+------------- ---------- ------------- -------------- ------------- ------------
+|LISTBOX    | |TEXT    | |RADIOBUTTON| |CHECKBOX    | |STATUSBAR  | |EDITBOX   |
+|(listbox.c)| |(text.c)| |(radio.c)  | |(checkbox.c)| |(statbar.c)| |(editbox.c|
+------------- ---------- ------------- -------------- ------------- |search.c) |
+         |                                                          ------------
+     /--------------------\                                             |
+  -------------     --------------                              ---------------
+  |POPDOWNMENU|     |SPINBUTTON  |                              |COMBOBOX     |
+  |(popdown.c)|     |(spinbutt.c)|                              |(combobox.c) |
+  -------------     --------------                              ---------------
+  
+
+
+(Inproper classes: DUMMY, TITLEBAR, HELPBOX)
+
+
