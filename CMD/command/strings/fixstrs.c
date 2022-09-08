@@ -883,6 +883,10 @@ ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
 \n\
 TARGETS  = lib\n\
 \n\
+.c: $(PATH)\n\
+\n\
+.h: $(PATH)\n\
+\n\
 lib: $(BLD)$(RELDIR)$(TRGT) .symbolic\n\
 \n\
 $(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\

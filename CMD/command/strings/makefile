@@ -25,19 +25,20 @@ PLATFORM =
 
 !include $(%ROOT)/mk/tools.mk
 
-TARGETS = $(PATH)$(PROJ).exe $(BLD)$(RELDIR)strings.h subdirs $(BLD)lib$(SEP)strings.lib
+TARGETS = $(PATH)$(PROJ).exe $(BLD)$(RELDIR)strings.h subdirs $(BLD)lib$(SEP)$(TRGT)
 #INSTALL = $(BLD)lib$(SEP)strings.lib
 
 $(PATH)$(PROJ).exe:
 
-$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)$(SEP)strings.lib: .symbolic
-$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings.lib: .symbolic
+$(BLD)$(RELDIR)$(TRGT): .symbolic
+#$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings.lib: .symbolic
+#$(BLD)lib$(SEP)strings.lib: .symbolic
 
 $(BLD)$(RELDIR)strings.h : $(MYDIR)default.lng $(PATH)$(PROJ).exe
  @$(PATH)$(PROJ).exe /lib /dir $(BLD)$(RELDIR) $(LNG)
 
-$(BLD)$(RELDIR)strings.lib: $(BLD)$(RELDIR)makefile.mk
+$(BLD)$(RELDIR)$(TRGT): $(BLD)$(RELDIR)makefile.mk
  @$(MAKE) $(MAKEOPT) -f $< lib
 
-$(BLD)lib$(SEP)strings.lib: $(BLD)$(RELDIR)strings.lib
+$(BLD)lib$(SEP)$(TRGT): $(BLD)$(RELDIR)$(TRGT)
  $(verbose)$(CP) $< $^@
