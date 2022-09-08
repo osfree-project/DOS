@@ -7,6 +7,9 @@
 #include <dos.h>
 
 #if MSC | __WATCOMC__
+#if __WATCOMC__
+#include <stdlib.h>
+#endif
 #include <direct.h>
 #else
 #include <dir.h>
