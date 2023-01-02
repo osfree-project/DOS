@@ -79,7 +79,7 @@ int Fcopybuf(FILE * const fdst, FILE * const fsrc, byte * const buf
 
 	chkHeap
         *num = Fget(buf, len, fsrc);
-	if(*num <= 0)		/* possible read error */
+	if(*num == 0)		/* possible read error */
 		DBG_RETURN_I(1)	
 
 	chkHeap
