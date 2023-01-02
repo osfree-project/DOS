@@ -13,6 +13,6 @@ ADD_COPT = -dLINUX
 !endif
 ADD_COPT += -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl
 
-!include $(%ROOT)/mk/tools.mk
+!include $(%ROOT)tools/mk/tools.mk
 
 TARGETS = $(PATH)$(PROJ).exe

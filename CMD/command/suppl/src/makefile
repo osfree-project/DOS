@@ -461,7 +461,7 @@ $(p)_getdcwd$(e)
 
 # defines additional options for C compiler
 
-!include $(%ROOT)/mk/libsdos.mk
+!include $(%ROOT)tools/mk/libsdos.mk
 
 ADD_COPT = -ml -dMODEL=l -d2 -db  -i=$(MYDIR) -i=$(MYDIR).. -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib

@@ -16,7 +16,7 @@ ADD_ASMOPT =  -dMODEL=l -i=$(PATH)..$(SEP)strings$(SEP)critstrs
 ADD_LINKOPT = lib suppl.lib
 #COM = 1
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 
 TARGETS = $(PATH)context.def subdirs $(PATH)$(PROJ).exe
 

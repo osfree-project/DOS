@@ -12,7 +12,7 @@ CLEAN_ADD = *.bat
 TARGETS  = $(PATH)$(PROJ).bat
 DEST     = os2$(SEP)mdos
 
-!include $(%ROOT)/mk/all.mk
+!include $(%ROOT)tools/mk/all.mk
 
 $(PATH)$(PROJ).bat: $(MYDIR)$(PROJ).bat
  @$(CP) $< $^@ $(BLACKHOLE)

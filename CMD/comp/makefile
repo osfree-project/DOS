@@ -12,6 +12,6 @@ srcfiles  = $(p)comp$(e)
 COM = 1
 NOLIBS = 1
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 
 $(PATH)comp.exe: .symbolic

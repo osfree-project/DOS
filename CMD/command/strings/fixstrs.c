@@ -879,7 +879,7 @@ srcfiles = ", fdmake);
 # defines additional options for C compiler\n\
 ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
 \n\
-!include $(%ROOT)/mk/libsdos.mk\n\
+!include $(%ROOT)/tools/mk/libsdos.mk\n\
 \n\
 TARGETS  = lib\n\
 \n\

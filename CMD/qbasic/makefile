@@ -18,7 +18,7 @@ ADD_LINKOPT = lib $(BLD)lib$(SEP)dflatp.lib, $(BLD)lib$(SEP)dtools.lib
 C      = s
 #HEAPSIZE = 65535
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 
 .c: $(MYDIR)contrib$(SEP)source$(SEP)edit
 

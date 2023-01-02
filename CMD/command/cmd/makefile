@@ -17,7 +17,7 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
            $(p)truename$(e) $(p)type$(e) $(p)verify$(e) $(p)which$(e)
 # defines additional options for C compiler
 
-!include $(%ROOT)/mk/libsdos.mk
+!include $(%ROOT)tools/mk/libsdos.mk
 
 ADD_COPT = -ml -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH) &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include &

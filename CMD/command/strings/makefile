@@ -23,7 +23,7 @@ LNG = $(MYDIR)$(LANG).lng
 DEST    = none
 PLATFORM =
 
-!include $(%ROOT)/mk/tools.mk
+!include $(%ROOT)tools/mk/tools.mk
 
 TARGETS = $(PATH)$(PROJ).exe $(BLD)$(RELDIR)strings.h subdirs $(BLD)lib$(SEP)$(TRGT)
 #INSTALL = $(BLD)lib$(SEP)strings.lib

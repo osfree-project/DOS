@@ -40,7 +40,7 @@ ADD_COPT = -ml
 # additions to install target
 INSTALL_ADD = 1
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 
 install_add: $(DEST)$(SEP)$(PROJ).com &
              $(DEST)$(SEP)$(PROJ)a.com &

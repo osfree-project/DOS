@@ -2,5 +2,5 @@
 
 DIRS=dflatp dtools
 
-!include $(%ROOT)/mk/all.mk
+!include $(%ROOT)tools/mk/all.mk
 

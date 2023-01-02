@@ -10,4 +10,4 @@ DESC      = Binary comparison of files
 srcfiles  = $(p)assign$(e)
 COM       = 1
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

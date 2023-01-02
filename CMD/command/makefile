@@ -12,7 +12,7 @@ DESC      = DOS command interpreter
 DIRS = strings criter cmd suppl lib shell utils
 DEST = os2$(SEP)mdos
 
-!include $(%ROOT)/mk/all.mk
+!include $(%ROOT)tools/mk/all.mk
 
 TARGETS=$(PATH)$(PROJ).com
 

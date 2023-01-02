@@ -11,4 +11,4 @@ DESC = Change volume label
 srcfiles = $(p)label$(e) #$(p)tcc2wat$(e)
 # defines additional options for C compiler
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

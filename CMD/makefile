@@ -23,5 +23,5 @@ DIRS =   shared    &
          exit_vdm  &
          edlin
 
-!include $(%ROOT)/mk/all.mk
+!include $(%ROOT)tools/mk/all.mk
 

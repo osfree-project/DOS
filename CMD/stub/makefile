@@ -13,4 +13,4 @@ srcfiles = $(p)stub$(e)
 
 DEST = os2$(SEP)mdos
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

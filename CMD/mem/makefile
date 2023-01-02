@@ -13,4 +13,4 @@ srcfiles = $(p)mem$(e)
 ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

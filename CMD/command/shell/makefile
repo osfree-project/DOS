@@ -24,5 +24,5 @@ ADD_ASMOPT  = -ml -dMODEL=l -d2 -db -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(M
               -i=$(PATH)..$(SEP)strings$(SEP)critstrs
 ADD_LINKOPT = debug all libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib, $(BLD)lib$(SEP)doscmd_shared.lib
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 

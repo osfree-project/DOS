@@ -13,4 +13,4 @@ srcfiles = $(p)subst$(e)
 ADD_COPT=-i=$(MYDIR)..$(SEP)..$(SEP)include
 ADD_LINKOPT = lib dos_shared.lib libpath $(ROOT)build$(SEP)lib
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

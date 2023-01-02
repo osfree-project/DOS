@@ -16,7 +16,7 @@ ADD_LINKOPT = lib suppl.lib
 DEST = none
 #COM = 1
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk
 
 TARGETS = $(PATH)context.def $(PATH)$(PROJ).exe
 

@@ -126,7 +126,7 @@ $(p)err9$(e)
 
 # defines additional options for C compiler
 
-!include $(%ROOT)/mk/libsdos.mk
+!include $(%ROOT)tools/mk/libsdos.mk
 
 ADD_COPT   = -ml -dMODEL=l -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) -i=$(MYDIR) -i=$(MYDIR).. &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include &

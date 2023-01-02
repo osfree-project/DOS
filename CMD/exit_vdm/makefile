@@ -13,4 +13,4 @@ COM =1
 ADD_COPT  = -i=$(MYDIR)..$(SEP)..$(SEP)include
 ADD_LINKOPT = lib $(BLD)lib$(SEP)dos_shared.lib
 
-!include $(%ROOT)/mk/appsdos.mk
+!include $(%ROOT)tools/mk/appsdos.mk

@@ -52,7 +52,7 @@ ADD_LINKOPT =
 
 #UNI2H = 1
 
-!include $(%ROOT)/mk/libsdos.mk
+!include $(%ROOT)tools/mk/libsdos.mk
 
 .c: $(MYDIR)..$(SEP)contrib$(SEP)source$(SEP)dflatp
 
