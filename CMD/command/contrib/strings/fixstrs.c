@@ -59,7 +59,6 @@ chg: To use STRINGS.H to keep up the order becomes problematic, as this
 add: version number of strings and logfile entries
 */
 
-
 #include <ctype.h>
 #if defined(__TURBOC__)
 #include <dir.h>
@@ -82,13 +81,12 @@ static char *strupr(char *s)
 #ifndef __LINUX__
 #include <direct.h>
 #endif
-#define mkdir(x) mkdir(x, 0777)
+//#define mkdir(x) mkdir(x, 0777)
 //#include <io.h>
 #endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
 #undef DEBUG
 #include "../config.h"
 #include "../include/strings.typ"
@@ -684,7 +682,6 @@ int main(int argc, char **argv)
           ++argv;
         }
 
-        printf("fDIR=%s\n", fDIR);
 	if(argc > 2) {
 		puts("FIXSTRS - Generate STRINGS.DAT and STRINGS.H for a language\n"
 			"Useage: FIXSTRS [/lib] [language]\n"
@@ -695,8 +692,14 @@ int main(int argc, char **argv)
 	}
 
 	in_file = 1;
+        if (*fDIR) {
+          strcpy(temp1, fDIR);
+          fTXT = strcat(temp1, fTXT);
+        }
+
 	if((rc = loadFile(fTXT)) != 0)
 		return rc;
+
 	in_file = 2;
 	if(argc > 1 && (rc = loadFile(argv[1])) != 0) {
           --argc;
@@ -869,7 +872,6 @@ puts("FIXSTRS: building STRINGS resource");
 #define ftc101 dat
                 //cfilename[-1] = '/';
                 //strcpy(cfilename, fDMAKEFILE);
-                printf("cfile=%s\n", cfile);
                 if (*fDIR) {
                   strcpy(temp1, fDIR);
                   cfile = strcat(temp1, fDMAKEFILE);
