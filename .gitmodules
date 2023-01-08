@@ -10,6 +10,3 @@
 [submodule "macrolib"]
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
-[submodule "CMD/command/DOS/CMD/command/contrib"]
-	path = CMD/command/DOS/CMD/command/contrib
-	url = https://github.com/FDOS/freecom
