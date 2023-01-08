@@ -11,8 +11,10 @@ srcfiles = $(p)mkinfres$(e)
 !ifeq %OS LINUX
 ADD_COPT = -dLINUX
 !endif
-ADD_COPT += -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl
+ADD_COPT += -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl
 
 !include $(%ROOT)tools/mk/tools.mk
+
+.c: $(MYDIR)..$(SEP)contrib$(SEP)utils
 
 TARGETS = $(PATH)$(PROJ).exe

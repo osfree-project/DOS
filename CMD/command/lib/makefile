@@ -19,21 +19,25 @@ srcfiles = $(p)myperror$(e) $(p)absfile$(e) $(p)almemblk$(e) $(p)alprmblk$(e) $(
         $(p)ctxt_set$(e) $(p)ctxt_ss$(e) $(p)ctxt_vw$(e) $(p)curdatel$(e) $(p)curtime$(e) $(p)cwd$(e) &
         $(p)dateget$(e) $(p)dateset$(e) $(p)dbg_c$(e) $(p)dbg_mem$(e) $(p)dbg_prnt$(e) $(p)dbg_s$(e) &
         $(p)dbg_sn$(e) $(p)devopen$(e) $(p)dfn_err$(e) $(p)dispcnt$(e) $(p)dispexit$(e) $(p)drvnum$(e) &
-        $(p)efct_001$(e) $(p)exec$(e) $(p)exec1$(e) $(p)farread$(e) $(p)fcompl1$(e) $(p)fcompl2$(e) &
-        $(p)fdattr$(e) $(p)fdevopen$(e) $(p)fdsattr$(e) $(p)fillcomp$(e) $(p)find$(e) $(p)freep$(e) &
+        $(p)efct_001$(e) $(p)exec$(e) $(p)exec1$(e) $(p)farread$(e) &
+#        $(p)fcompl1$(e) $(p)fcompl2$(e) &
+        $(p)fdattr$(e) $(p)fdevopen$(e) $(p)fdsattr$(e) $(p)filecomp$(e) $(p)fillcomp$(e) $(p)find$(e) $(p)freep$(e) &
         $(p)frsysblk$(e) $(p)fstpcpy$(e) $(p)gallstr$(e) $(p)get1mcb$(e) $(p)getenv$(e) $(p)goxy$(e) &
         $(p)grabfcom$(e) $(p)gumblink$(e) $(p)hdlrctxt$(e) $(p)hist_get$(e) $(p)hist_set$(e) &
         $(p)inputdos$(e) $(p)is_empty$(e) $(p)is_fnamc$(e) $(p)is_fnstr$(e) $(p)is_pchr$(e) &
         $(p)isadev$(e) $(p)keyprsd$(e) $(p)kswap_c$(e) $(p)lastdget$(e) $(p)lastdset$(e) $(p)leadopt$(e) &
-        $(p)lowexec$(e) $(p)ltrimcl$(e) $(p)ltrimsp$(e) $(p)lwr1wd$(e) $(p)match$(e) $(p)messages$(e) &
+        $(p)lfnfuncs$(e) $(p)lowexec$(e) &
+        $(p)ltrimcl$(e) $(p)ltrimsp$(e) $(p)lwr1wd$(e) $(p)match$(e) $(p)messages$(e) &
         $(p)mk_rddir$(e) $(p)mktmpfil$(e) $(p)msg_dflt$(e) $(p)msg_dps$(e) $(p)msg_fstr$(e) &
         $(p)msg_get$(e) $(p)msg_gpt$(e) $(p)msg_mkey$(e) $(p)msg_prmp$(e) $(p)mux_ae$(e) $(p)nls$(e) &
         $(p)nls_date$(e) $(p)nls_time$(e) $(p)num_fmt$(e) $(p)onoff$(e) $(p)openf$(e) $(p)optsb$(e) &
-        $(p)optsi$(e) $(p)optss$(e) $(p)parsenum$(e) $(p)pr_date$(e) $(p)pr_prmpt$(e) $(p)pr_time$(e) &
+        $(p)optsi$(e) $(p)optss$(e) $(p)parsenum$(e) $(p)prf$(e) $(p)pr_date$(e) $(p)pr_prmpt$(e) $(p)pr_time$(e) &
         $(p)prprompt$(e) $(p)readcmd$(e) $(p)realnum$(e) $(p)res$(e) $(p)res_r$(e) $(p)res_vald$(e) &
         $(p)res_w$(e) $(p)resfile$(e) $(p)rmtmpfil$(e) $(p)rtrimcl$(e) $(p)rtrimsp$(e) $(p)salloc$(e) &
         $(p)samefile$(e) $(p)scancmd$(e) $(p)scanopt$(e) $(p)session$(e) $(p)showcmds$(e) $(p)skqwd$(e) &
-        $(p)spfnam$(e) $(p)split$(e) $(p)sumblink$(e) $(p)tempfile$(e) $(p)timeget$(e) $(p)timeset$(e) &
+        $(p)spfnam$(e) $(p)split$(e) $(p)sumblink$(e) &
+#        $(p)tempfile$(e) &
+        $(p)timeget$(e) $(p)timeset$(e) &
         $(p)tmpnam$(e) $(p)trimcl$(e) $(p)trimsp$(e) $(p)truepath$(e) $(p)truncate$(e) $(p)txtlend$(e) &
         $(p)unquote$(e) $(p)vcgetch$(e) $(p)vcgetstr$(e) $(p)where$(e) &
 $(p)err1$(e) &
@@ -121,6 +125,7 @@ $(p)err83$(e) &
 $(p)err84$(e) &
 $(p)err85$(e) &
 $(p)err86$(e) &
+$(p)err87$(e) &
 $(p)err9$(e)
 
 
@@ -128,10 +133,16 @@ $(p)err9$(e)
 
 !include $(%ROOT)tools/mk/libsdos.mk
 
-ADD_COPT   = -ml -dMODEL=l -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) -i=$(MYDIR) -i=$(MYDIR).. &
-  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include &
+.asm: $(MYDIR)..$(SEP)contrib$(SEP)lib
+
+.c: $(MYDIR)..$(SEP)contrib$(SEP)lib
+
+ADD_COPT   = -ml -dMODEL=l -dDEBUG -dNDEBUG -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
   -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
-ADD_ASMOPT = -ml -dMODEL=l -d2 -db  -i=$(MYDIR) -i=$(MYDIR).. -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include
+ADD_ASMOPT = -ml -dMODEL=l -dDEBUG -dNDEBUG -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
+  -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)lib.lib
 

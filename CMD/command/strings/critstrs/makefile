@@ -5,7 +5,7 @@
 #
 
 LANG = russian
-LNG = $(MYDIR)..$(SEP)$(LANG).err
+LNG = $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).err
 DEST = os2
 
 !include $(%ROOT)tools/mk/all.mk
@@ -17,6 +17,7 @@ PLATFORM =
 
 .err: $(PATH)
 
-$(PATH)strings.err: $(MYDIR)..$(SEP)default.err
+$(PATH)strings.err: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.err
  @$(CP) $[@ $(PATH) $(BLACKHOLE)
- @critstrs.exe /dir $(PATH) $(LNG) $(BLACKHOLE)
+ @cd $(PATH)
+ @critstrs.exe $(LNG) $(BLACKHOLE)

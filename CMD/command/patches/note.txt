@@ -1,0 +1,3 @@
+cd contrib
+git clone https://github.com/FDOS/freecom
+patch -p1 <../patches/freecom.diff

@@ -9,7 +9,7 @@ PROJ      = command
 #TRGT      = $(PROJ).com
 DESC      = DOS command interpreter
 
-DIRS = strings criter cmd suppl lib shell utils
+DIRS = critstrs strings criter cmd suppl lib shell utils
 DEST = os2$(SEP)mdos
 
 !include $(%ROOT)tools/mk/all.mk
@@ -20,12 +20,12 @@ $(PATH)$(PROJ).lnk: .symbolic
 
 $(PATH)$(PROJ).com: $(PATH)shell$(SEP)$(PROJ).exe $(PATH)infores
 !ifneq ENV LINUX
-  @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.exe + $(PATH)criter$(SEP)criter.exe + $(BLD)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
+  @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.com + $(PATH)criter$(SEP)criter.com + $(BLD)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
   @copy $(PATH)command.com $(DEST)
 !else
-  @cat $(PATH)shell$(SEP)command.exe $(PATH)infores $(PATH)criter$(SEP)criter1$(SEP)criter1.exe $(PATH)criter$(SEP)criter.exe $(BLD)$(RELDIR)strings$(SEP)strings.dat >$(PATH)command.com
+  @cat $(PATH)shell$(SEP)command.exe $(PATH)infores $(PATH)criter$(SEP)criter1$(SEP)criter1.com $(PATH)criter$(SEP)criter.com $(BLD)$(RELDIR)strings$(SEP)strings.dat >$(PATH)command.com
   @cp $(PATH)command.com $(DEST)
 !endif
 
 $(PATH)infores: $(PATH)shell$(SEP)command.wmp $(PATH)shell$(SEP)command.exe
- @$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)utils$(SEP)mkinfres.exe $^@ $(PATH)shell$(SEP)command.wmp $(PATH)shell$(SEP)command.exe
+ @$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)utils$(SEP)mkinfres.exe -T$(PATH)info.txt $^@ $(PATH)shell$(SEP)command.wmp $(PATH)shell$(SEP)command.exe

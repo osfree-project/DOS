@@ -11,18 +11,23 @@ DESC = Command processor
 #defines object file names in format objname.$(O)
 srcfiles = $(p)cb_catch$(e) &
            $(p)batch$(e) $(p)cmdtable$(e) $(p)command$(e) $(p)dummies$(e) $(p)expalias$(e) $(p)init$(e) &
-           $(p)kswap$(e) $(p)loadhigh$(e) $(p)module$(e) $(p)redir$(e) $(p)ver$(e)  &
-           # $(p)xms_crit$(e) $(p)xms_brk$(e) $(p)xms_2e$(e) $(p)cswap$(e) 
+           $(p)kswap$(e) $(p)loadhigh$(e) $(p)module$(e) $(p)redir$(e) $(p)termhook$(e) $(p)ver$(e)  &
+           $(p)xms_crit$(e) $(p)xms_brk$(e) $(p)xms_2e$(e) $(p)cswap$(e)
 # defines additional options for C compiler
 DEST = none
 
-ADD_COPT    = -ml -dMODEL=l -d2 -db -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR).. -i=$(PATH)..$(SEP)criter$(SEP)criter1 &
-  -i=$(MYDIR)..$(SEP)strings -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include &
-  -i=$(MYDIR) -i=$(MYDIR)..
+ADD_COPT    = -ml -dMODEL=l -bt=dos -dDEBUG -dNDEBUG -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR).. &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PATH)..$(SEP)strings$(SEP)critstrs &
+  -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
+  -i=$(MYDIR)..$(SEP)..$(SEP)include &
+  -i=$(MYDIR)..$(SEP)contrib$(SEP)shell -i=$(MYDIR)..$(SEP)contrib
 
-ADD_ASMOPT  = -ml -dMODEL=l -d2 -db -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)strings -i=$(MYDIR)..$(SEP)suppl -i=$(MYDIR)..$(SEP)include -i=$(MYDIR) -i=$(MYDIR).. &
+ADD_ASMOPT  = -ml -dMODEL=l -bt=dos -dDEBUG -dNDEBUG -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)shell -i=$(MYDIR)..$(SEP)contrib &
               -i=$(PATH)..$(SEP)strings$(SEP)critstrs
-ADD_LINKOPT = debug all libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib, $(BLD)lib$(SEP)doscmd_shared.lib
+ADD_LINKOPT = libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
 
+.c:   $(MYDIR)..$(SEP)contrib$(SEP)shell
+
+.asm: $(MYDIR)..$(SEP)contrib$(SEP)shell

@@ -12,28 +12,35 @@ DIRS = criter1
 srcfiles = $(p)criter$(e)
 
 # defines additional options for C compiler
-ADD_ASMOPT =  -dMODEL=l -i=$(PATH)..$(SEP)strings$(SEP)critstrs 
-ADD_LINKOPT = lib suppl.lib
-#COM = 1
+ADD_ASMOPT =  -dMODEL=l -dDEBUG=1 -dNDEBUG=1 -i=$(PATH)..$(SEP)strings$(SEP)critstrs -i=$(PATH) -i=$(MYDIR)
+ADD_LINKOPT = #lib suppl.lib
+DEST = none
+COM = 1
+NOLIBS = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk
 
-TARGETS = $(PATH)context.def subdirs $(PATH)$(PROJ).exe
+TARGETS = $(PATH)context.def subdirs $(PATH)$(PROJ).com
 
 .SUFFIXES: .def .x
 
 .def: $(PATH)
 
-.x: $(MYDIR)
+.x: $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)
 
-$(PATH)criter.obj: $(PATH)context.def $(MYDIR)criter.asm $(MYDIR)dmy_cbrk.asm ..$(SEP)include$(SEP)stuff.inc
+.asm: $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)
 
-$(PATH)context.def: $(MYDIR)context.x
+.inc: $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)
+
+$(PATH)context.def: $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.x
  @mkctxt.exe $<
- @$(CP) $(MYDIR)context.h_c $(PATH) $(BLACKHOLE)
- @$(CP) $(MYDIR)context.inc $(PATH) $(BLACKHOLE)
- @$(CP) $(MYDIR)context.def $(PATH) $(BLACKHOLE)
- @$(DC) $(MYDIR)context.h_c $(BLACKHOLE)
- @$(DC) $(MYDIR)context.inc $(BLACKHOLE)
- @$(DC) $(MYDIR)context.def $(BLACKHOLE)
+ @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.h_c $(PATH) $(BLACKHOLE)
+ @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.inc $(PATH) $(BLACKHOLE)
+ @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.def $(PATH) $(BLACKHOLE)
+ @$(DC) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.h_c $(BLACKHOLE)
+ @$(DC) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.inc $(BLACKHOLE)
+ @$(DC) $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)context.def $(BLACKHOLE)
 
+$(PATH)criter.obj: $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)criter.asm $(PATH)context.def &
+    $(MYDIR)..$(SEP)contrib$(SEP)criter$(SEP)dmy_cbrk.asm &
+    $(MYDIR)..$(SEP)contrib$(SEP)include$(SEP)stuff.inc
