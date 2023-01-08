@@ -1,0 +1,21 @@
+You can download pre-compiled variants of FreeCOM from:
+
+https://github.com/FDOS/freecom
+
+For each language supported, a zip archive is provided with the following versions:
+
+  xmsswap: the latest FreeCOM with XMS-Only swap support
+
+  kswap: the latest FreeCOM with kswap support
+
+  plainedt: the latest FreeCOM without the command line editing
+            enhancements (history, file complation)
+
+  debug: the latest FreeCOM with debug information enabled
+
+
+And a developer package for localizer (to create new or maintaining existing *.LNG files),
+which includes latest FreeCOM (xmsswap with enhancements) and precompiled strings (*.dat)
+for each language along with the source (*.lng) language files and fixstrings.exe used to
+generate new strings.dat file.  See included documentation for further details.
+

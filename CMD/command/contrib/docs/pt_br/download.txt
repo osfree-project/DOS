@@ -1,0 +1,15 @@
+Você pode fazer o download de variantes pre-compiladas do FreeCOM de:
+
+https://github.com/FDOS/freecom
+
+outros lugares para o download são mostrados em:
+
+binary.zip: o último FreeCOM, apenas Binários
+
+plainedt.zip: o último FreeCOM sem os melhoramentos de edição de linha
+	de comando (história, arquivo de reclamações)
+
+debug.zip: o último FreeCOM com informações de debug ativadas
+
+localize.zip: Pacote para desenvolvedores para linguagens (para criar um novo ou
+	alterar arquivo *.LNG existentes), incluie o último FreeCOM
