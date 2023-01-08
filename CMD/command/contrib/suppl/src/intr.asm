@@ -25,39 +25,23 @@
 ; 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
 ;
 
-%include "model.inc"
+include "model.inc"
 
-%ifidn __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
-%define COMPILE 1
+.8086
 
-segment .text
+COMPILE equ 1
 
-bits 16
+TEXT  segment word public 'CODE' use16
 
-global intrf
-global _intrf
-
-intrf:
-_intrf:
-
-%elifidni COMPILER, WATCOM 	; and Open Watcom
-%define COMPILE 1
-
-segment _TEXT class=CODE
-
-
-global intrf_
-global _intrf_
+public intrf_
+public _intrf_
 
 intrf_:
 _intrf_:
-%endif
 
-%ifdef COMPILE
+ifdef COMPILE
 		push	bp			; Standard C entry
-%ifidn __OUTPUT_FORMAT__, elf
 		push	es			; gcc-ia16 has es caller-saved
-%endif
 		push	bx
 		push	cx
 		mov	bx, dx
@@ -65,7 +49,7 @@ _intrf_:
 		push	si
 		push	di
 		push	ds
-		mov	[cs:intr_1-1], al
+		mov	byte ptr [cs:intr_1-1], al
 		jmp	short intr_2		; flush the instruction cache
 intr_2:
 		mov	ah, [bx+18]		; SZAPC flags
@@ -76,7 +60,7 @@ intr_2:
 		mov	bp, [bx+8]
 		mov	si, [bx+10]
 		mov	di, [bx+12]
-		push	word [bx+14]		; ds
+		push	word ptr [bx+14]		; ds
 		mov	es, [bx+16]
 		mov	bx, [bx+2]
 		pop	ds
@@ -89,15 +73,15 @@ intr_1:
 		mov	ds, [ss:bx+6]
 		mov	bx, [ss:bx+12]		; address of REGPACK
 		mov	[bx], ax
-		pop	word [bx+2]
+		pop	word ptr [bx+2]
 		mov	[bx+4], cx
 		mov	[bx+6], dx
 		mov	[bx+8], bp
 		mov	[bx+10], si
 		mov	[bx+12], di
-		pop	word [bx+14]
+		pop	word ptr [bx+14]
 		mov	[bx+16], es
-		pop	word [bx+18]
+		pop	word ptr [bx+18]
 
 		pop	ds
 		pop	di
@@ -105,9 +89,11 @@ intr_1:
 		pop	dx
 		pop	cx
 		pop	bx
-%ifidn __OUTPUT_FORMAT__, elf
 		pop	es
-%endif
 		pop	bp
 		ret					; retf/retn model specific, see model.inc
-%endif
+endif
+
+TEXT  ends
+
+      end

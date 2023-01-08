@@ -1,7 +1,7 @@
-%include "resource.id"
-%macro resIdBlock 1-2 -1
+include "resource.id"
+resIdBlock macro x, y
 	dd	???ende - ???start		;; Length of this resource
-	dw %1						;; major resource ID
-	dw %2						;; minor resource ID
+	dw x						;; major resource ID
+	dw y						;; minor resource ID
 	db 'FREECOM '				;; cookie
-%endmacro
+endm

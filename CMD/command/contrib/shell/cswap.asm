@@ -26,66 +26,71 @@
 ;
 ;
 
-%include "model.inc"
-%include "stuff.inc"
+.386
 
-segment _BSS 			; transient data (in DS)
+include model.inc
+include stuff.inc
 
- 	cglobal SwapResidentSize
-SwapResidentSize  resw 1
+_BSS  segment word public 'BSS'  use16 ; transient data (in DS)
 
-	cglobal XMSsave
-XMSsave	resw 8
-%define currentSegmOfFreeCOMsave	XMSsave+8
+ 	public SwapResidentSize
+SwapResidentSize  dw 1
 
-execSS resw 1
-execSP resw 1
+	public XMSsave
+XMSsave	dw 8
+currentSegmOfFreeCOMsave	equ	XMSsave+8
 
-segment _DATA
+execSS dw 1
+execSP dw 1
+
+_BSS  ends
+
+_DATA segment word public 'DATA' use16
 
 resize_free db 4ah
 
-segment _TEXT
+_DATA ends
 
-%ifidn __OUTPUT_FORMAT__,elf ; GCC/ELF: no seg so use linker script symbol
-extern _TEXTSEG
-%else
-%define _TEXTSEG _TEXT
-%endif
+_TEXT segment word public 'CODE' use16
 
-	cglobal dosFCB1,dosFCB2
-dosFCB1 times 37 db 0
-dosFCB2 times 37 db 0
+_TEXTSEG equ _TEXT
+
+	public dosFCB1
+	public dosFCB2
+dosFCB1 db 37 dup (0)
+dosFCB2 db 37 dup (0)
 
 ;;	global _dosCMDTAIL, _dosCMDNAME		use command line from within PSP
-	cglobal dosCMDNAME
+	public dosCMDNAME
 ;;_dosCMDTAIL  times 128 db 0
-dosCMDNAME times 128 db 0
-		times 256	db 0
-    global localStack
+dosCMDNAME db 128 dup (0)
+	   db 256 dup (0)
+	public localStack
 localStack:
 
-	cglobal dosParamDosExec
-dosParamDosExec times 22	db 0
+	public dosParamDosExec
+dosParamDosExec db 22	dup (0)
 
 
-	cglobal XMSdriverAdress
+	public XMSdriverAdress
 XMSdriverAdress dd 0
-%define callXMS		call far [XMSdriverAdress]
+callXMS macro
+	call dword ptr [XMSdriverAdress]
+	endm
 
- 	cglobal SwapTransientSize
+ 	public SwapTransientSize
 SwapTransientSize  dw 0
 
-	cglobal XMSrestore
-XMSrestore	times 8 DW 0
-%define xms_handle	XMSrestore+4
-%define currentSegmOfFreeCOM	XMSrestore+14
+	public XMSrestore
+XMSrestore	DW 8 dup (0)
+xms_handle		equ	XMSrestore+4
+currentSegmOfFreeCOM	equ	XMSrestore+14
 
-	cglobal canexit
+	public canexit
 canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
 filler  DB 0
 
-    cglobal mySS, mySP
+    public mySS, mySP
 mySS DW 0
 mySP DW 0
 
@@ -100,11 +105,11 @@ real_XMSexec:
 ;;		mov ax, cs
                    		; ds:dx = ASCIZ program name
 ;;		mov ds, ax
-		mov  dx,dosCMDNAME
+		movzx  dx,dosCMDNAME
 		       
                         ; es:bx = parameter block
 		mov es, cx
-		mov bx, dosParamDosExec
+		movzx bx, dosParamDosExec
 
 
 						; our temporary stack
@@ -186,16 +191,16 @@ DOS_err 		db 'Memory allocation error$'
 common_error	db 0dh,0ah,0ah,'FreeCOM: XMSSwap-In: $'
 
 XMS_trouble_while_swapping_in:
-	mov bx,XMS_err
+	movzx bx, XMS_err
 	jmp short trouble_while_swapping_in
 
 DOS_trouble_while_swapping_in:
-	mov bx,DOS_err
+	movzx bx, DOS_err
 
 trouble_while_swapping_in:
 ;		push cs							; do some error message
 ;		pop  ds
-		mov dx, common_error
+		movzx dx, common_error
 		mov ah,09
 		int 21h
 
@@ -209,10 +214,10 @@ terminate_myself:
 
 		;; FALL THROUGH for elder FreeCOM kernels that simply ignore
 		;; DOS-4C for shells
-		cextern terminateFreeCOMHook
-		jmp terminateFreeCOMHook
+		extrn _terminateFreeCOMHook: far
+		jmp _terminateFreeCOMHook
 
-	global xms_kill
+	public xms_kill
 xms_kill:
 	; Kill the XMS memory block
 	mov dx, [xms_handle]
@@ -228,7 +233,7 @@ xms_kill:
 ; or we use the TURBO_C _restorezero() and use the
 ; DOS default handler for that
 
-%if 0
+if 0
 MsgZerodivide db 'integer zero divide$'
 	global _ZeroDivideInterrupt
 _ZeroDivideInterrupt:
@@ -242,7 +247,7 @@ _ZeroDivideInterrupt:
         mov ax,04c7fh       ; terminate with errorlevel 127
         int 21h
 		jmp _ZeroDivideInterrupt
-%endif
+endif
 
 
 ;********************************************************************
@@ -251,7 +256,7 @@ _ZeroDivideInterrupt:
 	cglobal SWAPresidentEnd
 SWAPresidentEnd:
 
-%if 0
+if 0
 ;
 ; normal EXEC
 ;
@@ -295,7 +300,7 @@ exec_error2:
 		pop di
 		pop	si
 		retf
-%endif
+endif
 
 ;; Added here to make it more easier for the C-part to make a XMS
 ;; request, because the code:
@@ -307,11 +312,11 @@ exec_error2:
 ;; detroying AX already holding the API function number
 
 ;; To be called with _far_!!
-	cglobal XMSrequest
+	public XMSrequest
 	;; Note: Because [CS:driverAdress] == [residentCS:driverAdress]
 	;; we need not use a similiar approach as with XMSexec
 XMSrequest:
-		jmp far [cs:XMSdriverAdress]
+		jmp dword ptr [cs:XMSdriverAdress]
 
 ;; Added here to make it more easier for the C-part to call functions
 ;; located in the resident part, because:
@@ -324,12 +329,10 @@ XMSrequest:
 
 ;;TODO: DS ought to be equal to SS, DS could be reconstructed from
 ;;	SS at the end of the XMSexec function
-		cglobal	XMSexec
+		public	XMSexec
 XMSexec:
 						; save ALL registers needed later
-%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
 		push es
-%endif
 		push si
 		push di
 		push bp
@@ -340,7 +343,7 @@ XMSexec:
 						; save everything to XMS
 		mov ah,0bh
 		mov si,XMSsave
-		call far [cs:XMSdriverAdress]
+		call dword ptr [cs:XMSdriverAdress]
 
 ;;TODO: test of result
 
@@ -371,7 +374,7 @@ ret_from_resident:
 		add [bp+4],bx				; ds
 		pop ds
 
-		mov byte [resize_free],49h ; change to "free" for next times
+		mov byte ptr [resize_free],49h ; change to "free" for next times
 
 		add [currentSegmOfFreeCOMsave],bx
 		mov cx,[execSS]
@@ -379,22 +382,16 @@ ret_from_resident:
 		mov ss,cx
 		mov sp,[execSP]
 
-%ifidn MODEL, m                     ; in medium & large need to fixup return segment
+ifidn MODEL, m                     ; in medium & large need to fixup return segment
 		mov bp, sp
 		add [bp+8],bx
-%endif
+endif
 		pop bp
 		pop di
 		pop	si
-%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
 		pop es
-%endif
 		ret							; done (really), retn/retf based on memory model, see model.inc
 
-%ifidn __OUTPUT_FORMAT__,elf
-; NASM does not support segment relocations so add them
-; manually
-segment .msdos_mz_reloc
-		dw reloc1, _TEXTSEG
-		dw reloc2, _TEXTSEG
-%endif
+_TEXT ends
+
+      end

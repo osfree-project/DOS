@@ -46,26 +46,25 @@
 ; chg: moving all assembly files to NASM
 ;
 
-%include "model.inc"
-%include "stuff.inc"
+include model.inc
+include stuff.inc
 
-segment _TEXT
-	cglobal lowLevelExec
+TEXT  segment word public 'CODE' use16
+	public _lowLevelExec
 
-lowLevelExec:
+_lowLevelExec:
 	push    bp
 	mov     bp, sp
-	pushm   si, di, ds
+	push    si
+	push    di
+	push    ds
 
-%ifidn __OUTPUT_FORMAT__, elf
-	push    es
-%endif
 	lds     dx, [bp+4+2*@CodeSize]      ; load file name
 	les     bx, [bp+8+2*@CodeSize]      ; load parameter block
 	mov     ax, 4b00h
 
-	mov     Word [cs:saveSP], sp
-	mov     Word [cs:saveSS], ss
+	mov     Word Ptr [cs:saveSP], sp
+	mov     Word Ptr [cs:saveSS], ss
 	int     21h
 	cli						;; Can be removed for post-8086 CPUs
 	mov     ss, [cs:saveSS]
@@ -76,12 +75,15 @@ lowLevelExec:
 	xor     ax, ax       ; otherwise, clear AX
 
 exec_error:
-%ifidn __OUTPUT_FORMAT__, elf
-	pop     es
-%endif
-	popm    si, di, ds
+	pop     ds
+	pop     di
+	pop     si
 	pop     bp
 	ret					; retf/retn model specific, see model.inc
 
 saveSP dw 0
 saveSS dw 0
+
+TEXT  ends
+
+      end

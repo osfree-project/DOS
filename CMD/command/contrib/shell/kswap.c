@@ -11,7 +11,7 @@
 #ifdef FEATURE_KERNEL_SWAP_SHELL
 
 #include <assert.h>
-#include <dos.h>
+//#include <dos.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,13 +23,17 @@
 #include "../include/command.h"
 #include "../err_fcts.h"
 #include "../include/kswap.h"
+#include "../include/debug.h"
 
 #define FD_MAGIC 0x4446 /* 'FD' */
+
+//#include "tcc2wat.h"
 
 /* Lock kswap feature within kernel and invalidate a previous external prg
     Return:  FALSE  no swap feature within kernel */
 int kswapInit(void)
 {   IREGS r;
+    //union REGPACK r;
 
     r.r_ax = 0x4bfe;        /* Get kswap argument structure segm */
     r.r_dx = FD_MAGIC;
@@ -71,6 +75,7 @@ static void kswapSetISR(void)
 
 void kswapRegister(kswap_p ctxt)
 {   IREGS r;
+    //union REGPACK r;
 
     dprintf(("[KSWAP: Registering static context at: 0x%04x]\n", (word)ctxt));
     assert(ctxt);

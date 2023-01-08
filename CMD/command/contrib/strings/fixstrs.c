@@ -77,8 +77,13 @@ static char *strupr(char *s)
   return s;
 }
 #else
+#include <ctype.h>
+#include "tcc2wat.h"
+#ifndef __LINUX__
 #include <direct.h>
-#include <io.h>
+#endif
+#define mkdir(x) mkdir(x, 0777)
+//#include <io.h>
 #endif
 #include <stdio.h>
 #include <string.h>
@@ -90,13 +95,13 @@ static char *strupr(char *s)
 #include "../include/resource.h"
 #include "../include/keys.h"
 
-#define logfile "strings.log"
-#define fDAT "strings.dat"
-#define fTXT "DEFAULT.lng"
-#define fH "strings.h"
-#define fEXT ".lng"
-#define fDMAKEFILE "makefile"
-#define fTCMAKEFILE "strings.rsp"
+char *logfile = "strings.log";
+char *fDAT    = "strings.dat";
+char *fTXT    = "DEFAULT.lng";
+char *fH      = "strings.h";
+char *fEXT    = ".lng";
+char *fDMAKEFILE  = "makefile.mk";
+char *fTCMAKEFILE = "strings.rsp";
 
 typedef enum STATE {
 	 LOOKING_FOR_START
@@ -116,12 +121,20 @@ const char id[]="FreeDOS STRINGS v";
 const char promptID[] = "PROMPT_";
 #define promptIDlen (sizeof(promptID) - 1)
 
-#define STRINGLIB_DIR "strings"
+//#define STRINGLIB_DIR "strings"
+//#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
+#define STRINGLIB_DIR "\0str45678.obj            "
+char name[] = STRINGLIB_DIR;
+char *cfilename = name;
+char *cfile = name;
+//#define STRINGLIB_DIR "strings"
 #define stringdir cfile
-#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
+//#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
+
 #define cfmt "str%04x.c"
 #define objfmt "str%04x.obj"
-char cfile[] = STRINGLIB_DIR "\0str45678.obj";
+#define objfmt1 "$(p)str%04x$(e) "
+//char cfile[] = STRINGLIB_DIR "\0str45678.obj";
 
 /*
 	Implementation details about to cache the strings within memory:
@@ -159,11 +172,14 @@ struct {
 string_count_t cnt = 0;		/* current string number */
 string_count_t maxCnt = 0;	/* number of strings within array */
 
-#if defined(__TINY__) || defined(__SMALL__) || defined(__MEDIUM__)
-#error "This program must be compiled with far data pointers"
-#endif
+//#if defined(__TINY__) || defined(__SMALL__) || defined(__MEDIUM__)
+//#error "This program must be compiled with far data pointers"
+//#endif
 
 char temp[1024];
+char temp1[256];
+char temp2[256];
+char fDIR[256];
 
 static const char besFromChar[] =
  "abcdefghijklmnopqrstuvwxyz,.[{}]\\?0";
@@ -650,7 +666,8 @@ int main(int argc, char **argv)
 	string_size_t lsize;
 	int makeLib = 0;
 
-	unlink(logfile);
+	//unlink(logfile);
+	*fDIR = '\0';
 
 	if(argv[1] && (stricmp(argv[1], "/lib") == 0 || stricmp(argv[1], "--lib") == 0)) {
 		--argc;
@@ -658,6 +675,16 @@ int main(int argc, char **argv)
 		makeLib = 1;
 	}
 
+        // output directory
+        if (argc > 1 && stricmp(argv[1], "/dir") == 0) {
+          --argc;
+          ++argv;
+          strcpy(fDIR, argv[1]);
+          --argc;
+          ++argv;
+        }
+
+        printf("fDIR=%s\n", fDIR);
 	if(argc > 2) {
 		puts("FIXSTRS - Generate STRINGS.DAT and STRINGS.H for a language\n"
 			"Useage: FIXSTRS [/lib] [language]\n"
@@ -667,13 +694,15 @@ int main(int argc, char **argv)
 		return 127;
 	}
 
-
 	in_file = 1;
 	if((rc = loadFile(fTXT)) != 0)
 		return rc;
 	in_file = 2;
-	if(argc > 1 && (rc = loadFile(argv[1])) != 0)
+	if(argc > 1 && (rc = loadFile(argv[1])) != 0) {
+          --argc;
+          ++argv;
 		return rc;
+	}
 
 /* Now all the strings are cached into memory */
 
@@ -681,6 +710,12 @@ int main(int argc, char **argv)
 		fputs("No string definition found.\n", stderr);
 		return 43;
 	}
+
+        /* Prepend a directory, if needed */
+        if (*fDIR) {
+          strcpy(temp1, fDIR);
+          logfile = strcat(temp1, logfile);
+        }
 
 	/* Create the LOG file */
 	if(argc > 1) {		/* Only if a local LNG file was specified */
@@ -748,13 +783,26 @@ breakLogFile:
 		return 44;
 	}
 
+        if (*fDIR) {
+          strcpy(temp1, fDIR);
+          fDAT = strcat(temp1, fDAT);
+        }
+
 	/* 2. Open STRINGS.DAT and STRINGS.H and dump control information */
 	if ((dat = fopen(fDAT,"wb")) == NULL) {
-		perror("creating " fDAT);
+                strcpy(temp2, "creating ");
+                strcpy(temp2, fDAT);
+                perror(temp2);
 		return 36;
 	}
+        if (*fDIR) {
+          strcpy(temp1, fDIR);
+          fH = strcat(temp1, fH);
+        }
 	if ((inc = fopen(fH,"wt")) == NULL) {
-		perror("creating " fH);
+                strcpy(temp2, "creating ");
+                strcat(temp2, fH);
+                perror(temp2);
 		return 37;
 	}
 
@@ -796,12 +844,18 @@ puts("FIXSTRS: building STRINGS resource");
 
 	fflush(dat);
 	if(ferror(dat)) {
-		fputs("Unspecific write error into " fDAT "\n", stderr);
+                strcpy(temp2, "Unspecific write error into ");
+                strcat(temp2, fDAT);
+                strcat(temp2, "\n");
+                fputs(temp2, stderr);
 		return 38;
 	}
 	fflush(inc);
 	if(ferror(inc)) {
-		fputs("Unspecific write error into " fH "\n", stderr);
+                strcpy(temp2, "Unspecific write error into ");
+                strcat(temp2, fH);
+                strcat(temp2, "\n");
+                fputs(temp2, stderr);
 		return 39;
 	}
 
@@ -809,11 +863,19 @@ puts("FIXSTRS: building STRINGS resource");
 	fclose(inc);
 
 	if(makeLib) {
-		mkdir(stringdir);
+		//mkdir(stringdir);
+		mkdir(fDIR);
 #define fdmake inc
 #define ftc101 dat
-		cfilename[-1] = '/';
-		strcpy(cfilename, fDMAKEFILE);
+                //cfilename[-1] = '/';
+                //strcpy(cfilename, fDMAKEFILE);
+                printf("cfile=%s\n", cfile);
+                if (*fDIR) {
+                  strcpy(temp1, fDIR);
+                  cfile = strcat(temp1, fDMAKEFILE);
+                  cfilename = cfile + strlen(fDIR);
+                }
+                printf("cfile=%s\n", cfile);
 		if((fdmake = fopen(cfile, "wt")) == NULL) {
 			pxerror("creating ", cfile);
 			return 100;
@@ -827,80 +889,60 @@ puts("FIXSTRS: building STRINGS resource");
 puts("FIXSTRS: building STRINGS library source files");
 		/********************** prologue */
 		fputs("\
-MAXLINELENGTH := 8192\n\
-# Project specific C compiler flags\n\
-MYCFLAGS_DBG = -UNDEBUG $(null,$(DEBUG) $(NULL) -DDEBUG=1)\n\
-MYCFLAGS_NDBG = -DNDEBUG=1 -UDEBUG\n\
-MYCFLAGS = $(null,$(NDEBUG) $(MYCFLAGS_DBG) $(MYCFLAGS_NDBG))\n\
+#\n\
+# A Makefile for ATTRIB\n\
+# (c) osFree project,\n\
+# author, date\n\
+#\n\
 \n\
-#	Default target\n\
-all: $(CFG) strings.lib\n\
-\n\
-strings.lib .LIBRARY : ", fdmake);
+PROJ  = strings\n\
+TRGT  = $(PROJ).lib\n\
+DESC  = Control file attributes\n\
+#defines object file names in format objname.$(O)\n\
+srcfiles = ", fdmake);
 
 		/********************* individual files */
 		for(cnt = 0; cnt < maxCnt; ++cnt) {
 			dumpString(cnt);
-			fprintf(fdmake, "\\\n\t" objfmt, cnt);
+                        fprintf(fdmake, " &\n\t" objfmt1, cnt);
 		}
 		for(cnt = 0; cnt < maxCnt - 1; ++cnt)
-#if defined(__TURBOC__)
-			fprintf(ftc101, "+" objfmt " &\n", cnt);
-#elif defined(GCC)
-			fprintf(ftc101, objfmt "\n", cnt);
-#else
 			fprintf(ftc101, "+" objfmt "\n", cnt);
-#endif
-#if defined(GCC)
-		fprintf(ftc101, objfmt " \n", cnt);
-#else
 		fprintf(ftc101, "+" objfmt " \n", cnt);
-#endif
 		/********************** epilogue */
 
-		fputs("\n\
+                fputs("\n\n\
+# defines additional options for C compiler\n\
+ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
 \n\
-.IF $(CFG) != $(NULL)\n\
+!include $(%ROOT)/tools/mk/libsdos.mk\n\
 \n\
-CONFIGURATION = $(CONF_BASE)\n\
+TARGETS  = lib\n\
 \n\
-.IF $(_COMPTYPE) == BC\n\
-CONF_BASE =	\\\n\
--f- \\\n\
--I$(INCDIR:s/;/ /:t\";\")	\\\n\
--L$(LIBDIR:s/;/ /:t\";\")	\\\n\
--w\n\
+.c: $(PATH)\n\
 \n\
-.IF $(_COMPILER)==BC5\n\
-CONFIGURATION += -RT- -x-\n\
-.ENDIF\n\
+.h: $(PATH)\n\
 \n\
-CONF_DBG =	$(MYCFLAGS_DBG)\n\
-CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
+lib: $(BLD)$(RELDIR)$(TRGT) .symbolic\n\
 \n\
-.ENDIF\n\
+$(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\
+ @$(MAKE) $(MAKEOPT) -f $(BLD)$(RELDIR)makefile.mk library=$(BLD)$(RELDIR)$(TRGT) library # install\n\
 \n\
-.IF $(_COMPTYPE) == TC\n\
-CONF_BASE =	\\\n\
--I$(INCDIR:s/;/ /:t\";\")	\\\n\
--L$(LIBDIR:s/;/ /:t\";\")	\\\n\
--w\n\
-\n\
-CONF_DBG =	$(MYCFLAGS_DBG)\n\
-CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
-\n\
-.ENDIF\n\
-.ENDIF\n", fdmake);
+\n", fdmake);
 
 		fflush(ftc101);
 		if(ferror(ftc101)) {
-			puts("Unspecific error writing to " fTCMAKEFILE);
+			strcpy(temp2, "Unspecific error writing to ");
+			strcat(temp2, fTCMAKEFILE);
+			puts(temp2);
 			return 104;
 		}
 		fclose(ftc101);
 		fflush(fdmake);
 		if(ferror(fdmake)) {
-			puts("Unspecific error writing to " fDMAKEFILE);
+			strcpy(temp2, "Unspecific error writing to ");
+			strcat(temp2, fDMAKEFILE);
+			puts(temp2);
 			return 105;
 		}
 		fclose(fdmake);

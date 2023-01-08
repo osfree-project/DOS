@@ -1,48 +1,54 @@
-cpu 8086
-
 ;; Multi-Push/Pop
 ;; Both take the registers in the same order, "F"==Flags
 ;; Push pushes left to right; pop right to left
 
-%macro pushm 2-*
-%rep %0
-%ifidni %1,f
-	pushf
-%else
-	push %1 
-%endif
-%rotate 1 
-%endrep 
-%endmacro
-%macro popm 2-*
-%rep %0
-%rotate -1 
-%ifidni %1,f
-	popf
-%else
-	pop %1 
-%endif
-%endrep 
-%endmacro
+;;;; ported to wasm/masm by valerius
 
-;; declare global and extern with underscore for OMF, without for ELF
+pushm macro args
+  push bp                               ; Save old bp
+  mov  bp, sp                           ; bp->old bp in stack
+  irp  y, <args>                        ;
+    ifidni y, f                         ; Save
+      pushf                             ;
+    else                                ; regs
+      push y                            ;
+    endif                               ; in specified order
+  endm                                  ;   
+  push bp                               ; save bp on stack top
+  mov  bp, [bp]                         ; restore old bp
+endm
 
-%macro  cglobal 1-*
-%rep %0
-%ifnidn __OUTPUT_FORMAT__,elf
-	%define %1 _%1 
-%endif
-	global	%1
-%rotate 1 
-%endrep 
-%endmacro
+popm macro args
+  push bp                               ; Save old bp
+  mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
+  mov  bp, [bp]                         ; now bp->stack bottom
+  irp  y, <args>                        ;
+    dec  bp                             ; next
+    dec  bp                             ; variable
+    push word ptr [bp]                  ;
+    ifidni y, f                         ;
+      popf                              ;
+    else                                ; Restore registers
+      pop y                             ; in reverse order
+    endif                               ;
+  endm                                  ;
+  pop  bp                               ; restore initial bp
+endm                                    ;
 
-%macro  cextern 1-*
-%rep %0
-%ifnidn __OUTPUT_FORMAT__,elf
-	%define %1 _%1 
-%endif
-	extern	%1
-%rotate 1 
-%endrep 
-%endmacro
+cglobal macro args
+  irp y, <args>
+    ;ifnidn __OUTPUT_FORMAT__,elf
+    ;  define y _y
+    ;endif
+      public y
+  endm
+endm
+
+cextern macro args
+  irp y, <args>
+    ;ifnidn __OUTPUT_FORMAT__,elf
+    ;  define y _y
+    ;endif
+      extrn y
+  endm
+endm

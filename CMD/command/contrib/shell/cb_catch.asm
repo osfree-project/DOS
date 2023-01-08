@@ -51,16 +51,18 @@
 ;   chg: moving all assembly files to NASM
 ;
 
-%include "../include/model.inc"
-%include "../include/stuff.inc"
+include model.inc
+include stuff.inc
 
-;segment _DATA
-;	EXTERN _ctrlBreak
+;_DATA segment
+;       EXTRN ctrlBreak_ :word
+;_DATA ends
 
-segment _TEXT
-;	GLOBAL _initCBreak
-	cglobal cbreak_handler
-	cglobal CBreakCounter
+_TEXT segment word public 'CODE' use16
+
+;	public _initCBreak
+	public _cbreak_handler
+	public _CBreakCounter
 
 ;_initCBreak:
 ;	;; At this point DS is the segment of _ctrlBreak
@@ -68,36 +70,39 @@ segment _TEXT
 ;	ret
 
 ;?freecomSegment DW 0
-CBreakCounter DW 0
+_CBreakCounter DW 0
 
-cbreak_handler:
-%ifdef DEBUG
-		dec BYTE [CS:strEnd]
+_cbreak_handler:
+ifdef DEBUG
+		dec BYTE PTR [CS:strEnd]
 		jz noRecurs
-		inc BYTE [CS:strEnd]
+		inc BYTE PTR [CS:strEnd]
 		jmp short recurs
 
 noRecurs:
-		push ds, dx, ax, bp
+		pushm ds, dx, ax, bp
 		mov dx, strBeg
 		mov ax, cs
 		mov ds, ax
 		mov ah, 9
 		int 21h
-		inc BYTE [strEnd]
-		pop ds, dx, ax, bp
-%endif
+		inc BYTE PTR [strEnd]
+		popm ds, dx, ax, bp
+endif
 
 		;; ^Break of COMAMND --> just set the variable
-		inc WORD [CS:CBreakCounter]
+		inc WORD PTR [CS:_CBreakCounter]
 
 recurs:
 		clc			;; tell DOS to proceed
 		retf 2
 
-%ifdef DEBUG
+ifdef DEBUG
 strBeg:
 	db 0dh, 0ah, 'COMMAND: ^Break detected.  ', 0dh, 0ah, 0dh, 0ah, '$'
 strEnd db 1
-%endif
+endif
 
+_TEXT ends
+
+      end

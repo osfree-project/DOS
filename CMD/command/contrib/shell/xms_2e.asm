@@ -3,24 +3,29 @@
 ;	variant
 ; int process_input(int xflag, char *commandline)
 
-%if 1
+if 1
 
-%include "../include/model.inc"
-%include "../include/stuff.inc"
-segment _TEXT
+include model.inc
+include stuff.inc
+
+TEXT  segment word public 'CODE' use16
 
 cglobal lowlevel_int_2e_handler
     lowlevel_int_2e_handler:
         mov ax, 0FFFFh
         iret
 
-%else
+else
 
-segment _TEXT class=CODE
+TEXT  segment word public 'CODE' use16
 
-extern _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
-%define callXMS     call far [cs:_XMSdriverAdress]
-%define currentSegmOfFreeCOM    _XMSsave+8
+extrn _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
+
+callXMS macro
+	call dword ptr [cs:_XMSdriverAdress]
+	endm
+
+currentSegmOfFreeCOM equ  _XMSsave+8
 
     global myfar2e_parsecommandline
 myfar2e_parsecommandline:
@@ -58,12 +63,12 @@ _lowlevel_int_2e_handler:
 ;       add ax,bx
 ;       mov ss,ax
 ;       mov sp,[_mySP]
-%if 0
+if 0
         mov ax,[_mySS]
         sub ax,10
         mov ss,ax
         mov sp,[_mySP]
-%endif
+endif
        ; calling stuff here
 ;       push es
         push ds
@@ -72,18 +77,22 @@ _lowlevel_int_2e_handler:
         mov ds,sp
 ;       push word 1
 ;       call _process_input
-        call far [myfar2e_parsecommandline]
-%if 0
+        call dword ptr [myfar2e_parsecommandline]
+if 0
         push ax
         mov ah,0bh       ; move into XMS again
         mov si,_XMSsave
         callXMS
         call SWAPXMSdirection
         pop ax
-%endif
+endif
         jmp finish
 swaperr:
         mov ax,0FFFFh
 finish:
         iret
-%endif
+endif
+
+TEXT  ends
+
+      end
