@@ -98,7 +98,7 @@
 #define CONTEXT_MAX_SIZE (65535U - 12)
 
 /* Defina este valor para selecionar o valor de FDDEBUG para a inicialização */
-#define FDDEBUG_INIT_VALUE 1
+#define FDDEBUG_INIT_VALUE 0
 
 #define INCLUDE_CMD_BEEP
 #define INCLUDE_CMD_BREAK

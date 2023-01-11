@@ -31,16 +31,17 @@ include "model.inc"
 
 COMPILE equ 1
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 
-public intrf_
 public _intrf_
+public _intrf
 
-intrf_:
 _intrf_:
+_intrf:
 
 ifdef COMPILE
 		push	bp			; Standard C entry
+		mov	bp, sp
 		push	es			; gcc-ia16 has es caller-saved
 		push	bx
 		push	cx
@@ -91,9 +92,9 @@ intr_1:
 		pop	bx
 		pop	es
 		pop	bp
-		ret					; retf/retn model specific, see model.inc
+		rret					; retf/retn model specific, see model.inc
 endif
 
-TEXT  ends
+_TEXT  ends
 
-      end
+       end

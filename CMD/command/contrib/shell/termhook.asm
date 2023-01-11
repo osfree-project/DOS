@@ -25,7 +25,7 @@ include stuff.inc
 
 .386
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 
 	public _termAddr
 
@@ -33,7 +33,7 @@ _termAddr:
 terminationAddressOffs	DW 0
 terminationAddressSegm	DW 0
 
-	extrn canexit: byte
+	extrn _canexit: far
 	public _myPID
 _myPID	DW 0
 	public _origPPID
@@ -44,17 +44,17 @@ _origPPID DW 0
 
 _terminateFreeCOMHook:
 ifndef XMS_SWAP
-	dec BYTE PTR [canexit]
+	dec BYTE PTR [_canexit]
 endif
 	mov ax, cs				; setup run environment (in this module)
 	mov ds, ax
 ifdef XMS_SWAP
-	extrn localStack
+	extrn localStack: near
 	mov ss, ax
 	mov sp, localStack
 
 	; Next time we hit here it's != 1 --> no zero flag --> I_AM_DEAD status
-	dec BYTE PTR [canexit]
+	dec BYTE PTR [_canexit]
 endif
 	jnz I_AM_DEAD
 
@@ -78,7 +78,7 @@ endif
 
 	; Kill the XMS memory block
 ifdef XMS_SWAP
-	extrn xms_kill
+	extrn xms_kill: near
 	call xms_kill
 endif
 
@@ -98,6 +98,6 @@ I_AM_DEAD_loop:
 dead_loop_string	DB 13,10,7,'Cannot terminate permanent FreeCOM instance'
 	DB 13,10,'System halted ... reboot or power off now$'
 
-TEXT  ends
+_TEXT  ends
 
-      end
+       end

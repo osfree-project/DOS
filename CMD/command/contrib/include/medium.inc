@@ -1,7 +1,6 @@
 
-; Large header
+; Medium header
 DGROUP group		_DATA, _BSS
-
 
 TEXT  segment word public 'CODE' use16
 TEXT  ends
@@ -12,9 +11,9 @@ _DATA ends
 _BSS  segment word public 'BSS'  use16
 _BSS  ends
 
-;@CodeSize EQU 1
-;@DataSize EQU 0
+CodeSize EQU 1
+DataSize EQU 0
 
-ret macro amt
+rret macro amt
 	retf amt
 endm

@@ -244,8 +244,8 @@ StrErrCodes		EQU 15
 ;		else: as normal INT-24 handler
 
 ifdef XMS_SWAP_CRITER
-	cglobal autofail_err_handler
-autofail_err_handler:
+	public _autofail_err_handler
+_autofail_err_handler:
 	mov al, FAIL
 	iret
 endif
@@ -258,7 +258,14 @@ ifdef AUTO_FAIL
 	iret
 else
 	push dx
-	pushm es, ds, bp, si, di, cx, bx, ax
+	push ax
+	push bx
+	push cx
+	push di
+	push si
+	push bp
+	push ds
+	push es
 
 	mov cx, cs
 	mov ds, cx		; DS := local code/data segment
@@ -485,7 +492,14 @@ endif
 	dec BYTE PTR [ds:1234h]
 repCheckDecAddr EQU $-2
 ?iretNow:
-	popm es, ds, bp, si, di, cx, bx
+	pop es
+	pop ds
+	pop bp
+	pop si
+	pop di
+	pop cx
+	pop bx
+	pop ax
 	pop dx
 	iret
 
@@ -655,8 +669,8 @@ dummyByte:	;; This byte is destroyed, when no repeatCheck AutoFail is
 ;;		counting the number of 0xFF bytes the immediately after the module
 ;;		got loaded into memory
 ifdef XMS_SWAP_CRITER
-	cglobal criter_repeat_checkarea
-criter_repeat_checkarea:
+	public _criter_repeat_checkarea
+_criter_repeat_checkarea:
 endif
 ?repCheck	DW -1	;; disabled
 		DB HIDE_CRITER_DRIVES dup (-1)		;; not displayed already

@@ -218,10 +218,8 @@ int initialize(void)
 		else free(p);
 	}
 #endif
-        //dprintf(( "000\n" ));
 	dbg_printmem();
 
-        //dprintf(( "001\n" ));
 #ifdef FEATURE_KERNEL_SWAP_SHELL
 	if(kswapInit()) {		/* re-invoked */
 		if(kswapLoadStruc()) {
@@ -237,7 +235,6 @@ int initialize(void)
 	}
 #endif
 
-  //dprintf(( "002\n" ));
   /* Some elder DOSs may not pass an initializied environment segment */
   if(env_glbSeg && !isMCB(SEG2MCB(env_glbSeg))) {
     env_setGlbSeg(0);       /* Disable the environment */

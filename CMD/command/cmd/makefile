@@ -21,14 +21,23 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
 
 .c: $(MYDIR)..$(SEP)contrib$(SEP)cmd
 
-ADD_COPT = -ml -dDEBUG -dNDEBUG -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs &
+XMS_SWAP=1
+
+ADD_COPT = &
+!ifdef XMS_SWAP
+  -dXMS_SWAP=1 &
+!endif
+  -d2 -db  &
+  -dNDEBUG &
+#  -dDEBUG &
+  -ml -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs &
   -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) &
   -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
   -i=$(MYDIR)..$(SEP)contrib$(SEP)cmd -i=$(MYDIR)..$(SEP)contrib -i=$(PATH) &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl &
   -i=$(MYDIR)..$(SEP)..$(SEP)include
 
-ADD_LINKOPT = #lib $(BLD)lib$(SEP)doscmd_shared.lib
+ADD_LINKOPT = debug all lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)cmd.lib
 
 $(TARGETS): $(OBJS) $(PATH)..$(SEP)criter$(SEP)context.def

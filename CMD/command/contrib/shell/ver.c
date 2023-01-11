@@ -36,6 +36,7 @@
 #include <stdio.h>
 #include <dos.h>
 
+#include "portable.h"
 #include "../include/command.h"
 #include "../include/cmdline.h"
 #include "../err_fcts.h"

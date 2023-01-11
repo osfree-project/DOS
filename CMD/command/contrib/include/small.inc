@@ -11,5 +11,9 @@ _DATA ends
 _BSS  segment word public 'BSS'  use16
 _BSS  ends
 
-@CodeSize EQU 0
-@DataSize EQU 0
+CodeSize EQU 0
+DataSize EQU 0
+
+rret macro amt
+	retn amt
+endm

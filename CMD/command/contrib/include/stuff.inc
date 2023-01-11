@@ -14,18 +14,18 @@ pushm macro args
       push y                            ;
     endif                               ; in specified order
   endm                                  ;   
-  push bp                               ; save bp on stack top
-  mov  bp, [bp]                         ; restore old bp
+  ;push bp                               ; save bp on stack top
+  ;mov  bp, [bp]                         ; restore old bp
 endm
 
 popm macro args
-  push bp                               ; Save old bp
-  mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
-  mov  bp, [bp]                         ; now bp->stack bottom
+  ;push bp                               ; Save old bp
+  ;mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
+  ;mov  bp, [bp]                         ; now bp->stack bottom
   irp  y, <args>                        ;
-    dec  bp                             ; next
-    dec  bp                             ; variable
-    push word ptr [bp]                  ;
+    ;dec  bp                             ; next
+    ;dec  bp                             ; variable
+    ;push word ptr [bp]                  ;
     ifidni y, f                         ;
       popf                              ;
     else                                ; Restore registers

@@ -5,12 +5,12 @@
 include model.inc
 include stuff.inc
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 
-	cglobal lowlevel_cbreak_handler
-lowlevel_cbreak_handler:
+	public _lowlevel_cbreak_handler
+_lowlevel_cbreak_handler:
 include "../criter/dmy_cbrk.asm"
 
-TEXT  ends
+_TEXT  ends
 
       end

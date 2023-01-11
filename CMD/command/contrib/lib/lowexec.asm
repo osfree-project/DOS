@@ -49,7 +49,7 @@
 include model.inc
 include stuff.inc
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 	public _lowLevelExec
 
 _lowLevelExec:
@@ -59,8 +59,11 @@ _lowLevelExec:
 	push    di
 	push    ds
 
-	lds     dx, [bp+4+2*@CodeSize]      ; load file name
-	les     bx, [bp+8+2*@CodeSize]      ; load parameter block
+ifidn __OUTPUT_FORMAT__, elf
+	push    es
+endif
+	lds     dx, [bp+4+2*CodeSize]      ; load file name
+	les     bx, [bp+8+2*CodeSize]      ; load parameter block
 	mov     ax, 4b00h
 
 	mov     Word Ptr [cs:saveSP], sp
@@ -75,6 +78,9 @@ _lowLevelExec:
 	xor     ax, ax       ; otherwise, clear AX
 
 exec_error:
+ifidn __OUTPUT_FORMAT__, elf
+	pop    es
+endif
 	pop     ds
 	pop     di
 	pop     si
@@ -84,6 +90,6 @@ exec_error:
 saveSP dw 0
 saveSS dw 0
 
-TEXT  ends
+_TEXT  ends
 
       end

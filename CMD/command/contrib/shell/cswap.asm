@@ -33,12 +33,12 @@ include stuff.inc
 
 _BSS  segment word public 'BSS'  use16 ; transient data (in DS)
 
- 	public SwapResidentSize
-SwapResidentSize  dw 1
+ 	public _SwapResidentSize
+_SwapResidentSize  dw 1
 
-	public XMSsave
-XMSsave	dw 8
-currentSegmOfFreeCOMsave	equ	XMSsave+8
+	public _XMSsave
+_XMSsave	dw 8
+currentSegmOfFreeCOMsave	equ	_XMSsave+8
 
 execSS dw 1
 execSP dw 1
@@ -51,43 +51,47 @@ resize_free db 4ah
 
 _DATA ends
 
+ifidn __OUTPUT_FORMAT__,elf ; GCC/ELF: no seg so use linker script symbol
+extern _TEXTSEG
+else
 _TEXT segment word public 'CODE' use16
 
 _TEXTSEG equ _TEXT
+endif
 
-	public dosFCB1
-	public dosFCB2
-dosFCB1 db 37 dup (0)
-dosFCB2 db 37 dup (0)
+	public _dosFCB1
+	public _dosFCB2
+_dosFCB1 db 37 dup (0)
+_dosFCB2 db 37 dup (0)
 
 ;;	global _dosCMDTAIL, _dosCMDNAME		use command line from within PSP
-	public dosCMDNAME
+	public _dosCMDNAME
 ;;_dosCMDTAIL  times 128 db 0
-dosCMDNAME db 128 dup (0)
+_dosCMDNAME db 128 dup (0)
 	   db 256 dup (0)
 	public localStack
 localStack:
 
-	public dosParamDosExec
-dosParamDosExec db 22	dup (0)
+	public _dosParamDosExec
+_dosParamDosExec db 22	dup (0)
 
 
-	public XMSdriverAdress
-XMSdriverAdress dd 0
+	public _XMSdriverAdress
+_XMSdriverAdress dd 0
 callXMS macro
-	call dword ptr [XMSdriverAdress]
+	call dword ptr [_XMSdriverAdress]
 	endm
 
- 	public SwapTransientSize
-SwapTransientSize  dw 0
+ 	public _SwapTransientSize
+_SwapTransientSize  dw 0
 
-	public XMSrestore
-XMSrestore	DW 8 dup (0)
-xms_handle		equ	XMSrestore+4
-currentSegmOfFreeCOM	equ	XMSrestore+14
+	public _XMSrestore
+_XMSrestore	DW 8 dup (0)
+xms_handle		equ	_XMSrestore+4
+currentSegmOfFreeCOM	equ	_XMSrestore+14
 
-	public canexit
-canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+	public _canexit
+_canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
 filler  DB 0
 
     public mySS, mySP
@@ -105,11 +109,11 @@ real_XMSexec:
 ;;		mov ax, cs
                    		; ds:dx = ASCIZ program name
 ;;		mov ds, ax
-		movzx  dx,dosCMDNAME
+		movzx  dx,_dosCMDNAME
 		       
                         ; es:bx = parameter block
 		mov es, cx
-		movzx bx, dosParamDosExec
+		movzx bx, _dosParamDosExec
 
 
 						; our temporary stack
@@ -151,7 +155,7 @@ exec_error:
 		; ignore any errors
 
 		mov ah,48h
-		mov bx,[SwapTransientSize]
+		mov bx,[_SwapTransientSize]
 		int 21h
 
 ;;ska		pushf
@@ -173,7 +177,7 @@ exec_error:
 
 								; restore everything to XMS
 		mov ah,0bh
-		mov si,XMSrestore
+		mov si, _XMSrestore
 		callXMS
 
 		pop bx                  ; get relocation factor back
@@ -253,15 +257,15 @@ endif
 ;********************************************************************
 ; *************   END OF RESIDENT AREA ******************************
 ;********************************************************************
-	cglobal SWAPresidentEnd
-SWAPresidentEnd:
+	public _SWAPresidentEnd
+_SWAPresidentEnd:
 
 if 0
 ;
 ; normal EXEC
 ;
 
-		global _DosEXEC
+		public _DosEXEC
 _DosEXEC:
 						; save ALL registers needed later
 		push si
@@ -316,7 +320,7 @@ endif
 	;; Note: Because [CS:driverAdress] == [residentCS:driverAdress]
 	;; we need not use a similiar approach as with XMSexec
 XMSrequest:
-		jmp dword ptr [cs:XMSdriverAdress]
+		jmp dword ptr [cs:_XMSdriverAdress]
 
 ;; Added here to make it more easier for the C-part to call functions
 ;; located in the resident part, because:
@@ -329,10 +333,12 @@ XMSrequest:
 
 ;;TODO: DS ought to be equal to SS, DS could be reconstructed from
 ;;	SS at the end of the XMSexec function
-		public	XMSexec
-XMSexec:
+		public	_XMSexec
+_XMSexec:
 						; save ALL registers needed later
+ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
 		push es
+endif
 		push si
 		push di
 		push bp
@@ -342,15 +348,15 @@ XMSexec:
 
 						; save everything to XMS
 		mov ah,0bh
-		mov si,XMSsave
-		call dword ptr [cs:XMSdriverAdress]
+		mov si, _XMSsave
+		call dword ptr [cs:_XMSdriverAdress]
 
 ;;TODO: test of result
 
 		mov es,[currentSegmOfFreeCOMsave]
 						; first time: shrink current psp
 		mov ah,[resize_free]
-		mov bx,[SwapResidentSize]
+		mov bx,[_SwapResidentSize]
 
 		mov dx, ds
 		mov cx, _TEXTSEG
@@ -388,8 +394,10 @@ ifidn MODEL, m                     ; in medium & large need to fixup return segm
 endif
 		pop bp
 		pop di
-		pop	si
+		pop si
+ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
 		pop es
+endif
 		ret							; done (really), retn/retf based on memory model, see model.inc
 
 _TEXT ends

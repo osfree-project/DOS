@@ -106,7 +106,7 @@ void dbg_printmem (void) {
 #endif
 	{
 		unsigned avail;	  
-		_dos_allocmem(0xffff, (void **)&avail);
+		_dos_allocmem(0xffff, (void *)&avail);
 		farThis = (unsigned long)avail << 4;
 	}
 #else

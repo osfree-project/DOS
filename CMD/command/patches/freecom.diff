@@ -1,6 +1,6 @@
 diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/criter.asm
 --- freecom-orig/criter/criter.asm	2023-01-05 22:42:01.291224837 +0300
-+++ contrib/criter/criter.asm	2023-01-06 21:39:19.799236905 +0300
++++ contrib/criter/criter.asm	2023-01-09 05:41:04.731110213 +0300
 @@ -111,23 +111,27 @@
  ; intermediate update 1
  ;
@@ -83,14 +83,16 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  
  LOCAL_BELL	EQU 7
-@@ -239,48 +243,48 @@
+@@ -239,48 +243,55 @@
  ;		ES:BX == pointer to context, package int24
  ;		else: as normal INT-24 handler
  
 -%ifdef XMS_SWAP_CRITER
+-	cglobal autofail_err_handler
+-autofail_err_handler:
 +ifdef XMS_SWAP_CRITER
- 	cglobal autofail_err_handler
- autofail_err_handler:
++	public _autofail_err_handler
++_autofail_err_handler:
  	mov al, FAIL
  	iret
 -%endif
@@ -108,7 +110,15 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
 -%else
 +else
  	push dx
- 	pushm es, ds, bp, si, di, cx, bx, ax
+-	pushm es, ds, bp, si, di, cx, bx, ax
++	push ax
++	push bx
++	push cx
++	push di
++	push si
++	push bp
++	push ds
++	push es
  
  	mov cx, cs
  	mov ds, cx		; DS := local code/data segment
@@ -144,7 +154,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  ;;
  ;; and al, (CodeIgnore or CodeRetry or CodeFail) / 2
-@@ -296,7 +300,7 @@
+@@ -296,7 +307,7 @@
  	mov [??allowIgnore], ah
  
  ;; AX is empty now
@@ -153,7 +163,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	push ds
  	mov ax, bp
  	mov ds, bp
-@@ -304,8 +308,8 @@
+@@ -304,8 +315,8 @@
  	push di
  	push cx
  	mov cx, 8
@@ -164,7 +174,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  ??__e:
  	lodsb
  	cmp al, 32
-@@ -320,20 +324,20 @@
+@@ -320,20 +331,20 @@
  	mov ax, [si+4]
  	pop ds
  	call ??dispAX
@@ -192,7 +202,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  	mov bl, StrBlockDevice		; by default issue block device error
  	pop ax						; AL := drive letter again
-@@ -341,12 +345,12 @@
+@@ -341,12 +352,12 @@
  	jnc ?noCharDevice
  
  	mov ds, bp					; is still segment of device driver
@@ -208,7 +218,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  		mov ah, ' '
  		cld
  ?drvNameGetLoop:
-@@ -364,7 +368,7 @@
+@@ -364,7 +375,7 @@
  		std
  		dec di			; stosb leaves DI behind the last written byte
  		repe scasb
@@ -217,7 +227,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  		mov cx, cs
  		mov bl, StrCharDevice		; issue device driver message
  		mov al, 0ffh		; AL := invalidate
-@@ -379,7 +383,7 @@
+@@ -379,7 +390,7 @@
  	;; Perform the repeat check; AL == -1 (char device), 0..31 if block
  	mov bx, ?repCheck
  	mov di, dummyByte	; Tha byte at [DI} will be decremented eventually
@@ -226,7 +236,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	jz ?noRepCheck
  	;; paranoid check to avoid memory overflow
  	;; also skips if char device
-@@ -389,13 +393,13 @@
+@@ -389,13 +400,13 @@
  	add al, 2		; correction as BX is two bytes below
  	add ax, bx		; repCheckByte area 
  	mov di, ax
@@ -243,7 +253,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  ;; Try to find a suitable I/O channel
  	mov ah, 62h		; Get PSP
-@@ -406,10 +410,10 @@
+@@ -406,10 +417,10 @@
  	mov al, [es:bx+2]	; stderr
  	; patch STDIN & STDOUT to point to the found channel
  	mov ah, al
@@ -258,7 +268,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	pop bx
  	mov es, cx			;; reset ES to the shared code/data segement
  
-@@ -439,7 +443,7 @@
+@@ -439,7 +450,7 @@
  
  ?inputLoop:
  	; Prepare to decode the character
@@ -267,7 +277,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	xor ax, ax
  	mov al, [di]
  	inc di
-@@ -466,7 +470,7 @@
+@@ -466,7 +477,7 @@
  	les di, [??repatchAddr]
  	mov ax, 1234h
  ?orgIOchannels EQU $-2
@@ -276,7 +286,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  ?iret:
  	pop ax			; preserve AH
-@@ -477,7 +481,8 @@
+@@ -477,10 +488,18 @@
  	je ?iretNow
  	;; AutoFail is activated for ABORT and FAIL only
  	;; as user selected something else, reset the AutoFail state of the drive
@@ -285,8 +295,19 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
 +	dec BYTE PTR [ds:1234h]
  repCheckDecAddr EQU $-2
  ?iretNow:
- 	popm es, ds, bp, si, di, cx, bx
-@@ -494,8 +499,8 @@
+-	popm es, ds, bp, si, di, cx, bx
++	pop es
++	pop ds
++	pop bp
++	pop si
++	pop di
++	pop cx
++	pop bx
++	pop ax
+ 	pop dx
+ 	iret
+ 
+@@ -494,8 +513,8 @@
  	or bh, [bx+??allow]
  	jz ?oRet			; not allowed
  	add bl, '5'			; local strarg code
@@ -297,7 +318,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	jmp short ?oBuffer
  
  ;; dump string #BL onto screen
-@@ -504,14 +509,14 @@
+@@ -504,14 +523,14 @@
  
  ?oString:
  	;; make sure BL is within limit
@@ -314,7 +335,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	jmp short ?oBuffer
  
  ;; dump character sequence pointed to by BX onto screen
-@@ -520,7 +525,7 @@
+@@ -520,7 +539,7 @@
  
  ?oB_bufA:		;; Dump string argument A
  	push bx
@@ -323,7 +344,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	call ?oBuffer
  	jmp short ?oB_1
  
-@@ -552,7 +557,7 @@
+@@ -552,7 +571,7 @@
  ?oB_2:
  	inc bx
  ?oBuffer:
@@ -332,7 +353,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	or al, al
  	jnz ?oB_loop
  ?oRet:
-@@ -569,20 +574,20 @@
+@@ -569,20 +588,20 @@
  ;; IN: AL = character
  
  ?oChar:
@@ -357,7 +378,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  ??_a DB "AX == 0x"
  ??_b DB 1,2,3,4, 13, 10, 0
  ??_d DB "Device name: >>"
-@@ -590,9 +595,9 @@
+@@ -590,9 +609,9 @@
  ??dispAX:
  	push bx
  	push ax
@@ -369,7 +390,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  	call ?oBuffer
  	pop ax
  	pop bx
-@@ -614,16 +619,16 @@
+@@ -614,16 +633,16 @@
  	jc ??__c
  	add al, 'A' - '0' - 10
  ??__c:
@@ -390,15 +411,17 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  ??repatchAddr DD 0
  
-@@ -649,12 +654,12 @@
+@@ -649,12 +668,12 @@
  ;;	+ the number of drives available to be checked is determined by
  ;;		counting the number of 0xFF bytes the immediately after the module
  ;;		got loaded into memory
 -%ifdef XMS_SWAP_CRITER
-+ifdef XMS_SWAP_CRITER
- 	cglobal criter_repeat_checkarea
- criter_repeat_checkarea:
+-	cglobal criter_repeat_checkarea
+-criter_repeat_checkarea:
 -%endif
++ifdef XMS_SWAP_CRITER
++	public _criter_repeat_checkarea
++_criter_repeat_checkarea:
 +endif
  ?repCheck	DW -1	;; disabled
 -TIMES HIDE_CRITER_DRIVES DB -1		;; not displayed already
@@ -406,7 +429,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  
  ??allow:
  ??allowIgnore	DB 0
-@@ -664,12 +669,12 @@
+@@ -664,12 +683,12 @@
  ??input			DB '%4%6', 0		;; temporary storage
  
  
@@ -424,7 +447,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  ??strings		DB 36	;; number of strings
  	;; Here start all the strings!
  
-@@ -749,32 +754,37 @@
+@@ -749,32 +768,37 @@
  S34 DB '(DOS 4.0+) out of input', 0
  S35 DB '(DOS 4.0+) insufficient disk space', 0
  S36	DB 'Unknown error code', 0
@@ -479,7 +502,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/criter.asm contrib/criter/crit
  ; Quote from RBIL
 diff -urwN -x .git -x .github freecom-orig/criter/resource.inc contrib/criter/resource.inc
 --- freecom-orig/criter/resource.inc	2023-01-05 22:42:01.291224837 +0300
-+++ contrib/criter/resource.inc	2023-01-06 05:45:20.241099591 +0300
++++ contrib/criter/resource.inc	2023-01-08 22:29:48.868220146 +0300
 @@ -1,7 +1,7 @@
 -%include "resource.id"
 -%macro resIdBlock 1-2 -1
@@ -495,7 +518,7 @@ diff -urwN -x .git -x .github freecom-orig/criter/resource.inc contrib/criter/re
 +endm
 diff -urwN -x .git -x .github freecom-orig/include/algnbyte.h contrib/include/algnbyte.h
 --- freecom-orig/include/algnbyte.h	1970-01-01 03:00:00.000000000 +0300
-+++ contrib/include/algnbyte.h	2023-01-06 14:19:00.025375059 +0300
++++ contrib/include/algnbyte.h	2023-01-08 22:29:48.868220146 +0300
 @@ -0,0 +1,13 @@
 +#if defined(_MSC_VER)
 +#if _MSC_VER >= 700
@@ -512,7 +535,7 @@ diff -urwN -x .git -x .github freecom-orig/include/algnbyte.h contrib/include/al
 +
 diff -urwN -x .git -x .github freecom-orig/include/algndflt.h contrib/include/algndflt.h
 --- freecom-orig/include/algndflt.h	1970-01-01 03:00:00.000000000 +0300
-+++ contrib/include/algndflt.h	2023-01-06 14:19:28.937998492 +0300
++++ contrib/include/algndflt.h	2023-01-08 22:29:48.868220146 +0300
 @@ -0,0 +1,8 @@
 +#if defined (_MSC_VER) || defined(_QC) || defined(__WATCOMC__) || defined(__GNUC__)
 +#pragma pack()
@@ -524,7 +547,7 @@ diff -urwN -x .git -x .github freecom-orig/include/algndflt.h contrib/include/al
 +
 diff -urwN -x .git -x .github freecom-orig/include/large.inc contrib/include/large.inc
 --- freecom-orig/include/large.inc	2023-01-05 22:42:01.375226287 +0300
-+++ contrib/include/large.inc	2023-01-05 23:30:45.473610861 +0300
++++ contrib/include/large.inc	2023-01-08 22:29:48.868220146 +0300
 @@ -1,13 +1,20 @@
  
  ; Large header
@@ -557,7 +580,7 @@ diff -urwN -x .git -x .github freecom-orig/include/large.inc contrib/include/lar
 +endm
 diff -urwN -x .git -x .github freecom-orig/include/medium.inc contrib/include/medium.inc
 --- freecom-orig/include/medium.inc	2023-01-05 22:42:01.375226287 +0300
-+++ contrib/include/medium.inc	2023-01-06 07:46:26.488810430 +0300
++++ contrib/include/medium.inc	2023-01-08 22:29:48.868220146 +0300
 @@ -1,13 +1,20 @@
  
 -; Medium header
@@ -591,7 +614,7 @@ diff -urwN -x .git -x .github freecom-orig/include/medium.inc contrib/include/me
 +endm
 diff -urwN -x .git -x .github freecom-orig/include/model.inc contrib/include/model.inc
 --- freecom-orig/include/model.inc	2023-01-05 22:42:01.375226287 +0300
-+++ contrib/include/model.inc	2023-01-06 07:43:41.481630936 +0300
++++ contrib/include/model.inc	2023-01-08 22:29:48.868220146 +0300
 @@ -1,9 +1,13 @@
 -%ifidni MODEL,s
 -%include "small.inc"
@@ -617,7 +640,7 @@ diff -urwN -x .git -x .github freecom-orig/include/model.inc contrib/include/mod
 +endif
 diff -urwN -x .git -x .github freecom-orig/include/small.inc contrib/include/small.inc
 --- freecom-orig/include/small.inc	2023-01-05 22:42:01.375226287 +0300
-+++ contrib/include/small.inc	2023-01-05 23:30:45.489611211 +0300
++++ contrib/include/small.inc	2023-01-08 22:29:48.868220146 +0300
 @@ -1,16 +1,15 @@
  
  ; Small header
@@ -647,7 +670,7 @@ diff -urwN -x .git -x .github freecom-orig/include/small.inc contrib/include/sma
  @DataSize EQU 0
 diff -urwN -x .git -x .github freecom-orig/include/stuff.inc contrib/include/stuff.inc
 --- freecom-orig/include/stuff.inc	2023-01-05 22:42:01.379226356 +0300
-+++ contrib/include/stuff.inc	2023-01-06 10:52:17.957566963 +0300
++++ contrib/include/stuff.inc	2023-01-09 05:18:02.342054228 +0300
 @@ -1,48 +1,54 @@
 -cpu 8086
 -
@@ -687,19 +710,19 @@ diff -urwN -x .git -x .github freecom-orig/include/stuff.inc contrib/include/stu
 +      push y                            ;
 +    endif                               ; in specified order
 +  endm                                  ;   
-+  push bp                               ; save bp on stack top
-+  mov  bp, [bp]                         ; restore old bp
++  ;push bp                               ; save bp on stack top
++  ;mov  bp, [bp]                         ; restore old bp
 +endm
  
 -;; declare global and extern with underscore for OMF, without for ELF
 +popm macro args
-+  push bp                               ; Save old bp
-+  mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
-+  mov  bp, [bp]                         ; now bp->stack bottom
++  ;push bp                               ; Save old bp
++  ;mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
++  ;mov  bp, [bp]                         ; now bp->stack bottom
 +  irp  y, <args>                        ;
-+    dec  bp                             ; next
-+    dec  bp                             ; variable
-+    push word ptr [bp]                  ;
++    ;dec  bp                             ; next
++    ;dec  bp                             ; variable
++    ;push word ptr [bp]                  ;
 +    ifidni y, f                         ;
 +      popf                              ;
 +    else                                ; Restore registers
@@ -744,10 +767,22 @@ diff -urwN -x .git -x .github freecom-orig/include/stuff.inc contrib/include/stu
 +      extrn y
 +  endm
 +endm
+diff -urwN -x .git -x .github freecom-orig/lib/dbg_mem.c contrib/lib/dbg_mem.c
+--- freecom-orig/lib/dbg_mem.c	2023-01-05 22:42:01.391226562 +0300
++++ contrib/lib/dbg_mem.c	2023-01-09 03:17:03.102170340 +0300
+@@ -106,7 +106,7 @@
+ #endif
+ 	{
+ 		unsigned avail;	  
+-		_dos_allocmem(0xffff, &avail);
++		_dos_allocmem(0xffff, (void *)&avail);
+ 		farThis = (unsigned long)avail << 4;
+ 	}
+ #else
 diff -urwN -x .git -x .github freecom-orig/lib/lowexec.asm contrib/lib/lowexec.asm
 --- freecom-orig/lib/lowexec.asm	2023-01-05 22:42:01.479228082 +0300
-+++ contrib/lib/lowexec.asm	2023-01-06 09:37:51.062648367 +0300
-@@ -46,26 +46,25 @@
++++ contrib/lib/lowexec.asm	2023-01-09 13:10:12.715730134 +0300
+@@ -46,26 +46,28 @@
  ; chg: moving all assembly files to NASM
  ;
  
@@ -758,7 +793,7 @@ diff -urwN -x .git -x .github freecom-orig/lib/lowexec.asm contrib/lib/lowexec.a
  
 -segment _TEXT
 -	cglobal lowLevelExec
-+TEXT  segment word public 'CODE' use16
++_TEXT  segment word public 'CODE' use16
 +	public _lowLevelExec
  
 -lowLevelExec:
@@ -771,8 +806,10 @@ diff -urwN -x .git -x .github freecom-orig/lib/lowexec.asm contrib/lib/lowexec.a
 +	push    ds
  
 -%ifidn __OUTPUT_FORMAT__, elf
--	push    es
++ifidn __OUTPUT_FORMAT__, elf
+ 	push    es
 -%endif
++endif
  	lds     dx, [bp+4+2*@CodeSize]      ; load file name
  	les     bx, [bp+8+2*@CodeSize]      ; load parameter block
  	mov     ax, 4b00h
@@ -784,14 +821,16 @@ diff -urwN -x .git -x .github freecom-orig/lib/lowexec.asm contrib/lib/lowexec.a
  	int     21h
  	cli						;; Can be removed for post-8086 CPUs
  	mov     ss, [cs:saveSS]
-@@ -76,12 +75,15 @@
+@@ -76,12 +78,18 @@
  	xor     ax, ax       ; otherwise, clear AX
  
  exec_error:
 -%ifidn __OUTPUT_FORMAT__, elf
--	pop     es
++ifidn __OUTPUT_FORMAT__, elf
+ 	pop     es
 -%endif
 -	popm    si, di, ds
++endif
 +	pop     ds
 +	pop     di
 +	pop     si
@@ -801,12 +840,12 @@ diff -urwN -x .git -x .github freecom-orig/lib/lowexec.asm contrib/lib/lowexec.a
  saveSP dw 0
  saveSS dw 0
 +
-+TEXT  ends
++_TEXT  ends
 +
 +      end
 diff -urwN -x .git -x .github freecom-orig/shell/cb_catch.asm contrib/shell/cb_catch.asm
 --- freecom-orig/shell/cb_catch.asm	2023-01-05 22:42:01.547229254 +0300
-+++ contrib/shell/cb_catch.asm	2023-01-06 10:53:32.219159125 +0300
++++ contrib/shell/cb_catch.asm	2023-01-09 05:28:07.754722858 +0300
 @@ -51,16 +51,18 @@
  ;   chg: moving all assembly files to NASM
  ;
@@ -835,7 +874,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cb_catch.asm contrib/shell/cb_c
  
  ;_initCBreak:
  ;	;; At this point DS is the segment of _ctrlBreak
-@@ -68,36 +70,39 @@
+@@ -68,36 +70,47 @@
  ;	ret
  
  ;?freecomSegment DW 0
@@ -855,7 +894,11 @@ diff -urwN -x .git -x .github freecom-orig/shell/cb_catch.asm contrib/shell/cb_c
  
  noRecurs:
 -		push ds, dx, ax, bp
-+		pushm ds, dx, ax, bp
++		push bp
++		push ax
++		push dx
++		push ds
++
  		mov dx, strBeg
  		mov ax, cs
  		mov ds, ax
@@ -865,7 +908,11 @@ diff -urwN -x .git -x .github freecom-orig/shell/cb_catch.asm contrib/shell/cb_c
 -		pop ds, dx, ax, bp
 -%endif
 +		inc BYTE PTR [strEnd]
-+		popm ds, dx, ax, bp
++
++		pop ds
++		pop dx
++		pop ax
++		pop bp
 +endif
  
  		;; ^Break of COMAMND --> just set the variable
@@ -887,10 +934,21 @@ diff -urwN -x .git -x .github freecom-orig/shell/cb_catch.asm contrib/shell/cb_c
 +_TEXT ends
  
 +      end
+diff -urwN -x .git -x .github freecom-orig/shell/command.c contrib/shell/command.c
+--- freecom-orig/shell/command.c	2023-01-05 22:42:01.551229324 +0300
++++ contrib/shell/command.c	2023-01-09 10:23:39.764031219 +0300
+@@ -23,6 +23,7 @@
+ #include <dfn.h>
+ #include "../include/lfnfuncs.h"
+ 
++#include "portable.h"
+ #include "../include/command.h"
+ #include "../include/batch.h"
+ #include "../include/cmdline.h"
 diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.asm
 --- freecom-orig/shell/cswap.asm	2023-01-05 22:42:01.551229324 +0300
-+++ contrib/shell/cswap.asm	2023-01-06 09:30:47.549917141 +0300
-@@ -26,66 +26,71 @@
++++ contrib/shell/cswap.asm	2023-01-09 13:07:35.276504929 +0300
+@@ -26,66 +26,75 @@
  ;
  ;
  
@@ -909,14 +967,14 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
 -	cglobal XMSsave
 -XMSsave	resw 8
 -%define currentSegmOfFreeCOMsave	XMSsave+8
-+ 	public SwapResidentSize
-+SwapResidentSize  dw 1
++ 	public _SwapResidentSize
++_SwapResidentSize  dw 1
  
 -execSS resw 1
 -execSP resw 1
-+	public XMSsave
-+XMSsave	dw 8
-+currentSegmOfFreeCOMsave	equ	XMSsave+8
++	public _XMSsave
++_XMSsave	dw 8
++currentSegmOfFreeCOMsave	equ	_XMSsave+8
  
 -segment _DATA
 +execSS dw 1
@@ -930,11 +988,10 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  
 -segment _TEXT
 +_DATA ends
-+
-+_TEXT segment word public 'CODE' use16
  
 -%ifidn __OUTPUT_FORMAT__,elf ; GCC/ELF: no seg so use linker script symbol
--extern _TEXTSEG
++ifidn __OUTPUT_FORMAT__,elf ; GCC/ELF: no seg so use linker script symbol
+ extern _TEXTSEG
 -%else
 -%define _TEXTSEG _TEXT
 -%endif
@@ -942,55 +999,64 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
 -	cglobal dosFCB1,dosFCB2
 -dosFCB1 times 37 db 0
 -dosFCB2 times 37 db 0
-+_TEXTSEG equ _TEXT
++else
++_TEXT segment word public 'CODE' use16
 +
-+	public dosFCB1
-+	public dosFCB2
-+dosFCB1 db 37 dup (0)
-+dosFCB2 db 37 dup (0)
++_TEXTSEG equ _TEXT
++endif
++
++	public _dosFCB1
++	public _dosFCB2
++_dosFCB1 db 37 dup (0)
++_dosFCB2 db 37 dup (0)
  
  ;;	global _dosCMDTAIL, _dosCMDNAME		use command line from within PSP
 -	cglobal dosCMDNAME
-+	public dosCMDNAME
++	public _dosCMDNAME
  ;;_dosCMDTAIL  times 128 db 0
 -dosCMDNAME times 128 db 0
 -		times 256	db 0
 -    global localStack
-+dosCMDNAME db 128 dup (0)
++_dosCMDNAME db 128 dup (0)
 +	   db 256 dup (0)
 +	public localStack
  localStack:
  
 -	cglobal dosParamDosExec
 -dosParamDosExec times 22	db 0
-+	public dosParamDosExec
-+dosParamDosExec db 22	dup (0)
++	public _dosParamDosExec
++_dosParamDosExec db 22	dup (0)
  
  
 -	cglobal XMSdriverAdress
-+	public XMSdriverAdress
- XMSdriverAdress dd 0
+-XMSdriverAdress dd 0
 -%define callXMS		call far [XMSdriverAdress]
++	public _XMSdriverAdress
++_XMSdriverAdress dd 0
 +callXMS macro
-+	call dword ptr [XMSdriverAdress]
++	call dword ptr [_XMSdriverAdress]
 +	endm
++
++ 	public _SwapTransientSize
++_SwapTransientSize  dw 0
++
++	public _XMSrestore
++_XMSrestore	DW 8 dup (0)
++xms_handle		equ	_XMSrestore+4
++currentSegmOfFreeCOM	equ	_XMSrestore+14
  
 - 	cglobal SwapTransientSize
-+ 	public SwapTransientSize
- SwapTransientSize  dw 0
- 
+-SwapTransientSize  dw 0
+-
 -	cglobal XMSrestore
 -XMSrestore	times 8 DW 0
 -%define xms_handle	XMSrestore+4
 -%define currentSegmOfFreeCOM	XMSrestore+14
-+	public XMSrestore
-+XMSrestore	DW 8 dup (0)
-+xms_handle		equ	XMSrestore+4
-+currentSegmOfFreeCOM	equ	XMSrestore+14
- 
+-
 -	cglobal canexit
-+	public canexit
- canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+-canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
++	public _canexit
++_canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
  filler  DB 0
  
 -    cglobal mySS, mySP
@@ -998,21 +1064,39 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  mySS DW 0
  mySP DW 0
  
-@@ -100,11 +105,11 @@
+@@ -100,11 +109,11 @@
  ;;		mov ax, cs
                     		; ds:dx = ASCIZ program name
  ;;		mov ds, ax
 -		mov  dx,dosCMDNAME
-+		movzx  dx,dosCMDNAME
++		movzx  dx,_dosCMDNAME
  		       
                          ; es:bx = parameter block
  		mov es, cx
 -		mov bx, dosParamDosExec
-+		movzx bx, dosParamDosExec
++		movzx bx, _dosParamDosExec
  
  
  						; our temporary stack
-@@ -186,16 +191,16 @@
+@@ -146,7 +155,7 @@
+ 		; ignore any errors
+ 
+ 		mov ah,48h
+-		mov bx,[SwapTransientSize]
++		mov bx,[_SwapTransientSize]
+ 		int 21h
+ 
+ ;;ska		pushf
+@@ -168,7 +177,7 @@
+ 
+ 								; restore everything to XMS
+ 		mov ah,0bh
+-		mov si,XMSrestore
++		mov si, _XMSrestore
+ 		callXMS
+ 
+ 		pop bx                  ; get relocation factor back
+@@ -186,16 +195,16 @@
  common_error	db 0dh,0ah,0ah,'FreeCOM: XMSSwap-In: $'
  
  XMS_trouble_while_swapping_in:
@@ -1032,7 +1116,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  		mov ah,09
  		int 21h
  
-@@ -209,10 +214,10 @@
+@@ -209,10 +218,10 @@
  
  		;; FALL THROUGH for elder FreeCOM kernels that simply ignore
  		;; DOS-4C for shells
@@ -1046,7 +1130,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  xms_kill:
  	; Kill the XMS memory block
  	mov dx, [xms_handle]
-@@ -228,7 +233,7 @@
+@@ -228,7 +237,7 @@
  ; or we use the TURBO_C _restorezero() and use the
  ; DOS default handler for that
  
@@ -1055,7 +1139,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  MsgZerodivide db 'integer zero divide$'
  	global _ZeroDivideInterrupt
  _ZeroDivideInterrupt:
-@@ -242,7 +247,7 @@
+@@ -242,21 +251,21 @@
          mov ax,04c7fh       ; terminate with errorlevel 127
          int 21h
  		jmp _ZeroDivideInterrupt
@@ -1064,16 +1148,25 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  
  
  ;********************************************************************
-@@ -251,7 +256,7 @@
- 	cglobal SWAPresidentEnd
- SWAPresidentEnd:
+ ; *************   END OF RESIDENT AREA ******************************
+ ;********************************************************************
+-	cglobal SWAPresidentEnd
+-SWAPresidentEnd:
++	public _SWAPresidentEnd
++_SWAPresidentEnd:
  
 -%if 0
 +if 0
  ;
  ; normal EXEC
  ;
-@@ -295,7 +300,7 @@
+ 
+-		global _DosEXEC
++		public _DosEXEC
+ _DosEXEC:
+ 						; save ALL registers needed later
+ 		push si
+@@ -295,7 +304,7 @@
  		pop di
  		pop	si
  		retf
@@ -1082,7 +1175,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  
  ;; Added here to make it more easier for the C-part to make a XMS
  ;; request, because the code:
-@@ -307,11 +312,11 @@
+@@ -307,11 +316,11 @@
  ;; detroying AX already holding the API function number
  
  ;; To be called with _far_!!
@@ -1092,34 +1185,47 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  	;; we need not use a similiar approach as with XMSexec
  XMSrequest:
 -		jmp far [cs:XMSdriverAdress]
-+		jmp dword ptr [cs:XMSdriverAdress]
++		jmp dword ptr [cs:_XMSdriverAdress]
  
  ;; Added here to make it more easier for the C-part to call functions
  ;; located in the resident part, because:
-@@ -324,12 +329,10 @@
+@@ -324,12 +333,12 @@
  
  ;;TODO: DS ought to be equal to SS, DS could be reconstructed from
  ;;	SS at the end of the XMSexec function
 -		cglobal	XMSexec
-+		public	XMSexec
- XMSexec:
+-XMSexec:
++		public	_XMSexec
++_XMSexec:
  						; save ALL registers needed later
 -%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
++ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
  		push es
 -%endif
++endif
  		push si
  		push di
  		push bp
-@@ -340,7 +343,7 @@
+@@ -339,15 +348,15 @@
+ 
  						; save everything to XMS
  		mov ah,0bh
- 		mov si,XMSsave
+-		mov si,XMSsave
 -		call far [cs:XMSdriverAdress]
-+		call dword ptr [cs:XMSdriverAdress]
++		mov si, _XMSsave
++		call dword ptr [cs:_XMSdriverAdress]
  
  ;;TODO: test of result
  
-@@ -371,7 +374,7 @@
+ 		mov es,[currentSegmOfFreeCOMsave]
+ 						; first time: shrink current psp
+ 		mov ah,[resize_free]
+-		mov bx,[SwapResidentSize]
++		mov bx,[_SwapResidentSize]
+ 
+ 		mov dx, ds
+ 		mov cx, _TEXTSEG
+@@ -371,7 +380,7 @@
  		add [bp+4],bx				; ds
  		pop ds
  
@@ -1128,7 +1234,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  
  		add [currentSegmOfFreeCOMsave],bx
  		mov cx,[execSS]
-@@ -379,22 +382,16 @@
+@@ -379,22 +388,18 @@
  		mov ss,cx
  		mov sp,[execSP]
  
@@ -1142,8 +1248,10 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
  		pop di
  		pop	si
 -%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
++ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
  		pop es
 -%endif
++endif
  		ret							; done (really), retn/retf based on memory model, see model.inc
  
 -%ifidn __OUTPUT_FORMAT__,elf
@@ -1158,7 +1266,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/cswap.asm contrib/shell/cswap.a
 +      end
 diff -urwN -x .git -x .github freecom-orig/shell/dummies.asm contrib/shell/dummies.asm
 --- freecom-orig/shell/dummies.asm	2023-01-05 22:42:01.551229324 +0300
-+++ contrib/shell/dummies.asm	2023-01-06 08:58:08.237462580 +0300
++++ contrib/shell/dummies.asm	2023-01-08 22:29:48.868220146 +0300
 @@ -2,13 +2,18 @@
  
  ; Dummy drivers to be included into FreeCOM itself
@@ -1185,31 +1293,9 @@ diff -urwN -x .git -x .github freecom-orig/shell/dummies.asm contrib/shell/dummi
 +_TEXT ends
 +
 +      end
-diff -urwN -x .git -x .github freecom-orig/shell/init.c contrib/shell/init.c
---- freecom-orig/shell/init.c	2023-01-05 22:42:01.551229324 +0300
-+++ contrib/shell/init.c	2023-01-06 20:29:33.781642449 +0300
-@@ -218,8 +218,10 @@
- 		else free(p);
- 	}
- #endif
-+        //dprintf(( "000\n" ));
- 	dbg_printmem();
- 
-+        //dprintf(( "001\n" ));
- #ifdef FEATURE_KERNEL_SWAP_SHELL
- 	if(kswapInit()) {		/* re-invoked */
- 		if(kswapLoadStruc()) {
-@@ -235,6 +237,7 @@
- 	}
- #endif
- 
-+  //dprintf(( "002\n" ));
-   /* Some elder DOSs may not pass an initializied environment segment */
-   if(env_glbSeg && !isMCB(SEG2MCB(env_glbSeg))) {
-     env_setGlbSeg(0);       /* Disable the environment */
 diff -urwN -x .git -x .github freecom-orig/shell/kswap.c contrib/shell/kswap.c
 --- freecom-orig/shell/kswap.c	2023-01-05 22:42:01.551229324 +0300
-+++ contrib/shell/kswap.c	2023-01-06 10:03:19.166704941 +0300
++++ contrib/shell/kswap.c	2023-01-09 13:12:41.506806627 +0300
 @@ -11,7 +11,7 @@
  #ifdef FEATURE_KERNEL_SWAP_SHELL
  
@@ -1219,7 +1305,12 @@ diff -urwN -x .git -x .github freecom-orig/shell/kswap.c contrib/shell/kswap.c
  #include <stdlib.h>
  #include <string.h>
  
-@@ -23,13 +23,17 @@
+@@ -19,10 +19,12 @@
+ #include <environ.h>
+ #include <mcb.h>
+ 
++#include "portable.h"
+ #include "../include/context.h"
  #include "../include/command.h"
  #include "../err_fcts.h"
  #include "../include/kswap.h"
@@ -1227,27 +1318,9 @@ diff -urwN -x .git -x .github freecom-orig/shell/kswap.c contrib/shell/kswap.c
  
  #define FD_MAGIC 0x4446 /* 'FD' */
  
-+//#include "tcc2wat.h"
-+
- /* Lock kswap feature within kernel and invalidate a previous external prg
-     Return:  FALSE  no swap feature within kernel */
- int kswapInit(void)
- {   IREGS r;
-+    //union REGPACK r;
- 
-     r.r_ax = 0x4bfe;        /* Get kswap argument structure segm */
-     r.r_dx = FD_MAGIC;
-@@ -71,6 +75,7 @@
- 
- void kswapRegister(kswap_p ctxt)
- {   IREGS r;
-+    //union REGPACK r;
- 
-     dprintf(("[KSWAP: Registering static context at: 0x%04x]\n", (word)ctxt));
-     assert(ctxt);
 diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/termhook.asm
 --- freecom-orig/shell/termhook.asm	2023-01-05 22:42:01.551229324 +0300
-+++ contrib/shell/termhook.asm	2023-01-06 09:30:37.737716946 +0300
++++ contrib/shell/termhook.asm	2023-01-09 08:08:04.194120134 +0300
 @@ -20,41 +20,45 @@
  ;
  ;
@@ -1262,7 +1335,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/term
  
 -	cglobal termAddr
 -termAddr:
-+TEXT  segment word public 'CODE' use16
++_TEXT  segment word public 'CODE' use16
 +
 +	public _termAddr
 +
@@ -1275,7 +1348,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/term
 -myPID	DW 0
 -	cglobal origPPID
 -origPPID DW 0
-+	extrn canexit: byte
++	extrn _canexit: far
 +	public _myPID
 +_myPID	DW 0
 +	public _origPPID
@@ -1291,21 +1364,21 @@ diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/term
 +
 +_terminateFreeCOMHook:
 +ifndef XMS_SWAP
-+	dec BYTE PTR [canexit]
++	dec BYTE PTR [_canexit]
 +endif
  	mov ax, cs				; setup run environment (in this module)
  	mov ds, ax
 -%ifdef XMS_SWAP
 -	extern localStack
 +ifdef XMS_SWAP
-+	extrn localStack
++	extrn localStack: near
  	mov ss, ax
  	mov sp, localStack
  
  	; Next time we hit here it's != 1 --> no zero flag --> I_AM_DEAD status
 -	dec BYTE [canexit]
 -%endif
-+	dec BYTE PTR [canexit]
++	dec BYTE PTR [_canexit]
 +endif
  	jnz I_AM_DEAD
  
@@ -1326,7 +1399,7 @@ diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/term
 -%ifdef XMS_SWAP
 -	extern xms_kill
 +ifdef XMS_SWAP
-+	extrn xms_kill
++	extrn xms_kill: near
  	call xms_kill
 -%endif
 +endif
@@ -1347,13 +1420,24 @@ diff -urwN -x .git -x .github freecom-orig/shell/termhook.asm contrib/shell/term
  dead_loop_string	DB 13,10,7,'Cannot terminate permanent FreeCOM instance'
  	DB 13,10,'System halted ... reboot or power off now$'
 +
-+TEXT  ends
++_TEXT  ends
 +
-+      end
++       end
+diff -urwN -x .git -x .github freecom-orig/shell/ver.c contrib/shell/ver.c
+--- freecom-orig/shell/ver.c	2023-01-05 22:42:01.555229392 +0300
++++ contrib/shell/ver.c	2023-01-09 10:24:03.728541241 +0300
+@@ -36,6 +36,7 @@
+ #include <stdio.h>
+ #include <dos.h>
+ 
++#include "portable.h"
+ #include "../include/command.h"
+ #include "../include/cmdline.h"
+ #include "../err_fcts.h"
 diff -urwN -x .git -x .github freecom-orig/shell/xms_2e.asm contrib/shell/xms_2e.asm
 --- freecom-orig/shell/xms_2e.asm	2023-01-05 22:42:01.555229392 +0300
-+++ contrib/shell/xms_2e.asm	2023-01-06 10:49:07.233467804 +0300
-@@ -3,24 +3,29 @@
++++ contrib/shell/xms_2e.asm	2023-01-09 06:55:11.779855777 +0300
+@@ -3,31 +3,36 @@
  ;	variant
  ; int process_input(int xflag, char *commandline)
  
@@ -1365,33 +1449,44 @@ diff -urwN -x .git -x .github freecom-orig/shell/xms_2e.asm contrib/shell/xms_2e
 -segment _TEXT
 +include model.inc
 +include stuff.inc
-+
-+TEXT  segment word public 'CODE' use16
  
- cglobal lowlevel_int_2e_handler
-     lowlevel_int_2e_handler:
+-cglobal lowlevel_int_2e_handler
+-    lowlevel_int_2e_handler:
++_TEXT  segment word public 'CODE' use16
++
++public _lowlevel_int_2e_handler
++    _lowlevel_int_2e_handler:
          mov ax, 0FFFFh
          iret
  
 -%else
 +else
 +
-+TEXT  segment word public 'CODE' use16
-+
-+extrn _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
++_TEXT  segment word public 'CODE' use16
  
 -segment _TEXT class=CODE
-+callXMS macro
-+	call dword ptr [cs:_XMSdriverAdress]
-+	endm
++extrn _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
  
 -extern _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
 -%define callXMS     call far [cs:_XMSdriverAdress]
 -%define currentSegmOfFreeCOM    _XMSsave+8
-+currentSegmOfFreeCOM equ  _XMSsave+8
++callXMS macro
++	call dword ptr [cs:_XMSdriverAdress]
++	endm
  
-     global myfar2e_parsecommandline
+-    global myfar2e_parsecommandline
++currentSegmOfFreeCOM equ  _XMSsave+8
++
++    public myfar2e_parsecommandline
  myfar2e_parsecommandline:
+     call _my2e_parsecommandline
+     retf
+ 
+-	global _lowlevel_int_2e_handler
++	public _lowlevel_int_2e_handler
+ _lowlevel_int_2e_handler:
+         cld
+         push si
 @@ -58,12 +63,12 @@
  ;       add ax,bx
  ;       mov ss,ax
@@ -1431,12 +1526,12 @@ diff -urwN -x .git -x .github freecom-orig/shell/xms_2e.asm contrib/shell/xms_2e
 -%endif
 +endif
 +
-+TEXT  ends
++_TEXT  ends
 +
 +      end
 diff -urwN -x .git -x .github freecom-orig/shell/xms_brk.asm contrib/shell/xms_brk.asm
 --- freecom-orig/shell/xms_brk.asm	2023-01-05 22:42:01.555229392 +0300
-+++ contrib/shell/xms_brk.asm	2023-01-06 10:42:17.764589542 +0300
++++ contrib/shell/xms_brk.asm	2023-01-09 06:55:27.928188055 +0300
 @@ -2,10 +2,15 @@
  ;	Criter and ^Break handler for external programs for XMS Swap
  ;	variant
@@ -1446,20 +1541,22 @@ diff -urwN -x .git -x .github freecom-orig/shell/xms_brk.asm contrib/shell/xms_b
 -segment _TEXT
 +include model.inc
 +include stuff.inc
-+
-+TEXT  segment word public 'CODE' use16
  
- 	cglobal lowlevel_cbreak_handler
- lowlevel_cbreak_handler:
+-	cglobal lowlevel_cbreak_handler
+-lowlevel_cbreak_handler:
 -%include "../criter/dmy_cbrk.asm"
++_TEXT  segment word public 'CODE' use16
++
++	public _lowlevel_cbreak_handler
++_lowlevel_cbreak_handler:
 +include "../criter/dmy_cbrk.asm"
 +
-+TEXT  ends
++_TEXT  ends
 +
 +      end
 diff -urwN -x .git -x .github freecom-orig/shell/xms_crit.asm contrib/shell/xms_crit.asm
 --- freecom-orig/shell/xms_crit.asm	2023-01-05 22:42:01.555229392 +0300
-+++ contrib/shell/xms_crit.asm	2023-01-06 11:27:27.650724174 +0300
++++ contrib/shell/xms_crit.asm	2023-01-08 22:29:48.868220146 +0300
 @@ -2,15 +2,14 @@
  ;	Criter and ^Break handler for external programs for XMS Swap
  ;	variant
@@ -1482,8 +1579,16 @@ diff -urwN -x .git -x .github freecom-orig/shell/xms_crit.asm contrib/shell/xms_
 +include "../criter/criter.asm"
 diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fixstrs.c
 --- freecom-orig/strings/fixstrs.c	2023-01-05 22:42:01.559229462 +0300
-+++ contrib/strings/fixstrs.c	2023-01-06 04:48:20.751361564 +0300
-@@ -77,8 +77,13 @@
++++ contrib/strings/fixstrs.c	2023-01-09 01:29:13.012672747 +0300
+@@ -59,7 +59,6 @@
+ add: version number of strings and logfile entries
+ */
+ 
+-
+ #include <ctype.h>
+ #if defined(__TURBOC__)
+ #include <dir.h>
+@@ -77,26 +76,30 @@
    return s;
  }
  #else
@@ -1493,12 +1598,16 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  #include <direct.h>
 -#include <io.h>
 +#endif
-+#define mkdir(x) mkdir(x, 0777)
++//#define mkdir(x) mkdir(x, 0777)
 +//#include <io.h>
  #endif
  #include <stdio.h>
  #include <string.h>
-@@ -90,13 +95,13 @@
+ #include <stdlib.h>
+-
+ #undef DEBUG
+ #include "../config.h"
+ #include "../include/strings.typ"
  #include "../include/resource.h"
  #include "../include/keys.h"
  
@@ -1519,7 +1628,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  
  typedef enum STATE {
  	 LOOKING_FOR_START
-@@ -116,12 +121,20 @@
+@@ -116,12 +119,20 @@
  const char promptID[] = "PROMPT_";
  #define promptIDlen (sizeof(promptID) - 1)
  
@@ -1543,7 +1652,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  
  /*
  	Implementation details about to cache the strings within memory:
-@@ -159,11 +172,14 @@
+@@ -159,11 +170,14 @@
  string_count_t cnt = 0;		/* current string number */
  string_count_t maxCnt = 0;	/* number of strings within array */
  
@@ -1561,7 +1670,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  
  static const char besFromChar[] =
   "abcdefghijklmnopqrstuvwxyz,.[{}]\\?0";
-@@ -650,7 +666,8 @@
+@@ -650,7 +664,8 @@
  	string_size_t lsize;
  	int makeLib = 0;
  
@@ -1571,7 +1680,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  
  	if(argv[1] && (stricmp(argv[1], "/lib") == 0 || stricmp(argv[1], "--lib") == 0)) {
  		--argc;
-@@ -658,6 +675,16 @@
+@@ -658,6 +673,15 @@
  		makeLib = 1;
  	}
  
@@ -1584,18 +1693,23 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
 +          ++argv;
 +        }
 +
-+        printf("fDIR=%s\n", fDIR);
  	if(argc > 2) {
  		puts("FIXSTRS - Generate STRINGS.DAT and STRINGS.H for a language\n"
  			"Useage: FIXSTRS [/lib] [language]\n"
-@@ -667,13 +694,15 @@
+@@ -667,13 +691,21 @@
  		return 127;
  	}
  
 -
  	in_file = 1;
++        if (*fDIR) {
++          strcpy(temp1, fDIR);
++          fTXT = strcat(temp1, fTXT);
++        }
++
  	if((rc = loadFile(fTXT)) != 0)
  		return rc;
++
  	in_file = 2;
 -	if(argc > 1 && (rc = loadFile(argv[1])) != 0)
 +	if(argc > 1 && (rc = loadFile(argv[1])) != 0) {
@@ -1606,7 +1720,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  
  /* Now all the strings are cached into memory */
  
-@@ -682,6 +711,12 @@
+@@ -682,6 +714,12 @@
  		return 43;
  	}
  
@@ -1619,7 +1733,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  	/* Create the LOG file */
  	if(argc > 1) {		/* Only if a local LNG file was specified */
  		lgf = NULL;			/* No LOG entry til this time */
-@@ -748,13 +783,26 @@
+@@ -748,13 +786,26 @@
  		return 44;
  	}
  
@@ -1648,7 +1762,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  		return 37;
  	}
  
-@@ -796,12 +844,18 @@
+@@ -796,12 +847,18 @@
  
  	fflush(dat);
  	if(ferror(dat)) {
@@ -1669,7 +1783,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  		return 39;
  	}
  
-@@ -809,11 +863,19 @@
+@@ -809,11 +866,18 @@
  	fclose(inc);
  
  	if(makeLib) {
@@ -1682,7 +1796,6 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
 -		strcpy(cfilename, fDMAKEFILE);
 +                //cfilename[-1] = '/';
 +                //strcpy(cfilename, fDMAKEFILE);
-+                printf("cfile=%s\n", cfile);
 +                if (*fDIR) {
 +                  strcpy(temp1, fDIR);
 +                  cfile = strcat(temp1, fDMAKEFILE);
@@ -1692,7 +1805,7 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  		if((fdmake = fopen(cfile, "wt")) == NULL) {
  			pxerror("creating ", cfile);
  			return 100;
-@@ -827,80 +889,60 @@
+@@ -827,80 +891,60 @@
  puts("FIXSTRS: building STRINGS library source files");
  		/********************** prologue */
  		fputs("\
@@ -1802,10 +1915,22 @@ diff -urwN -x .git -x .github freecom-orig/strings/fixstrs.c contrib/strings/fix
  			return 105;
  		}
  		fclose(fdmake);
+diff -urwN -x .git -x .github freecom-orig/suppl/p-watcom.h contrib/suppl/p-watcom.h
+--- freecom-orig/suppl/p-watcom.h	2023-01-05 22:42:01.211223457 +0300
++++ contrib/suppl/p-watcom.h	2023-01-09 10:39:40.824387724 +0300
+@@ -71,7 +71,7 @@
+     unsigned int    r_es;
+     unsigned int    r_flags;
+ } IREGS;
+-#define intrpt(num,regs) intrf((num), (union REGPACK*)(regs))
++#define intrpt(num,regs) intr((num), (union REGPACK*)(regs))
+ 
+ #ifdef __WATCOMC__
+ unsigned CS_(void);
 diff -urwN -x .git -x .github freecom-orig/suppl/src/intr.asm contrib/suppl/src/intr.asm
 --- freecom-orig/suppl/src/intr.asm	2023-01-05 22:42:01.259224285 +0300
-+++ contrib/suppl/src/intr.asm	2023-01-06 08:36:54.926766852 +0300
-@@ -25,39 +25,23 @@
++++ contrib/suppl/src/intr.asm	2023-01-09 12:50:54.019671806 +0300
+@@ -25,39 +25,37 @@
  ; 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
  ;
  
@@ -1815,44 +1940,55 @@ diff -urwN -x .git -x .github freecom-orig/suppl/src/intr.asm contrib/suppl/src/
 -%ifidn __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
 -%define COMPILE 1
 +.8086
- 
--segment .text
++
++ifidn __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
 +COMPILE equ 1
  
--bits 16
-+TEXT  segment word public 'CODE' use16
+ segment .text
+ 
+ bits 16
  
 -global intrf
 -global _intrf
 -
 -intrf:
 -_intrf:
--
--%elifidni COMPILER, WATCOM 	; and Open Watcom
--%define COMPILE 1
--
--segment _TEXT class=CODE
--
--
--global intrf_
--global _intrf_
 +public intrf_
 +public _intrf_
  
- intrf_:
- _intrf_:
--%endif
+-%elifidni COMPILER, WATCOM 	; and Open Watcom
+-%define COMPILE 1
++intrf_:
++_intrf_:
  
+-segment _TEXT class=CODE
++else
++ifidni COMPILER, WATCOM 	; and Open Watcom
++COMPILE equ 1
+ 
++_TEXT  segment word public 'CODE' use16
+ 
+-global intrf_
+-global _intrf_
++endif
++endif
+ 
+-intrf_:
+-_intrf_:
+-%endif
+-
 -%ifdef COMPILE
 +ifdef COMPILE
  		push	bp			; Standard C entry
 -%ifidn __OUTPUT_FORMAT__, elf
++ifidn __OUTPUT_FORMAT__, elf
  		push	es			; gcc-ia16 has es caller-saved
 -%endif
++endif
  		push	bx
  		push	cx
  		mov	bx, dx
-@@ -65,7 +49,7 @@
+@@ -65,7 +63,7 @@
  		push	si
  		push	di
  		push	ds
@@ -1861,7 +1997,7 @@ diff -urwN -x .git -x .github freecom-orig/suppl/src/intr.asm contrib/suppl/src/
  		jmp	short intr_2		; flush the instruction cache
  intr_2:
  		mov	ah, [bx+18]		; SZAPC flags
-@@ -76,7 +60,7 @@
+@@ -76,7 +74,7 @@
  		mov	bp, [bx+8]
  		mov	si, [bx+10]
  		mov	di, [bx+12]
@@ -1870,7 +2006,7 @@ diff -urwN -x .git -x .github freecom-orig/suppl/src/intr.asm contrib/suppl/src/
  		mov	es, [bx+16]
  		mov	bx, [bx+2]
  		pop	ds
-@@ -89,15 +73,15 @@
+@@ -89,15 +87,15 @@
  		mov	ds, [ss:bx+6]
  		mov	bx, [ss:bx+12]		; address of REGPACK
  		mov	[bx], ax
@@ -1889,18 +2025,22 @@ diff -urwN -x .git -x .github freecom-orig/suppl/src/intr.asm contrib/suppl/src/
  
  		pop	ds
  		pop	di
-@@ -105,9 +89,11 @@
+@@ -105,9 +103,15 @@
  		pop	dx
  		pop	cx
  		pop	bx
 -%ifidn __OUTPUT_FORMAT__, elf
++ifidn __OUTPUT_FORMAT__, elf
  		pop	es
 -%endif
++endif
  		pop	bp
  		ret					; retf/retn model specific, see model.inc
 -%endif
 +endif
 +
-+TEXT  ends
++ifidni __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
++_TEXT  ends
++endif
 +
-+      end
++       end

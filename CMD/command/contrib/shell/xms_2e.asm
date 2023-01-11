@@ -8,16 +8,16 @@ if 1
 include model.inc
 include stuff.inc
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 
-cglobal lowlevel_int_2e_handler
-    lowlevel_int_2e_handler:
+public _lowlevel_int_2e_handler
+    _lowlevel_int_2e_handler:
         mov ax, 0FFFFh
         iret
 
 else
 
-TEXT  segment word public 'CODE' use16
+_TEXT  segment word public 'CODE' use16
 
 extrn _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
 
@@ -27,12 +27,12 @@ callXMS macro
 
 currentSegmOfFreeCOM equ  _XMSsave+8
 
-    global myfar2e_parsecommandline
+    public myfar2e_parsecommandline
 myfar2e_parsecommandline:
     call _my2e_parsecommandline
     retf
 
-	global _lowlevel_int_2e_handler
+	public _lowlevel_int_2e_handler
 _lowlevel_int_2e_handler:
         cld
         push si
@@ -93,6 +93,6 @@ finish:
         iret
 endif
 
-TEXT  ends
+_TEXT  ends
 
       end

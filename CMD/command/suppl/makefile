@@ -473,9 +473,27 @@ $(p)_getdcwd$(e)
 
 .h: $(MYDIR)..$(SEP)contrib$(SEP)suppl
 
-ADD_COPT = -ml -dMODEL=l -dDEBUG -dNDEBUG -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
-ADD_ASMOPT = -ml -dMODEL=l -dDEBUG -dNDEBUG  -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
-ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
+XMS_SWAP=1
+
+ADD_COPT = &
+!ifdef XMS_SWAP
+  -dXMS_SWAP=1 &
+!endif
+  -d2 -db  &
+  -dNDEBUG &
+#  -dDEBUG &
+  -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
+
+ADD_ASMOPT = &
+!ifdef XMS_SWAP
+  -dXMS_SWAP=1 &
+!endif
+  -d2 -db  &
+  -dNDEBUG &
+#  -dDEBUG &
+  -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
+
+ADD_LINKOPT = debug all lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)suppl.lib
 
 $(TARGETS): $(OBJS)

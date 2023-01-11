@@ -23,6 +23,7 @@
 #include <dfn.h>
 #include "../include/lfnfuncs.h"
 
+#include "portable.h"
 #include "../include/command.h"
 #include "../include/batch.h"
 #include "../include/cmdline.h"

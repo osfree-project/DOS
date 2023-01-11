@@ -11,7 +11,10 @@ DESC = Critical Error & Dummy ^Break handler & Kernel Swap Context
 srcfiles = $(p)criter$(e)
 
 # defines additional options for C compiler
-ADD_ASMOPT =  -dDEBUG=1 -dNDEBUG=1 -dAUTO_FAIL  -dMODEL=l -i=$(PATH)..$(SEP)..$(SEP)strings$(SEP)critstrs -i=$(PATH) -i=$(MYDIR)
+ADD_ASMOPT = &
+  -dNDEBUG &
+#  -dDEBUG &
+  -ml -dAUTO_FAIL -dMODEL=l -i=$(PATH)..$(SEP)..$(SEP)strings$(SEP)critstrs -i=$(PATH) -i=$(MYDIR)
 ADD_LINKOPT = # lib suppl.lib
 DEST = none
 COM = 1
