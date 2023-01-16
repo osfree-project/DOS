@@ -17,7 +17,9 @@ srcfiles = $(p)cb_catch$(e) $(p)termhook$(e) &
            $(p)cswapc$(e) &
 !endif
            $(p)batch$(e) $(p)cmdtable$(e) $(p)command$(e) $(p)dummies$(e) $(p)expalias$(e)  $(p)init$(e) &
-           $(p)kswap$(e) $(p)loadhigh$(e) $(p)module$(e) $(p)redir$(e) $(p)ver$(e) &
+           $(p)kswap$(e) $(p)loadhigh$(e) $(p)module$(e) $(p)redir$(e) $(p)ver$(e)
+#DEBUG = all
+STACKSIZE = 4096
 
 # defines additional options for C compiler
 DEST = none
@@ -26,9 +28,9 @@ ADD_COPT    = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d2 &
   -ml -dMODEL=l -bt=dos -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR).. &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PATH)..$(SEP)strings$(SEP)critstrs &
   -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl &
@@ -39,13 +41,13 @@ ADD_ASMOPT  = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d2 &
   -ml -dMODEL=l -bt=dos -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)shell -i=$(MYDIR)..$(SEP)contrib &
   -i=$(PATH)..$(SEP)strings$(SEP)critstrs
 
-ADD_LINKOPT = debug all libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib
+ADD_LINKOPT = libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
 

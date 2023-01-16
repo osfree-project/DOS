@@ -127,6 +127,7 @@ $(p)err85$(e) &
 $(p)err86$(e) &
 $(p)err87$(e) &
 $(p)err9$(e)
+#DEBUG = all
 
 
 # defines additional options for C compiler
@@ -143,9 +144,9 @@ ADD_COPT   = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d1 &
   -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
   -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
@@ -154,14 +155,14 @@ ADD_ASMOPT = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d1 &
   -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
   -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
 
-ADD_LINKOPT = debug all lib $(BLD)lib$(SEP)doscmd_shared.lib
+ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)lib.lib
 
 $(TARGETS): $(OBJS)

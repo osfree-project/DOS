@@ -14,7 +14,6 @@ srcfiles = $(p)criter$(e)
 # defines additional options for C compiler
 ADD_ASMOPT = &
   -dNDEBUG &
-#  -dDEBUG &
   -ml -dMODEL=l -i=$(PATH)..$(SEP)strings$(SEP)critstrs -i=$(PATH) -i=$(MYDIR)
 ADD_LINKOPT = #lib suppl.lib
 DEST = none

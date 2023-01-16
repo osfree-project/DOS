@@ -462,6 +462,7 @@ $(p)toupperx$(e) &
 #$(p)toxdigit$(e) &
 #$(p)_flags$(e) &
 $(p)_getdcwd$(e)
+#DEBUG = all
 
 # defines additional options for C compiler
 
@@ -479,21 +480,21 @@ ADD_COPT = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d1 &
   -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
 
 ADD_ASMOPT = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
 !endif
-  -d2 -db  &
   -dNDEBUG &
 #  -dDEBUG &
+#  -d1 &
   -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
 
-ADD_LINKOPT = debug all lib $(BLD)lib$(SEP)doscmd_shared.lib
+ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)suppl.lib
 
 $(TARGETS): $(OBJS)
