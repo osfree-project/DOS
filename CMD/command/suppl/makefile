@@ -474,7 +474,7 @@ $(p)_getdcwd$(e)
 
 .h: $(MYDIR)..$(SEP)contrib$(SEP)suppl
 
-XMS_SWAP=1
+#XMS_SWAP=1
 
 ADD_COPT = &
 !ifdef XMS_SWAP

@@ -22,7 +22,7 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
 
 .c: $(MYDIR)..$(SEP)contrib$(SEP)cmd
 
-XMS_SWAP=1
+#XMS_SWAP=1
 
 ADD_COPT = &
 !ifdef XMS_SWAP

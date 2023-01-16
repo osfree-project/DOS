@@ -138,7 +138,7 @@ $(p)err9$(e)
 
 .c: $(MYDIR)..$(SEP)contrib$(SEP)lib
 
-XMS_SWAP=1
+#XMS_SWAP=1
 
 ADD_COPT   = &
 !ifdef XMS_SWAP

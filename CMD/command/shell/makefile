@@ -10,7 +10,7 @@ TRGT = $(PROJ).exe
 DESC = Command processor
 
 #defines object file names in format objname.$(O)
-XMS_SWAP=1
+#XMS_SWAP=1
 srcfiles = $(p)cb_catch$(e) $(p)termhook$(e) &
            $(p)xms_crit$(e) $(p)xms_brk$(e) $(p)xms_2e$(e) $(p)cswap$(e) &
 !ifdef XMS_SWAP
