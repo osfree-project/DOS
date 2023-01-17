@@ -22,3 +22,6 @@
 [submodule "CMD/find/contrib"]
 	path = CMD/find/contrib
 	url = https://github.com/FDOS/find
+[submodule "CMD/xcopy/contrib"]
+	path = CMD/xcopy/contrib
+	url = https://github.com/FDOS/xcopy
