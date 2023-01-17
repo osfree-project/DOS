@@ -16,3 +16,6 @@
 [submodule "CMD/diskcomp/contrib"]
 	path = CMD/diskcomp/contrib
 	url = https://github.com/FDOS/diskcomp
+[submodule "CMD/edlin/contrib"]
+	path = CMD/edlin/contrib
+	url = https://github.com/FDOS/edlin
