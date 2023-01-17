@@ -8,7 +8,7 @@ PROJ      = attrib
 TRGT      = $(PROJ).exe
 DESC      = Control file attributes
 #defines object file names in format $(p)objname$(e)
-srcfiles  = $(p)ATTRIB$(e)
+srcfiles  = $(p)attrib$(e)
 
 # defines additional options for C compiler
 #ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
