@@ -28,3 +28,6 @@
 [submodule "CMD/attrib/contrib"]
 	path = CMD/attrib/contrib
 	url = https://github.com/FDOS/attrib
+[submodule "CMD/basic/contrib"]
+	path = CMD/basic/contrib
+	url = https://github.com/nerun/bwbasic
