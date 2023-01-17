@@ -25,3 +25,6 @@
 [submodule "CMD/xcopy/contrib"]
 	path = CMD/xcopy/contrib
 	url = https://github.com/FDOS/xcopy
+[submodule "CMD/attrib/contrib"]
+	path = CMD/attrib/contrib
+	url = https://github.com/FDOS/attrib

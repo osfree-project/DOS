@@ -1,0 +1,23 @@
+diff -urN contrib\ATTRIB.C contrib2\ATTRIB.C
+--- contrib\ATTRIB.C	Tue Jan 17 14:00:44 2023
++++ contrib2\ATTRIB.C	Tue Jan 17 14:03:58 2023
+@@ -89,6 +89,19 @@
+ 
+ 
+ /*======================================================================*/
++#ifdef __WATCOMC__
++char *stpcpy (char *dest, const char *src)
++{
++  register char *d = dest;
++  register const char *s = src;
++
++  do
++    *d++ = *s;
++  while (*s++ != '\0');
++
++  return d - 1;
++}
++#endif
+ 
+ LOCAL char *PROC adds (char dst[], const char src[]) {
+ 	return stpcpy (dst, src);
