@@ -1,0 +1,3 @@
+cd contrib
+git clone https://github.com/FDOS/diskcomp
+patch -p1 <../patches/diskcomp.diff

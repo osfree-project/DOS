@@ -13,3 +13,6 @@
 [submodule "CMD/more/contrib"]
 	path = CMD/more/contrib
 	url = https://github.com/FDOS/more
+[submodule "CMD/diskcomp/contrib"]
+	path = CMD/diskcomp/contrib
+	url = https://github.com/FDOS/diskcomp

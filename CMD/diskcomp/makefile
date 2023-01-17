@@ -11,6 +11,10 @@ DESC = Compare disks
 srcfiles = $(p)diskcomp$(e) $(p)drive$(e) $(p)md5$(e) $(p)misc$(e)
 # defines additional options for C compiler
 ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
-ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
+#ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
+
+.c: $(MYDIR)contrib2
+
+.h: $(MYDIR)contrib2
