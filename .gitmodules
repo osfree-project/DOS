@@ -19,3 +19,6 @@
 [submodule "CMD/edlin/contrib"]
 	path = CMD/edlin/contrib
 	url = https://github.com/FDOS/edlin
+[submodule "CMD/find/contrib"]
+	path = CMD/find/contrib
+	url = https://github.com/FDOS/find
