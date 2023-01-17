@@ -10,3 +10,6 @@
 [submodule "macrolib"]
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
+[submodule "CMD/more/contrib"]
+	path = CMD/more/contrib
+	url = https://github.com/FDOS/more
