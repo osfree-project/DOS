@@ -31,3 +31,6 @@
 [submodule "CMD/basic/contrib"]
 	path = CMD/basic/contrib
 	url = https://github.com/nerun/bwbasic
+[submodule "CMD/mem/contrib"]
+	path = CMD/mem/contrib
+	url = https://gitlab.com/FreeDOS/base/mem.git
