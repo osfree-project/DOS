@@ -12,8 +12,8 @@ $(p)more$(e) &
 $(p)tnyprntf$(e) &
 $(p)kitten$(e)
 
-ADD_COPT = -ml -D__MSDOS__
-#ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
+# We use 80386 here because osFree at least 80386
+ADD_COPT = -mc -D__MSDOS__ -3 -oas -s
 STACKSIZE = 4096
 
 !include $(%ROOT)tools/mk/appsdos.mk
