@@ -10,3 +10,27 @@
 [submodule "macrolib"]
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
+[submodule "CMD/more/contrib"]
+	path = CMD/more/contrib
+	url = https://github.com/FDOS/more
+[submodule "CMD/diskcomp/contrib"]
+	path = CMD/diskcomp/contrib
+	url = https://github.com/FDOS/diskcomp
+[submodule "CMD/edlin/contrib"]
+	path = CMD/edlin/contrib
+	url = https://github.com/FDOS/edlin
+[submodule "CMD/find/contrib"]
+	path = CMD/find/contrib
+	url = https://github.com/FDOS/find
+[submodule "CMD/xcopy/contrib"]
+	path = CMD/xcopy/contrib
+	url = https://github.com/FDOS/xcopy
+[submodule "CMD/attrib/contrib"]
+	path = CMD/attrib/contrib
+	url = https://github.com/FDOS/attrib
+[submodule "CMD/basic/contrib"]
+	path = CMD/basic/contrib
+	url = https://github.com/nerun/bwbasic
+[submodule "CMD/mem/contrib"]
+	path = CMD/mem/contrib
+	url = https://gitlab.com/FreeDOS/base/mem.git

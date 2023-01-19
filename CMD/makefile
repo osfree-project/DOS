@@ -5,23 +5,23 @@
 #
 
 DIRS =   shared    &
+         append    &
          attrib    &
-         help      &
-         find      &
+         basic     &
+         command   &
+         comp      &
+         debug     &
          diskcomp  &
+         edlin     &
+         exit_vdm  &
+         find      &
+         help      &
          label     &
          mem       &
-         xcopy     &
-         basic     &
          more      &
-         subst     &
          stub      &
-         command   &
-         debug     &
-         comp      &
-         append    &
-         exit_vdm  &
-         edlin
+         subst     &
+         xcopy
 
 !include $(%ROOT)tools/mk/all.mk
 

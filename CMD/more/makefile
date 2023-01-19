@@ -6,14 +6,22 @@
 
 PROJ = more
 TRGT = $(PROJ).exe
-DESC = Show text file page by page
-#defines object file names in format objname.$(O)
-srcfiles = $(p)find95$(e) $(p)l2s95$(e) $(p)lfnapi$(e) $(p)more$(e) &
-           $(p)talloc$(e) $(p)tcdummy$(e)
+DESC = DOS MORE
+srcfiles = &
+$(p)more$(e) &
+$(p)tnyprntf$(e) &
+$(p)kitten$(e)
 
-# defines additional options for linker
-STACKSIZE = 40000
-ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
-ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
+# We use 80386 here because osFree at least 80386
+ADD_COPT = -mc -D__MSDOS__ -3 -oas -s
+STACKSIZE = 4096
 
 !include $(%ROOT)tools/mk/appsdos.mk
+
+.c: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)tnyprntf;$(MYDIR)contrib$(SEP)kitten
+
+.h: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)tnyprntf;$(MYDIR)contrib$(SEP)kitten
+
+#set COMFLAGS=-mt -lt
+#set EXEFLAGS=-mc
+#set CFLAGS=%EXEFLAGS%-fe=

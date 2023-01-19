@@ -1,0 +1,38 @@
+CHANGELOG
+=========
+All user-notable changes to this project will be documented in this file.
+
+The format is based on <https://keepachangelog.com/en/1.0.0/>.
+
+This is just a template for new entries:
+[Unreleased]
+------------
+Added:
+Changed:
+Deprecated:
+Removed:
+Fixed:
+Security:
+
+
+Note: Also see `SOURCE\MEM\MEM.C' for older changes.
+
+[1.12] - 2022-03-01
+-------------------
+Added:
+- `DOC\MEM\CHANGES.TXT' (this file)
+
+Changed:
+- two minor edits to English language file for clarity
+- made German translation more compliant to German orthography
+  - separate spellings -> compound spelling, e.g., 'XMS-Treiber'
+  - single quotes -> double quotes
+  - ...
+- renamed `DOC\MEM\README' to `DOC\MEM\README.TXT'
+
+Removed:
+- outdated `DOC\MEM\MEM.LSM' (`APPINFO\MEM.LSM' exists)
+
+Fixed:
+- reporting 0K conventional memory free on some machines
+- non-working URL in `DOC\MEM\README.TXT'

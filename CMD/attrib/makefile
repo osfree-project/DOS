@@ -11,7 +11,11 @@ DESC      = Control file attributes
 srcfiles  = $(p)attrib$(e)
 
 # defines additional options for C compiler
-ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
-ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
+ADD_COPT  = -ms -3 -ox
+#ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
+
+.c: $(MYDIR)contrib2
+
+.h: $(MYDIR)contrib2
