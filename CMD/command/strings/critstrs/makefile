@@ -19,5 +19,4 @@ PLATFORM =
 
 $(PATH)strings.err: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.err
  @$(CP) $[@ $(PATH) $(BLACKHOLE)
- @cd $(PATH)
- @critstrs.exe $(LNG) $(BLACKHOLE)
+ @$(CD) $(PATH) && critstrs.exe $(LNG) $(BLACKHOLE)
