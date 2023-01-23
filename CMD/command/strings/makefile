@@ -39,8 +39,7 @@ $(BLD)$(RELDIR)$(TRGT): .symbolic
 $(BLD)$(RELDIR)strings.h : $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng $(PATH)$(PROJ).exe
  @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR)
  @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR)
- @$(CD) $(BLD)$(RELDIR)
- @$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)$(PROJ).exe /lib /dir $(BLD)$(RELDIR) $(LNG)
+ @$(CD) $(BLD)$(RELDIR) && @$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)$(PROJ).exe /lib /dir $(BLD)$(RELDIR) $(LNG)
 
 $(BLD)$(RELDIR)$(TRGT): $(BLD)$(RELDIR)makefile.mk
  @$(MAKE) $(MAKEOPT) -f $< lib
