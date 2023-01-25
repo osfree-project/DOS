@@ -4,45 +4,35 @@
 # author, date
 #
 
-PROJ  = fixstrs
+PROJ  = strings
 DESC  = Control file attributes
-TRGT  = strings.lib
-DIRS  = critstrs
+TGT  = $(PROJ).lib
+DIRS  = fixstrs critstrs
 #defines object file names in format objname.$(O)
-srcfiles = $(p)fixstrs$(e) # $(p)porting$(e)
-# defines additional options for C compiler
-!ifeq %OS LINUX
-ADD_COPT = -dLINUX
-!endif
-ADD_COPT += -dMODEL=l -i=$(BLD)$(RELDIR) -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl
-ADD_LINKOPT = #debug all
 
 LANG = russian
 LNG = $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).lng
 
-DEST    = none
-PLATFORM =
+DEST = none
 
-!include $(%ROOT)tools/mk/tools.mk
+!include $(%ROOT)tools/mk/all.mk
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)strings
+#PLATFORM =
 
-TARGETS = $(PATH)$(PROJ).exe $(BLD)$(RELDIR)strings.h subdirs $(BLD)lib$(SEP)$(TRGT)
+TARGETS = $(BLD)lib$(SEP)$(TGT)
 #INSTALL = $(BLD)lib$(SEP)strings.lib
 
-$(PATH)$(PROJ).exe:
-
-$(BLD)$(RELDIR)$(TRGT): .symbolic
+#$(BLD)$(RELDIR)$(TGT): .symbolic
 #$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings.lib: .symbolic
 #$(BLD)lib$(SEP)strings.lib: .symbolic
 
-$(BLD)$(RELDIR)strings.h : $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng $(PATH)$(PROJ).exe
+$(BLD)$(RELDIR)strings.h: $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng
  @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR)
  @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR)
- @$(CD) $(BLD)$(RELDIR) && $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)$(PROJ).exe /lib /dir $(BLD)$(RELDIR) $(LNG)
+ @$(CD) $(BLD)$(RELDIR) && $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)fixstrs$(SEP)fixstrs.exe /lib /dir $(BLD)$(RELDIR) $(LNG)
 
-$(BLD)$(RELDIR)$(TRGT): $(BLD)$(RELDIR)makefile.mk
+$(BLD)$(RELDIR)$(TGT): $(BLD)$(RELDIR)makefile.mk
  @$(MAKE) $(MAKEOPT) -f $< lib
 
-$(BLD)lib$(SEP)$(TRGT): $(BLD)$(RELDIR)$(TRGT)
- $(verbose)$(CP) $< $^@
+$(BLD)lib$(SEP)$(TGT): $(BLD)$(RELDIR)strings.h subdirs $(BLD)$(RELDIR)$(TGT)
+ $(verbose)$(CP) $(BLD)$(RELDIR)$(TGT) $^@

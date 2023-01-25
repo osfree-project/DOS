@@ -20,7 +20,7 @@ TARGETS=$(PATH)$(PROJ).com
 $(PATH)$(PROJ).lnk: .symbolic
 
 $(PATH)$(PROJ).com: $(PATH)shell$(SEP)$(PROJ).exe $(PATH)infores
-!ifneq ENV LINUX
+!ifneq UNIX TRUE
   @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.com + $(PATH)criter$(SEP)criter.com + $(BLD)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
   @copy $(PATH)command.com $(DEST)
 !else

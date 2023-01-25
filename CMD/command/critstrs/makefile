@@ -8,7 +8,7 @@ PROJ = critstrs
 TRGT = $(PROJ).exe
 DESC = Critical Error Strings compiler
 srcfiles = $(p)critstrs$(e)
-ADD_COPT = -i=..$(SEP)include
+ADD_COPT = -i=$(MYDIR)..$(SEP)contrib$(SEP)include
 
 !include $(%ROOT)tools/mk/tools.mk
 
