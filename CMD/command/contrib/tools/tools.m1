@@ -1,4 +1,0 @@
-CFG_DEPENDENCIES = tools.m1 ../utils/mktools.c tools.m2
-
-TOP=..
-!include "$(TOP)/config.mak"

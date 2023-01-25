@@ -9,7 +9,7 @@ PROJ      = command
 #TRGT      = $(PROJ).com
 DESC      = DOS command interpreter
 
-DIRS = critstrs strings criter cmd suppl lib shell utils
+DIRS = port critstrs strings criter cmd suppl lib shell utils
 DEST = os2$(SEP)mdos
 #XMS_SWAP=1
 

@@ -5,10 +5,11 @@
 #
 
 LANG = russian
-LNG = $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).err
+LNG = $(PORT_BASE)strings$(SEP)$(LANG).err
 DEST = os2
 
 !include $(%ROOT)tools/mk/all.mk
+!include $(MYDIR)..$(SEP)..$(SEP)port$(SEP)freecom.mk
 
 TARGETS = $(PATH)strings.err
 PLATFORM =
@@ -17,6 +18,6 @@ PLATFORM =
 
 .err: $(PATH)
 
-$(PATH)strings.err: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.err
+$(PATH)strings.err: $(PORT_BASE)strings$(SEP)DEFAULT.err
  @$(CP) $[@ $(PATH) $(BLACKHOLE)
  @$(CD) $(PATH) && critstrs.exe $(LNG) $(BLACKHOLE)

@@ -20,6 +20,7 @@ COM = 1
 NOLIBS = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)..$(SEP)..$(SEP)port$(SEP)freecom.mk
 
 TARGETS = $(PATH)context.def $(PATH)$(PROJ).com
 
@@ -27,21 +28,21 @@ TARGETS = $(PATH)context.def $(PATH)$(PROJ).com
 
 .def: $(PATH)
 
-.x:   $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)
+.x:   $(PORT_BASE)criter$(SEP)
 
-.asm: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)
+.asm: $(PORT_BASE)criter$(SEP)
 
-.inc: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)
+.inc: $(PORT_BASE)criter$(SEP)
 
-$(PATH)context.def: $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.x
+$(PATH)context.def: $(PORT_BASE)criter$(SEP)context.x
  @mkctxt.exe $<
- @$(CP) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.h_c $(PATH) $(BLACKHOLE)
- @$(CP) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.inc $(PATH) $(BLACKHOLE)
- @$(CP) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.def $(PATH) $(BLACKHOLE)
- @$(DC) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.h_c $(BLACKHOLE)
- @$(DC) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.inc $(BLACKHOLE)
- @$(DC) $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)context.def $(BLACKHOLE)
+ @$(CP) $(PORT_BASE)criter$(SEP)context.h_c $(PATH) $(BLACKHOLE)
+ @$(CP) $(PORT_BASE)criter$(SEP)context.inc $(PATH) $(BLACKHOLE)
+ @$(CP) $(PORT_BASE)criter$(SEP)context.def $(PATH) $(BLACKHOLE)
+ @$(DC) $(PORT_BASE)criter$(SEP)context.h_c $(BLACKHOLE)
+ @$(DC) $(PORT_BASE)criter$(SEP)context.inc $(BLACKHOLE)
+ @$(DC) $(PORT_BASE)criter$(SEP)context.def $(BLACKHOLE)
 
-$(PATH)criter.obj: $(PATH)context.def $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)criter.asm &
-    $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)criter$(SEP)dmy_cbrk.asm &
-    $(MYDIR)..$(SEP)..$(SEP)contrib$(SEP)include$(SEP)stuff.inc
+$(PATH)criter.obj: $(PATH)context.def $(PORT_BASE)criter$(SEP)criter.asm &
+    $(PORT_BASE)criter$(SEP)dmy_cbrk.asm &
+    $(PORT_BASE)include$(SEP)stuff.inc

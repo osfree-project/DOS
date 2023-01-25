@@ -8,8 +8,11 @@ PROJ = critstrs
 TRGT = $(PROJ).exe
 DESC = Critical Error Strings compiler
 srcfiles = $(p)critstrs$(e)
-ADD_COPT = -i=$(MYDIR)..$(SEP)contrib$(SEP)include
+ADD_COPT = -i=$(PORT_BASE)include
 
 !include $(%ROOT)tools/mk/tools.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)strings
+ADD_COPT = -i=$(PORT_BASE)include
+
+.c: $(PORT_BASE)strings

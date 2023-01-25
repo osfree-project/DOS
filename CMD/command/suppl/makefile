@@ -467,12 +467,13 @@ $(p)_getdcwd$(e)
 # defines additional options for C compiler
 
 !include $(%ROOT)tools/mk/libsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
-.asm: $(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src
+.asm: $(PORT_BASE)suppl$(SEP)src
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src
+.c: $(PORT_BASE)suppl$(SEP)src
 
-.h: $(MYDIR)..$(SEP)contrib$(SEP)suppl
+.h: $(PORT_BASE)suppl
 
 #XMS_SWAP=1
 
@@ -483,7 +484,7 @@ ADD_COPT = &
   -dNDEBUG &
 #  -dDEBUG &
 #  -d1 &
-  -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
+  -ml -dMODEL=l -i=$(PORT_BASE)suppl$(SEP)src -i=$(PORT_BASE)suppl -i=$(PORT_BASE)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
 
 ADD_ASMOPT = &
 !ifdef XMS_SWAP
@@ -492,7 +493,7 @@ ADD_ASMOPT = &
   -dNDEBUG &
 #  -dDEBUG &
 #  -d1 &
-  -ml -dMODEL=l -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl$(SEP)src -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
+  -ml -dMODEL=l -i=$(PORT_BASE)suppl$(SEP)src -i=$(PORT_BASE)suppl -i=$(PORT_BASE)include -i=$(MYDIR)..$(SEP)..$(SEP)include -dSUPPL_DBG_ALL
 
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)suppl.lib

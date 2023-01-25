@@ -8,13 +8,15 @@ PROJ      = mkinfres
 #TRGT      = $(PROJ).exe
 DESC      = DOS command interpreter
 srcfiles = $(p)mkinfres$(e)
+
+!include $(%ROOT)tools/mk/tools.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
+
 !ifeq %OS LINUX
 ADD_COPT = -dLINUX
 !endif
-ADD_COPT += -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl
+ADD_COPT += -i=$(PORT_BASE)include -i=$(PORT_BASE)suppl
 
-!include $(%ROOT)tools/mk/tools.mk
-
-.c: $(MYDIR)..$(SEP)contrib$(SEP)utils
+.c: $(PORT_BASE)utils
 
 TARGETS = $(PATH)$(PROJ).exe

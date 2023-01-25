@@ -19,8 +19,9 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
 #DEBUG = all
 
 !include $(%ROOT)tools/mk/libsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)cmd
+.c: $(PORT_BASE)cmd
 
 #XMS_SWAP=1
 
@@ -33,9 +34,9 @@ ADD_COPT = &
 #  -d1 &
   -ml -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs &
   -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR) &
-  -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
-  -i=$(MYDIR)..$(SEP)contrib$(SEP)cmd -i=$(MYDIR)..$(SEP)contrib -i=$(PATH) &
-  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl &
+  -i=$(PORT_BASE)include &
+  -i=$(PORT_BASE)cmd -i=$(PORT_BASE) -i=$(PATH) &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PORT_BASE)suppl &
   -i=$(MYDIR)..$(SEP)..$(SEP)include
 
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib

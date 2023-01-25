@@ -133,10 +133,11 @@ $(p)err9$(e)
 # defines additional options for C compiler
 
 !include $(%ROOT)tools/mk/libsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
-.asm: $(MYDIR)..$(SEP)contrib$(SEP)lib
+.asm: $(PORT_BASE)lib
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)lib
+.c:   $(PORT_BASE)lib
 
 #XMS_SWAP=1
 
@@ -147,8 +148,8 @@ ADD_COPT   = &
   -dNDEBUG &
 #  -dDEBUG &
 #  -d1 &
-  -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
-  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
+  -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(PORT_BASE)lib -i=$(PORT_BASE) &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PORT_BASE)suppl -i=$(PORT_BASE)include &
   -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
 
 ADD_ASMOPT = &
@@ -158,8 +159,8 @@ ADD_ASMOPT = &
   -dNDEBUG &
 #  -dDEBUG &
 #  -d1 &
-  -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(MYDIR)..$(SEP)contrib$(SEP)lib -i=$(MYDIR)..$(SEP)contrib &
-  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
+  -ml -dMODEL=l -i=$(BLD)DOS$(SEP)CMD$(SEP)command$(SEP)strings$(SEP)critstrs -i=$(PORT_BASE)lib -i=$(PORT_BASE)contrib &
+  -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PORT_BASE)suppl -i=$(PORT_BASE)include &
   -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PATH)
 
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib

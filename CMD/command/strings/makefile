@@ -11,11 +11,12 @@ DIRS  = fixstrs critstrs
 #defines object file names in format objname.$(O)
 
 LANG = russian
-LNG = $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).lng
+LNG = $(PORT_BASE)strings$(SEP)$(LANG).lng
 
 DEST = none
 
 !include $(%ROOT)tools/mk/all.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
 #PLATFORM =
 
@@ -26,9 +27,9 @@ TARGETS = $(BLD)lib$(SEP)$(TGT)
 #$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)strings.lib: .symbolic
 #$(BLD)lib$(SEP)strings.lib: .symbolic
 
-$(BLD)$(RELDIR)strings.h: $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng
- @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR)
- @$(CP) $(MYDIR)..$(SEP)contrib$(SEP)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR)
+$(BLD)$(RELDIR)strings.h: $(PORT_BASE)strings$(SEP)DEFAULT.lng
+ @$(CP) $(PORT_BASE)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR)
+ @$(CP) $(PORT_BASE)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR)
  @$(CD) $(BLD)$(RELDIR) && $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)fixstrs$(SEP)fixstrs.exe /lib /dir $(BLD)$(RELDIR) $(LNG)
 
 $(BLD)$(RELDIR)$(TGT): $(BLD)$(RELDIR)makefile.mk

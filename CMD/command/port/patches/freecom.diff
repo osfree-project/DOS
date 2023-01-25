@@ -1,0 +1,2045 @@
+diff -urwN -x .git -x .github xx-orig/criter/criter.asm freecom/criter/criter.asm
+--- xx-orig/criter/criter.asm	2023-01-25 22:26:30.935341776 +0300
++++ freecom/criter/criter.asm	2023-01-25 22:30:35.856493251 +0300
+@@ -111,23 +111,27 @@
+ ; intermediate update 1
+ ;
+ 
++.386
++
+ ;;; Settings for stand-alone variant
+-%define COMPILE_STRINGS		;; always keep this enabled in this release!!
+-%define INCLUDE_STRINGS		;; use STRINGS.INC instead of hard-coded strings
++COMPILE_STRINGS		equ 1;; always keep this enabled in this release!!
++;INCLUDE_STRINGS		equ 1;; use STRINGS.INC instead of hard-coded strings
+ ;; %define AUTO_FAIL		;; make the autofail variant of Criter
+-%define HIDE_CRITER_DRIVES 26	;; For how many drives hide-multiple is active
++HIDE_CRITER_DRIVES equ 26	;; For how many drives hide-multiple is active
+ 
+ ;; Version of this module
+ MODULE_VERSION EQU 2
+ 
+-%include "../include/stuff.inc"
+-%ifndef XMS_SWAP_CRITER
+-%include "resource.inc"
+-%endif
++include "../include/stuff.inc"
++ifndef XMS_SWAP_CRITER
++include resource.inc
++endif
++
++_TEXT  segment word public 'CODE'  use16
+ 
+ ???start:
+ 
+-%ifdef COMPILE_COM
++ifdef COMPILE_COM
+ ORG 100h
+ 
+ mov ax, cs
+@@ -154,33 +158,33 @@
+ 
+ dummy_file DB "a:\ux", 0
+ 
+-%ifndef COMPILE_STRINGS
+-%define COMPILE_STRINGS
+-%endif
+-%endif
++ifndef COMPILE_STRINGS
++COMPILE_STRINGS equ 1
++endif
++endif
+ 
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; Real start
+ ;; Join both modules into the same memory image in order to handle
+ ;; them easier
+ 
+-%ifndef XMS_SWAP_CRITER
++ifndef XMS_SWAP_CRITER
+ 	;; Static context of KSwap support
+-%include "context.def" 
++include context.def
+ 
+-%include "dmy_cbrk.asm"
+-%endif
++include dmy_cbrk.asm
++endif
+ 
+ ;; Low level Critical Error handler
+ ;; Note: Both I/O functions should use the channel to read/write
+ ;;	the characters. In this case: the BIOS.
+ ;; Sidenote: RBIL states that some BIOSes destroy the BP register.
+-%macro printALtoConsole 0
++printALtoConsole macro
+ 	call ?oChar
+-%endmacro
+-%macro readALfromConsole 0
++	endm
++readALfromConsole macro
+ 	mov ax, 0c07h	; clear buffer, read from STDIN one key without echo
+ 	int 21h
+-%endmacro
++	endm
+ 
+ 
+ LOCAL_BELL	EQU 7
+@@ -239,48 +243,55 @@
+ ;		ES:BX == pointer to context, package int24
+ ;		else: as normal INT-24 handler
+ 
+-%ifdef XMS_SWAP_CRITER
+-	cglobal autofail_err_handler
+-autofail_err_handler:
++ifdef XMS_SWAP_CRITER
++	public _autofail_err_handler
++_autofail_err_handler:
+ 	mov al, FAIL
+ 	iret
+-%endif
++endif
+ 
+-	cglobal lowlevel_err_handler
+-lowlevel_err_handler:
+-%ifdef AUTO_FAIL
++	public _lowlevel_err_handler
++_lowlevel_err_handler:
++ifdef AUTO_FAIL
+ 	;; most simple <-> return AL := 3
+ 	mov al, FAIL
+ 	iret
+-%else
++else
+ 	push dx
+-	pushm es, ds, bp, si, di, cx, bx, ax
++	push ax
++	push bx
++	push cx
++	push di
++	push si
++	push bp
++	push ds
++	push es
+ 
+ 	mov cx, cs
+ 	mov ds, cx		; DS := local code/data segment
+ 
+-%ifdef DEBUG
++ifdef DEBUG
+ 	call ??dispAX
+-%endif
++endif
+ 
+ 	push ax			; save AH bit 7  and AL for later
+ 
+ 			;; free AL
+ 	add al, 'A'		; AL may contain the drive number
+-	mov BYTE [??strargA], al	;; will be overwritten, if char device
++	mov BYTE PTR [??strargA], al	;; will be overwritten, if char device
+ 	xor al, al
+-	mov BYTE [??strargA + 1], al	; end of string
++	mov BYTE PTR [??strargA + 1], al	; end of string
+ 
+ 	mov es, cx		; still shared local code/data segm
+ 
+ 	shr ah, 1		; Carry := 0-> read; 1->write
+ 	adc al, al		; AL := 0-> read; 1->write
+-	mov BYTE [??strarg1], al
++	mov BYTE PTR [??strarg1], al
+ 
+ 	mov al, ah
+ 	and al, 3		; AL := 0/1/2/3 -> DOS/FAT/root/data area
+ 	add al, StrArea	;  make it a string#
+-	mov BYTE [??strarg2], al	;; will be ignored if char device
++	mov BYTE PTR [??strarg2], al	;; will be ignored if char device
+ 
+ ;;
+ ;; and al, (CodeIgnore or CodeRetry or CodeFail) / 2
+@@ -296,7 +307,7 @@
+ 	mov [??allowIgnore], ah
+ 
+ ;; AX is empty now
+-%ifdef DEBUG
++ifdef DEBUG
+ 	push ds
+ 	mov ax, bp
+ 	mov ds, bp
+@@ -304,8 +315,8 @@
+ 	push di
+ 	push cx
+ 	mov cx, 8
+-	mov di, ??_c
+-	add si, byte 10
++	movzx di, ??_c
++	add si, byte ptr 10
+ ??__e:
+ 	lodsb
+ 	cmp al, 32
+@@ -320,20 +331,20 @@
+ 	mov ax, [si+4]
+ 	pop ds
+ 	call ??dispAX
+-	mov bx, ??_d
++	movzx bx, ??_d
+ 	call ?oBuffer
+-%endif
++endif
+ 
+-%if 0		;; No need when doing I/O through DOS
++if 0		;; No need when doing I/O through DOS
+ 	mov ah, 0fh		; Get current video mode
+ 	int 10h
+-	mov BYTE [??actPage], bh
+-	mov BYTE [??actColour], 255
+-%endif
++	mov BYTE PTR [??actPage], bh
++	mov BYTE PTR [??actColour], 255
++endif
+ 
+ 	mov ax, di		; AL := lobyte(DI) -> error number
+ 	add al, StrErrCodes
+-	mov BYTE [??strarg3], al
++	mov BYTE PTR [??strarg3], al
+ 
+ 	mov bl, StrBlockDevice		; by default issue block device error
+ 	pop ax						; AL := drive letter again
+@@ -341,12 +352,12 @@
+ 	jnc ?noCharDevice
+ 
+ 	mov ds, bp					; is still segment of device driver
+-	test BYTE [si+5], 128		; bit 7 == 1 if block device
++	test BYTE PTR [si+5], 128		; bit 7 == 1 if block device
+ 	jz ?noCharDevice
+ 			; fetch the name of the character device
+ 		mov cx, 8		; max eight characters to display
+-		add si, byte 10		; located at offset 10
+-		mov di, ??strargA
++		add si, byte ptr 10		; located at offset 10
++		movzx di, ??strargA
+ 		mov ah, ' '
+ 		cld
+ ?drvNameGetLoop:
+@@ -364,7 +375,7 @@
+ 		std
+ 		dec di			; stosb leaves DI behind the last written byte
+ 		repe scasb
+-		mov BYTE [ES:di+2], ch	; place termination character
++		mov BYTE PTR [ES:di+2], ch	; place termination character
+ 		mov cx, cs
+ 		mov bl, StrCharDevice		; issue device driver message
+ 		mov al, 0ffh		; AL := invalidate
+@@ -379,7 +390,7 @@
+ 	;; Perform the repeat check; AL == -1 (char device), 0..31 if block
+ 	mov bx, ?repCheck
+ 	mov di, dummyByte	; Tha byte at [DI} will be decremented eventually
+-	inc WORD [BX]	; check if enabled
++	inc WORD PTR [BX]	; check if enabled
+ 	jz ?noRepCheck
+ 	;; paranoid check to avoid memory overflow
+ 	;; also skips if char device
+@@ -389,13 +400,13 @@
+ 	add al, 2		; correction as BX is two bytes below
+ 	add ax, bx		; repCheckByte area 
+ 	mov di, ax
+-	inc BYTE [DI]	; will display the 1st and every 256th Criter
++	inc BYTE PTR [DI]	; will display the 1st and every 256th Criter
+ 	jnz	?fail		; displayed already --> AutoFail && keep incremented [BX]
+ 					; NOTE: There is no output generated til now!!
+ 					;	The output channels have not been touched
+ ?noRepCheck:
+-	dec WORD [BX]	; keep the word at value -1
+-	mov WORD [repCheckDecAddr], di
++	dec WORD PTR [BX]	; keep the word at value -1
++	mov WORD PTR [repCheckDecAddr], di
+ 
+ ;; Try to find a suitable I/O channel
+ 	mov ah, 62h		; Get PSP
+@@ -406,10 +417,10 @@
+ 	mov al, [es:bx+2]	; stderr
+ 	; patch STDIN & STDOUT to point to the found channel
+ 	mov ah, al
+-	xchg WORD [ES:bx], ax
+-	mov WORD [?orgIOchannels], ax
+-	mov WORD [??repatchAddr], bx
+-	mov WORD [??repatchAddr+2], es
++	xchg WORD PTR [ES:bx], ax
++	mov WORD PTR [?orgIOchannels], ax
++	mov WORD PTR [??repatchAddr], bx
++	mov WORD PTR [??repatchAddr+2], es
+ 	pop bx
+ 	mov es, cx			;; reset ES to the shared code/data segement
+ 
+@@ -439,7 +450,7 @@
+ 
+ ?inputLoop:
+ 	; Prepare to decode the character
+-	mov di, [StrKeys * 2 + 1 + ??strings]	; address of enumerated valid keys
++	mov di, word ptr [StrKeys * 2 + 1 + ??strings]	; address of enumerated valid keys
+ 	xor ax, ax
+ 	mov al, [di]
+ 	inc di
+@@ -466,7 +477,7 @@
+ 	les di, [??repatchAddr]
+ 	mov ax, 1234h
+ ?orgIOchannels EQU $-2
+-	mov WORD [ES:di], ax
++	mov WORD PTR [ES:di], ax
+ 
+ ?iret:
+ 	pop ax			; preserve AH
+@@ -477,10 +488,18 @@
+ 	je ?iretNow
+ 	;; AutoFail is activated for ABORT and FAIL only
+ 	;; as user selected something else, reset the AutoFail state of the drive
+-	dec BYTE [1234h]
++	;dec BYTE PTR [1234h]
++	dec BYTE PTR [ds:1234h]
+ repCheckDecAddr EQU $-2
+ ?iretNow:
+-	popm es, ds, bp, si, di, cx, bx
++	pop es
++	pop ds
++	pop bp
++	pop si
++	pop di
++	pop cx
++	pop bx
++	pop ax
+ 	pop dx
+ 	iret
+ 
+@@ -494,8 +513,8 @@
+ 	or bh, [bx+??allow]
+ 	jz ?oRet			; not allowed
+ 	add bl, '5'			; local strarg code
+-	mov BYTE [??input+3], bl	; construct the temp output buffer
+-	mov bx, ??input
++	mov BYTE PTR [??input+3], bl	; construct the temp output buffer
++	movzx bx, ??input
+ 	jmp short ?oBuffer
+ 
+ ;; dump string #BL onto screen
+@@ -504,14 +523,14 @@
+ 
+ ?oString:
+ 	;; make sure BL is within limit
+-	mov al, BYTE [??strings]
++	mov al, BYTE PTR [??strings]
+ 	cmp bl, al
+ 	jc ?oS_idOK
+ 	mov bl, al
+ ?oS_idOK:
+ 	mov bh, 0
+ 	add bx, bx
+-	mov bx, WORD [bx+??strings+1]
++	mov bx, WORD PTR [bx+??strings+1]
+ 	jmp short ?oBuffer
+ 
+ ;; dump character sequence pointed to by BX onto screen
+@@ -520,7 +539,7 @@
+ 
+ ?oB_bufA:		;; Dump string argument A
+ 	push bx
+-	mov bx, ??strargA
++	movzx bx, ??strargA
+ 	call ?oBuffer
+ 	jmp short ?oB_1
+ 
+@@ -552,7 +571,7 @@
+ ?oB_2:
+ 	inc bx
+ ?oBuffer:
+-	mov al, BYTE [BX]
++	mov al, BYTE PTR [BX]
+ 	or al, al
+ 	jnz ?oB_loop
+ ?oRet:
+@@ -569,20 +588,20 @@
+ ;; IN: AL = character
+ 
+ ?oChar:
+-%if 0		;; no need when doing I/O through DOS
++if 0		;; no need when doing I/O through DOS
+ 	push bx
+ 	mov bx, [??0Earg]
+ 	mov ah, 0eh		; teletype output
+ 	int 10h
+ 	pop bx
+-%else
++else
+ 	mov ah, 2		; output to STDOUT
+ 	mov dl, al
+ 	int 21h
+-%endif
++endif
+ 	ret
+ 
+-%ifdef DEBUG
++ifdef DEBUG
+ ??_a DB "AX == 0x"
+ ??_b DB 1,2,3,4, 13, 10, 0
+ ??_d DB "Device name: >>"
+@@ -590,9 +609,9 @@
+ ??dispAX:
+ 	push bx
+ 	push ax
+-	mov bx, ??_b
++	movzx bx, ??_b
+ 	call ??AXtoBX
+-	mov bx, ??_a
++	movzx bx, ??_a
+ 	call ?oBuffer
+ 	pop ax
+ 	pop bx
+@@ -614,16 +633,16 @@
+ 	jc ??__c
+ 	add al, 'A' - '0' - 10
+ ??__c:
+-	mov BYTE [bx], al
++	mov BYTE PTR [bx], al
+ 	inc bx
+ 	ret
+-%endif
++endif
+ 
+-%if 0		;; no need for I/O through DOS
++if 0		;; no need for I/O through DOS
+ ??0Earg:
+ ??actColour	DB 7
+ ??actPage	DB 0
+-%endif
++endif
+ 
+ ??repatchAddr DD 0
+ 
+@@ -649,12 +668,12 @@
+ ;;	+ the number of drives available to be checked is determined by
+ ;;		counting the number of 0xFF bytes the immediately after the module
+ ;;		got loaded into memory
+-%ifdef XMS_SWAP_CRITER
+-	cglobal criter_repeat_checkarea
+-criter_repeat_checkarea:
+-%endif
++ifdef XMS_SWAP_CRITER
++	public _criter_repeat_checkarea
++_criter_repeat_checkarea:
++endif
+ ?repCheck	DW -1	;; disabled
+-TIMES HIDE_CRITER_DRIVES DB -1		;; not displayed already
++		DB HIDE_CRITER_DRIVES dup (-1)		;; not displayed already
+ 
+ ??allow:
+ ??allowIgnore	DB 0
+@@ -664,12 +683,12 @@
+ ??input			DB '%4%6', 0		;; temporary storage
+ 
+ 
+-%ifndef COMPILE_STRINGS
++ifndef COMPILE_STRINGS
+ ??strings:
+-%else
+-%ifdef INCLUDE_STRINGS
+-%include "../strings/strings.err"
+-%else
++else
++ifdef INCLUDE_STRINGS
++include strings.err
++else
+ ??strings		DB 36	;; number of strings
+ 	;; Here start all the strings!
+ 
+@@ -749,32 +768,37 @@
+ S34 DB '(DOS 4.0+) out of input', 0
+ S35 DB '(DOS 4.0+) insufficient disk space', 0
+ S36	DB 'Unknown error code', 0
+-%endif		; INCLUDE_STRINGS
+-%endif		; COMPILE_STRINGS
+-%endif		; AUTO_FILE
++endif		; INCLUDE_STRINGS
++endif		; COMPILE_STRINGS
++endif		; AUTO_FILE
+ 
+ 
+-%ifndef NO_RESOURCE_BLOCK
+-%ifndef AUTO_FAIL
++ifndef NO_RESOURCE_BLOCK
++ifndef AUTO_FAIL
+ 	DW ?repCheck
+-%endif
+-%endif
++endif
++endif
+ 
+ ???ende:
+ 
+-%ifndef NO_RESOURCE_BLOCK
++ifndef NO_RESOURCE_BLOCK
+ ;; Include resource block
+-%ifdef AUTO_FAIL
++ifdef AUTO_FAIL
+ 	resIdBlock RES_ID_CRITER, 0
+-%else
+-%ifndef COMPILE_STRINGS
++else
++ifndef COMPILE_STRINGS
+ 	resIdBlock RES_ID_CRITER, 1
+-%else
++else
+ 	resIdBlock RES_ID_CRITER, 3
+-%endif		; COMPILER_STRINGS
+-%endif		; AUTO_FAIL
+-%endif		; NO_RESOURCE_BLOCK
++endif		; COMPILER_STRINGS
++endif		; AUTO_FAIL
++endif		; NO_RESOURCE_BLOCK
++
++_TEXT  ends
++
++;endif
+ 
++       end
+ ;;END
+ 
+ ; Quote from RBIL
+diff -urwN -x .git -x .github xx-orig/criter/resource.inc freecom/criter/resource.inc
+--- xx-orig/criter/resource.inc	2023-01-25 22:26:30.935341776 +0300
++++ freecom/criter/resource.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,7 +1,7 @@
+-%include "resource.id"
+-%macro resIdBlock 1-2 -1
++include "resource.id"
++resIdBlock macro x, y
+ 	dd	???ende - ???start		;; Length of this resource
+-	dw %1						;; major resource ID
+-	dw %2						;; minor resource ID
++	dw x						;; major resource ID
++	dw y						;; minor resource ID
+ 	db 'FREECOM '				;; cookie
+-%endmacro
++endm
+diff -urwN -x .git -x .github xx-orig/include/algnbyte.h freecom/include/algnbyte.h
+--- xx-orig/include/algnbyte.h	1970-01-01 03:00:00.000000000 +0300
++++ freecom/include/algnbyte.h	2023-01-25 22:30:35.860493335 +0300
+@@ -0,0 +1,13 @@
++#if defined(_MSC_VER)
++#if _MSC_VER >= 700
++#pragma warning(disable:4103)
++#endif
++#pragma pack(1)
++#elif defined(_QC) || defined(__WATCOMC__) || defined(__GNUC__)
++#pragma pack(1)
++#elif defined(__ZTC__)
++#pragma ZTC align 1
++#elif defined(__TURBOC__) && (__TURBOC__ > 0x202)
++#pragma option -a-
++#endif
++
+diff -urwN -x .git -x .github xx-orig/include/algndflt.h freecom/include/algndflt.h
+--- xx-orig/include/algndflt.h	1970-01-01 03:00:00.000000000 +0300
++++ freecom/include/algndflt.h	2023-01-25 22:30:35.860493335 +0300
+@@ -0,0 +1,8 @@
++#if defined (_MSC_VER) || defined(_QC) || defined(__WATCOMC__) || defined(__GNUC__)
++#pragma pack()
++#elif defined (__ZTC__)
++#pragma ZTC align
++#elif defined(__TURBOC__) && (__TURBOC__ > 0x202)
++#pragma option -a.
++#endif
++
+diff -urwN -x .git -x .github xx-orig/include/large.inc freecom/include/large.inc
+--- xx-orig/include/large.inc	2023-01-25 22:26:31.011343371 +0300
++++ freecom/include/large.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,13 +1,20 @@
+ 
+ ; Large header
+-group	DGROUP		_DATA _BSS
+-segment	_TEXT		class=CODE
+-segment	_DATA		class=DATA align=2
+-segment	_BSS		class=BSS align=2
++DGROUP group		_DATA, _BSS
+ 
+-@CodeSize EQU 1
+-@DataSize EQU 1
+ 
+-%macro ret 0-1
+-	retf %1
+-%endmacro
++TEXT  segment word public 'CODE' use16
++TEXT  ends
++_TEXT segment word public 'CODE' use16
++_TEXT ends
++_DATA segment word public 'DATA' use16
++_DATA ends
++_BSS  segment word public 'BSS'  use16
++_BSS  ends
++
++;@CodeSize EQU 1
++;@DataSize EQU 1
++
++ret macro amt
++	retf amt
++endm
+diff -urwN -x .git -x .github xx-orig/include/medium.inc freecom/include/medium.inc
+--- xx-orig/include/medium.inc	2023-01-25 22:26:31.011343371 +0300
++++ freecom/include/medium.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,13 +1,20 @@
+ 
+-; Medium header
+-group	DGROUP		_DATA _BSS
+-segment	_TEXT		class=CODE
+-segment	_DATA		class=DATA align=2
+-segment	_BSS		class=BSS align=2
++; Large header
++DGROUP group		_DATA, _BSS
+ 
+-@CodeSize EQU 1
+-@DataSize EQU 0
+ 
+-%macro ret 0-1
+-	retf %1
+-%endmacro
++TEXT  segment word public 'CODE' use16
++TEXT  ends
++_TEXT segment word public 'CODE' use16
++_TEXT ends
++_DATA segment word public 'DATA' use16
++_DATA ends
++_BSS  segment word public 'BSS'  use16
++_BSS  ends
++
++;@CodeSize EQU 1
++;@DataSize EQU 0
++
++ret macro amt
++	retf amt
++endm
+diff -urwN -x .git -x .github xx-orig/include/model.inc freecom/include/model.inc
+--- xx-orig/include/model.inc	2023-01-25 22:26:35.247432245 +0300
++++ freecom/include/model.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,9 +1,13 @@
+-%ifidni MODEL,s
+-%include "../include/small.inc"
+-%elifidni MODEL,m
+-%include "../include/medium.inc"
+-%elifidni MODEL,l
+-%include "../include/large.inc"
+-%else
+-%error "Unsupported MODEL; assign 's', 'm' or 'l' to macro MODEL"
+-%endif
++ifidni MODEL,s
++include "small.inc"
++else
++ifidni MODEL,m
++include "medium.inc"
++else
++ifidni MODEL,l
++include "large.inc"
++else
++error "Unsupported MODEL; assign 's', 'm' or 'l' to macro MODEL"
++endif
++endif
++endif
+diff -urwN -x .git -x .github xx-orig/include/small.inc freecom/include/small.inc
+--- xx-orig/include/small.inc	2023-01-25 22:26:31.015343456 +0300
++++ freecom/include/small.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,16 +1,15 @@
+ 
+ ; Small header
+-%ifidn __OUTPUT_FORMAT__, obj
+-group	DGROUP		_DATA _BSS
+-segment	_TEXT		class=CODE
+-segment	_DATA		class=DATA align=2
+-segment	_BSS		class=BSS align=2
+-%else
+-bits 16
+-%define _TEXT .text
+-%define _DATA .data
+-%define _BSS .bss
+-%endif
++DGROUP	group	_DATA, _BSS
++
++TEXT  segment word public 'CODE' use16
++TEXT  ends
++_TEXT segment word public 'CODE' use16
++_TEXT ends
++_DATA segment word public 'DATA' use16
++_DATA ends
++_BSS  segment word public 'BSS'  use16
++_BSS  ends
+ 
+ @CodeSize EQU 0
+ @DataSize EQU 0
+diff -urwN -x .git -x .github xx-orig/include/stuff.inc freecom/include/stuff.inc
+--- xx-orig/include/stuff.inc	2023-01-25 22:26:31.015343456 +0300
++++ freecom/include/stuff.inc	2023-01-25 22:30:35.860493335 +0300
+@@ -1,48 +1,54 @@
+-cpu 8086
+-
+ ;; Multi-Push/Pop
+ ;; Both take the registers in the same order, "F"==Flags
+ ;; Push pushes left to right; pop right to left
+ 
+-%macro pushm 2-*
+-%rep %0
+-%ifidni %1,f
+-	pushf
+-%else
+-	push %1 
+-%endif
+-%rotate 1 
+-%endrep 
+-%endmacro
+-%macro popm 2-*
+-%rep %0
+-%rotate -1 
+-%ifidni %1,f
+-	popf
+-%else
+-	pop %1 
+-%endif
+-%endrep 
+-%endmacro
++;;;; ported to wasm/masm by valerius
++
++pushm macro args
++  push bp                               ; Save old bp
++  mov  bp, sp                           ; bp->old bp in stack
++  irp  y, <args>                        ;
++    ifidni y, f                         ; Save
++      pushf                             ;
++    else                                ; regs
++      push y                            ;
++    endif                               ; in specified order
++  endm                                  ;   
++  ;push bp                               ; save bp on stack top
++  ;mov  bp, [bp]                         ; restore old bp
++endm
+ 
+-;; declare global and extern with underscore for OMF, without for ELF
++popm macro args
++  ;push bp                               ; Save old bp
++  ;mov  bp, sp                           ; bp->stack top (which contain stack frame bottom address)
++  ;mov  bp, [bp]                         ; now bp->stack bottom
++  irp  y, <args>                        ;
++    ;dec  bp                             ; next
++    ;dec  bp                             ; variable
++    ;push word ptr [bp]                  ;
++    ifidni y, f                         ;
++      popf                              ;
++    else                                ; Restore registers
++      pop y                             ; in reverse order
++    endif                               ;
++  endm                                  ;
++  pop  bp                               ; restore initial bp
++endm                                    ;
+ 
+-%macro  cglobal 1-*
+-%rep %0
+-%ifnidn __OUTPUT_FORMAT__,elf
+-	%define %1 _%1 
+-%endif
+-	global	%1
+-%rotate 1 
+-%endrep 
+-%endmacro
++cglobal macro args
++  irp y, <args>
++    ;ifnidn __OUTPUT_FORMAT__,elf
++    ;  define y _y
++    ;endif
++      public y
++  endm
++endm
+ 
+-%macro  cextern 1-*
+-%rep %0
+-%ifnidn __OUTPUT_FORMAT__,elf
+-	%define %1 _%1 
+-%endif
+-	extern	%1
+-%rotate 1 
+-%endrep 
+-%endmacro
++cextern macro args
++  irp y, <args>
++    ;ifnidn __OUTPUT_FORMAT__,elf
++    ;  define y _y
++    ;endif
++      extrn y
++  endm
++endm
+diff -urwN -x .git -x .github xx-orig/lib/dbg_mem.c freecom/lib/dbg_mem.c
+--- xx-orig/lib/dbg_mem.c	2023-01-25 22:26:31.079344798 +0300
++++ freecom/lib/dbg_mem.c	2023-01-25 22:30:35.860493335 +0300
+@@ -106,7 +106,7 @@
+ #endif
+ 	{
+ 		unsigned avail;	  
+-		_dos_allocmem(0xffff, &avail);
++		_dos_allocmem(0xffff, (void *)&avail);
+ 		farThis = (unsigned long)avail << 4;
+ 	}
+ #else
+diff -urwN -x .git -x .github xx-orig/lib/lowexec.asm freecom/lib/lowexec.asm
+--- xx-orig/lib/lowexec.asm	2023-01-25 22:26:35.247432245 +0300
++++ freecom/lib/lowexec.asm	2023-01-25 23:00:47.382557009 +0300
+@@ -46,26 +46,28 @@
+ ; chg: moving all assembly files to NASM
+ ;
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
++include model.inc
++include stuff.inc
+ 
+-segment _TEXT
+-	cglobal lowLevelExec
++_TEXT  segment word public 'CODE' use16
++	public _lowLevelExec
+ 
+-lowLevelExec:
++_lowLevelExec:
+ 	push    bp
+ 	mov     bp, sp
+-	pushm   si, di, ds
++	push    si
++	push    di
++	push    ds
+ 
+-%ifidn __OUTPUT_FORMAT__, elf
++ifidn __OUTPUT_FORMAT__, elf
+ 	push    es
+-%endif
++endif
+ 	lds     dx, [bp+4+2*@CodeSize]      ; load file name
+ 	les     bx, [bp+8+2*@CodeSize]      ; load parameter block
+ 	mov     ax, 4b00h
+ 
+-	mov     Word [cs:saveSP], sp
+-	mov     Word [cs:saveSS], ss
++	mov     Word Ptr [cs:saveSP], sp
++	mov     Word Ptr [cs:saveSS], ss
+ 	int     21h
+ 	cli						;; Can be removed for post-8086 CPUs
+ 	mov     ss, [cs:saveSS]
+@@ -76,16 +78,22 @@
+ 	xor     ax, ax       ; otherwise, clear AX
+ 
+ exec_error:
+-%ifidn __OUTPUT_FORMAT__, elf
++ifidn __OUTPUT_FORMAT__, elf
+ 	pop     es
+-%endif
+-	popm    si, di, ds
++endif
++	pop     ds
++	pop     di
++	pop     si
+ 	pop     bp
+-%ifidn MODEL,m					; in medium & large call far, in small & compact call near
++ifidn MODEL,m					; in medium & large call far, in small & compact call near
+ 		retf
+-%else
++else
+ 		ret
+-%endif
++endif
+ 
+ saveSP dw 0
+ saveSS dw 0
++
++_TEXT  ends
++
++      end
+diff -urwN -x .git -x .github xx-orig/shell/cb_catch.asm freecom/shell/cb_catch.asm
+--- xx-orig/shell/cb_catch.asm	2023-01-25 22:26:31.119345637 +0300
++++ freecom/shell/cb_catch.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -51,16 +51,18 @@
+ ;   chg: moving all assembly files to NASM
+ ;
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
++include model.inc
++include stuff.inc
+ 
+-;segment _DATA
+-;	EXTERN _ctrlBreak
+-
+-segment _TEXT
+-;	GLOBAL _initCBreak
+-	cglobal cbreak_handler
+-	cglobal CBreakCounter
++;_DATA segment
++;       EXTRN ctrlBreak_ :word
++;_DATA ends
++
++_TEXT segment word public 'CODE' use16
++
++;	public _initCBreak
++	public _cbreak_handler
++	public _CBreakCounter
+ 
+ ;_initCBreak:
+ ;	;; At this point DS is the segment of _ctrlBreak
+@@ -68,36 +70,47 @@
+ ;	ret
+ 
+ ;?freecomSegment DW 0
+-CBreakCounter DW 0
++_CBreakCounter DW 0
+ 
+-cbreak_handler:
+-%ifdef DEBUG
+-		dec BYTE [CS:strEnd]
++_cbreak_handler:
++ifdef DEBUG
++		dec BYTE PTR [CS:strEnd]
+ 		jz noRecurs
+-		inc BYTE [CS:strEnd]
++		inc BYTE PTR [CS:strEnd]
+ 		jmp short recurs
+ 
+ noRecurs:
+-		push ds, dx, ax, bp
++		push bp
++		push ax
++		push dx
++		push ds
++
+ 		mov dx, strBeg
+ 		mov ax, cs
+ 		mov ds, ax
+ 		mov ah, 9
+ 		int 21h
+-		inc BYTE [strEnd]
+-		pop ds, dx, ax, bp
+-%endif
++		inc BYTE PTR [strEnd]
++
++		pop ds
++		pop dx
++		pop ax
++		pop bp
++endif
+ 
+ 		;; ^Break of COMAMND --> just set the variable
+-		inc WORD [CS:CBreakCounter]
++		inc WORD PTR [CS:_CBreakCounter]
+ 
+ recurs:
+ 		clc			;; tell DOS to proceed
+ 		retf 2
+ 
+-%ifdef DEBUG
++ifdef DEBUG
+ strBeg:
+ 	db 0dh, 0ah, 'COMMAND: ^Break detected.  ', 0dh, 0ah, 0dh, 0ah, '$'
+ strEnd db 1
+-%endif
++endif
++
++_TEXT ends
+ 
++      end
+diff -urwN -x .git -x .github xx-orig/shell/command.c freecom/shell/command.c
+--- xx-orig/shell/command.c	2023-01-25 22:26:35.247432245 +0300
++++ freecom/shell/command.c	2023-01-25 22:30:35.860493335 +0300
+@@ -23,6 +23,7 @@
+ #include <dfn.h>
+ #include "../include/lfnfuncs.h"
+ 
++#include "portable.h"
+ #include "../include/command.h"
+ #include "../include/batch.h"
+ #include "../include/cmdline.h"
+diff -urwN -x .git -x .github xx-orig/shell/cswap.asm freecom/shell/cswap.asm
+--- xx-orig/shell/cswap.asm	2023-01-25 22:26:35.247432245 +0300
++++ freecom/shell/cswap.asm	2023-01-25 23:07:58.019634100 +0300
+@@ -26,66 +26,73 @@
+ ;
+ ;
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
++.386
+ 
+-segment _BSS 			; transient data (in DS)
++include model.inc
++include stuff.inc
+ 
+- 	cglobal SwapResidentSize
+-SwapResidentSize  resw 1
++_BSS  segment word public 'BSS'  use16 ; transient data (in DS)
+ 
+-	cglobal XMSsave
+-XMSsave	resw 8
+-%define currentSegmOfFreeCOMsave	XMSsave+8
++ 	public _SwapResidentSize
++_SwapResidentSize  dw 1
+ 
+-execSS resw 1
+-execSP resw 1
++	public _XMSsave
++_XMSsave	dw 8
++currentSegmOfFreeCOMsave	equ	_XMSsave+8
+ 
+-segment _DATA
++execSS dw 1
++execSP dw 1
++
++_BSS  ends
++
++_DATA segment word public 'DATA' use16
+ 
+ resize_free db 4ah
+ 
+-segment _TEXT
++_DATA ends
++
++;extern _TEXTSEG
++_TEXT segment word public 'CODE' use16
++
++_TEXTSEG equ _TEXT
+ 
+-%ifidn __OUTPUT_FORMAT__,elf ; GCC/ELF: no seg so use linker script symbol
+-extern _TEXTSEG
+-%else
+-%define _TEXTSEG _TEXT
+-%endif
+-
+-	cglobal dosFCB1,dosFCB2
+-dosFCB1 times 37 db 0
+-dosFCB2 times 37 db 0
++	public _dosFCB1
++	public _dosFCB2
++_dosFCB1 db 37 dup (0)
++_dosFCB2 db 37 dup (0)
+ 
+ ;;	global _dosCMDTAIL, _dosCMDNAME		use command line from within PSP
+-	cglobal dosCMDNAME
++	public _dosCMDNAME
+ ;;_dosCMDTAIL  times 128 db 0
+-dosCMDNAME times 128 db 0
+-		times 256	db 0
+-    global localStack
++_dosCMDNAME db 128 dup (0)
++	    db 256 dup (0)
++	public localStack
+ localStack:
+ 
+-	cglobal dosParamDosExec
+-dosParamDosExec times 22	db 0
++	public _dosParamDosExec
++_dosParamDosExec db 22	dup (0)
+ 
+ 
+-	cglobal XMSdriverAdress
+-XMSdriverAdress dd 0
+-%define callXMS		call far [XMSdriverAdress]
++	public _XMSdriverAdress
++_XMSdriverAdress dd 0
++callXMS macro
++	call dword ptr [_XMSdriverAdress]
++	endm
++
++ 	public _SwapTransientSize
++_SwapTransientSize  dw 0
++
++	public _XMSrestore
++_XMSrestore	DW 8 dup (0)
++xms_handle		equ	_XMSrestore+4
++currentSegmOfFreeCOM	equ	_XMSrestore+14
+ 
+- 	cglobal SwapTransientSize
+-SwapTransientSize  dw 0
+-
+-	cglobal XMSrestore
+-XMSrestore	times 8 DW 0
+-%define xms_handle	XMSrestore+4
+-%define currentSegmOfFreeCOM	XMSrestore+14
+-
+-	cglobal canexit
++	public _canexit
++_canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+ canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+ filler  DB 0
+ 
+-    cglobal mySS, mySP
++    public mySS, mySP
+ mySS DW 0
+ mySP DW 0
+ 
+@@ -100,11 +107,11 @@
+ ;;		mov ax, cs
+                    		; ds:dx = ASCIZ program name
+ ;;		mov ds, ax
+-		mov  dx,dosCMDNAME
++		movzx  dx,_dosCMDNAME
+ 		       
+                         ; es:bx = parameter block
+ 		mov es, cx
+-		mov bx, dosParamDosExec
++		movzx bx, _dosParamDosExec
+ 
+ 
+ 						; our temporary stack
+@@ -146,7 +153,7 @@
+ 		; ignore any errors
+ 
+ 		mov ah,48h
+-		mov bx,[SwapTransientSize]
++		mov bx,[_SwapTransientSize]
+ 		int 21h
+ 
+ ;;ska		pushf
+@@ -168,7 +175,7 @@
+ 
+ 								; restore everything to XMS
+ 		mov ah,0bh
+-		mov si,XMSrestore
++		mov si, _XMSrestore
+ 		callXMS
+ 
+ 		pop bx                  ; get relocation factor back
+@@ -186,16 +193,16 @@
+ common_error	db 0dh,0ah,0ah,'FreeCOM: XMSSwap-In: $'
+ 
+ XMS_trouble_while_swapping_in:
+-	mov bx,XMS_err
++	movzx bx, XMS_err
+ 	jmp short trouble_while_swapping_in
+ 
+ DOS_trouble_while_swapping_in:
+-	mov bx,DOS_err
++	movzx bx, DOS_err
+ 
+ trouble_while_swapping_in:
+ ;		push cs							; do some error message
+ ;		pop  ds
+-		mov dx, common_error
++		movzx dx, common_error
+ 		mov ah,09
+ 		int 21h
+ 
+@@ -209,10 +216,10 @@
+ 
+ 		;; FALL THROUGH for elder FreeCOM kernels that simply ignore
+ 		;; DOS-4C for shells
+-		cextern terminateFreeCOMHook
+-		jmp terminateFreeCOMHook
++		extrn _terminateFreeCOMHook: far
++		jmp _terminateFreeCOMHook
+ 
+-	global xms_kill
++	public xms_kill
+ xms_kill:
+ 	; Kill the XMS memory block
+ 	mov dx, [xms_handle]
+@@ -228,7 +235,7 @@
+ ; or we use the TURBO_C _restorezero() and use the
+ ; DOS default handler for that
+ 
+-%if 0
++if 0
+ MsgZerodivide db 'integer zero divide$'
+ 	global _ZeroDivideInterrupt
+ _ZeroDivideInterrupt:
+@@ -242,21 +249,21 @@
+         mov ax,04c7fh       ; terminate with errorlevel 127
+         int 21h
+ 		jmp _ZeroDivideInterrupt
+-%endif
++endif
+ 
+ 
+ ;********************************************************************
+ ; *************   END OF RESIDENT AREA ******************************
+ ;********************************************************************
+-	cglobal SWAPresidentEnd
+-SWAPresidentEnd:
++	public _SWAPresidentEnd
++_SWAPresidentEnd:
+ 
+-%if 0
++if 0
+ ;
+ ; normal EXEC
+ ;
+ 
+-		global _DosEXEC
++		public _DosEXEC
+ _DosEXEC:
+ 						; save ALL registers needed later
+ 		push si
+@@ -295,7 +302,7 @@
+ 		pop di
+ 		pop	si
+ 		retf
+-%endif
++endif
+ 
+ ;; Added here to make it more easier for the C-part to make a XMS
+ ;; request, because the code:
+@@ -307,11 +314,11 @@
+ ;; detroying AX already holding the API function number
+ 
+ ;; To be called with _far_!!
+-	cglobal XMSrequest
++	public XMSrequest
+ 	;; Note: Because [CS:driverAdress] == [residentCS:driverAdress]
+ 	;; we need not use a similiar approach as with XMSexec
+ XMSrequest:
+-		jmp far [cs:XMSdriverAdress]
++		jmp dword ptr [cs:_XMSdriverAdress]
+ 
+ ;; Added here to make it more easier for the C-part to call functions
+ ;; located in the resident part, because:
+@@ -324,12 +331,10 @@
+ 
+ ;;TODO: DS ought to be equal to SS, DS could be reconstructed from
+ ;;	SS at the end of the XMSexec function
+-		cglobal	XMSexec
+-XMSexec:
++		public	_XMSexec
++_XMSexec:
+ 						; save ALL registers needed later
+-%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
+ 		push es
+-%endif
+ 		push si
+ 		push di
+ 		push bp
+@@ -339,15 +344,15 @@
+ 
+ 						; save everything to XMS
+ 		mov ah,0bh
+-		mov si,XMSsave
+-		call far [cs:XMSdriverAdress]
++		mov si, _XMSsave
++		call dword ptr [cs:_XMSdriverAdress]
+ 
+ ;;TODO: test of result
+ 
+ 		mov es,[currentSegmOfFreeCOMsave]
+ 						; first time: shrink current psp
+ 		mov ah,[resize_free]
+-		mov bx,[SwapResidentSize]
++		mov bx,[_SwapResidentSize]
+ 
+ 		mov dx, ds
+ 		mov cx, _TEXTSEG
+@@ -371,7 +376,7 @@
+ 		add [bp+4],bx				; ds
+ 		pop ds
+ 
+-		mov byte [resize_free],49h ; change to "free" for next times
++		mov byte ptr [resize_free],49h ; change to "free" for next times
+ 
+ 		add [currentSegmOfFreeCOMsave],bx
+ 		mov cx,[execSS]
+@@ -379,26 +384,20 @@
+ 		mov ss,cx
+ 		mov sp,[execSP]
+ 
+-%ifidn MODEL, m                     ; in medium & large need to fixup return segment
++ifidn MODEL, m                     ; in medium & large need to fixup return segment
+ 		mov bp, sp
+ 		add [bp+8],bx
+-%endif
++endif
+ 		pop bp
+ 		pop di
+ 		pop	si
+-%ifidn __OUTPUT_FORMAT__,elf 	; GCC: need to preserve es
+ 		pop es
+-%endif
+-%ifidn MODEL, m                     ; in medium & large call far, in small & compact call near		
++ifidn MODEL, m                     ; in medium & large call far, in small & compact call near		
+ 		retf						; done (really)
+-%else
++else
+ 		retn						; done (really)
+-%endif
++endif
++
++_TEXT ends
+ 
+-%ifidn __OUTPUT_FORMAT__,elf
+-; NASM does not support segment relocations so add them
+-; manually
+-segment .msdos_mz_reloc
+-		dw reloc1, _TEXTSEG
+-		dw reloc2, _TEXTSEG
+-%endif
++      end
+diff -urwN -x .git -x .github xx-orig/shell/dummies.asm freecom/shell/dummies.asm
+--- xx-orig/shell/dummies.asm	2023-01-25 22:26:31.119345637 +0300
++++ freecom/shell/dummies.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -2,13 +2,18 @@
+ 
+ ; Dummy drivers to be included into FreeCOM itself
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
++include model.inc
++include stuff.inc
+ 
+-segment _TEXT
+-	cglobal dummy_criter_handler
+-	cglobal end_dummy_criter_handler
+-dummy_criter_handler:
++_TEXT segment word public 'CODE' use16
++
++        public _dummy_criter_handler
++        public _end_dummy_criter_handler
++_dummy_criter_handler:
+ 	mov al, 3			; always fail
+ 	iret
+-end_dummy_criter_handler:
++_end_dummy_criter_handler:
++
++_TEXT ends
++
++      end
+diff -urwN -x .git -x .github xx-orig/shell/kswap.c freecom/shell/kswap.c
+--- xx-orig/shell/kswap.c	2023-01-25 22:26:31.123345721 +0300
++++ freecom/shell/kswap.c	2023-01-25 22:30:35.860493335 +0300
+@@ -11,7 +11,7 @@
+ #ifdef FEATURE_KERNEL_SWAP_SHELL
+ 
+ #include <assert.h>
+-#include <dos.h>
++//#include <dos.h>
+ #include <stdlib.h>
+ #include <string.h>
+ 
+@@ -19,10 +19,12 @@
+ #include <environ.h>
+ #include <mcb.h>
+ 
++#include "portable.h"
+ #include "../include/context.h"
+ #include "../include/command.h"
+ #include "../err_fcts.h"
+ #include "../include/kswap.h"
++#include "../include/debug.h"
+ 
+ #define FD_MAGIC 0x4446 /* 'FD' */
+ 
+diff -urwN -x .git -x .github xx-orig/shell/termhook.asm freecom/shell/termhook.asm
+--- xx-orig/shell/termhook.asm	2023-01-25 22:26:31.123345721 +0300
++++ freecom/shell/termhook.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -20,41 +20,45 @@
+ ;
+ ;
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
++include model.inc
++include stuff.inc
+ 
+-segment _TEXT
++.386
+ 
+-	cglobal termAddr
+-termAddr:
++_TEXT  segment word public 'CODE' use16
++
++	public _termAddr
++
++_termAddr:
+ terminationAddressOffs	DW 0
+ terminationAddressSegm	DW 0
+ 
+-	cextern canexit
+-	cglobal myPID
+-myPID	DW 0
+-	cglobal origPPID
+-origPPID DW 0
++	extrn _canexit: far
++	public _myPID
++_myPID	DW 0
++	public _origPPID
++_origPPID DW 0
+ 
+ 	;; central PSP:0xa hook <-> may be called in every circumstance
+-	cglobal terminateFreeCOMHook
+-terminateFreeCOMHook:
+-%ifndef XMS_SWAP
+-	dec BYTE [canexit]
+-%endif
++	public _terminateFreeCOMHook
++
++_terminateFreeCOMHook:
++ifndef XMS_SWAP
++	dec BYTE PTR [_canexit]
++endif
+ 	mov ax, cs				; setup run environment (in this module)
+ 	mov ds, ax
+-%ifdef XMS_SWAP
+-	extern localStack
++ifdef XMS_SWAP
++	extrn localStack: near
+ 	mov ss, ax
+ 	mov sp, localStack
+ 
+ 	; Next time we hit here it's != 1 --> no zero flag --> I_AM_DEAD status
+-	dec BYTE [canexit]
+-%endif
++	dec BYTE PTR [_canexit]
++endif
+ 	jnz I_AM_DEAD
+ 
+-	mov ax, [myPID]		; our own PSP [in case we arrived here
++	mov ax, [_myPID]		; our own PSP [in case we arrived here
+ 	mov es, ax				; in some strange ways]
+ 
+ 	; Make sure the current PSP hasn't patched to nonsense already
+@@ -69,14 +73,14 @@
+ 	mov [es:0ch], ax
+ 
+ 	; Drop our "Shell" privileges
+-	mov ax, [origPPID]		; original parent process ID
++	mov ax, [_origPPID]		; original parent process ID
+ 	mov [es:16h], ax
+ 
+ 	; Kill the XMS memory block
+-%ifdef XMS_SWAP
+-	extern xms_kill
++ifdef XMS_SWAP
++	extrn xms_kill: near
+ 	call xms_kill
+-%endif
++endif
+ 
+ 	; Now, DOS-4C should proceed correctly
+ 	mov ax,04cffh					; and die ...
+@@ -84,7 +88,7 @@
+ 
+ 
+ I_AM_DEAD:								; process 0 can't terminate ...
+-	mov dx, dead_loop_string
++	movzx dx, dead_loop_string
+ 	mov ah, 9
+ 	int 21h
+ I_AM_DEAD_loop:
+@@ -93,3 +97,7 @@
+ 
+ dead_loop_string	DB 13,10,7,'Cannot terminate permanent FreeCOM instance'
+ 	DB 13,10,'System halted ... reboot or power off now$'
++
++_TEXT  ends
++
++       end
+diff -urwN -x .git -x .github xx-orig/shell/ver.c freecom/shell/ver.c
+--- xx-orig/shell/ver.c	2023-01-25 22:26:31.135345973 +0300
++++ freecom/shell/ver.c	2023-01-25 22:30:35.860493335 +0300
+@@ -36,6 +36,7 @@
+ #include <stdio.h>
+ #include <dos.h>
+ 
++#include "portable.h"
+ #include "../include/command.h"
+ #include "../include/cmdline.h"
+ #include "../err_fcts.h"
+diff -urwN -x .git -x .github xx-orig/shell/xms_2e.asm freecom/shell/xms_2e.asm
+--- xx-orig/shell/xms_2e.asm	2023-01-25 22:26:31.135345973 +0300
++++ freecom/shell/xms_2e.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -3,31 +3,36 @@
+ ;	variant
+ ; int process_input(int xflag, char *commandline)
+ 
+-%if 1
++if 1
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
+-segment _TEXT
++include model.inc
++include stuff.inc
+ 
+-cglobal lowlevel_int_2e_handler
+-    lowlevel_int_2e_handler:
++_TEXT  segment word public 'CODE' use16
++
++public _lowlevel_int_2e_handler
++    _lowlevel_int_2e_handler:
+         mov ax, 0FFFFh
+         iret
+ 
+-%else
++else
++
++_TEXT  segment word public 'CODE' use16
+ 
+-segment _TEXT class=CODE
++extrn _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
+ 
+-extern _residentCS, _mySS, _mySP, _XMSsave, _XMSdriverAdress, _SwapTransientSize, _my2e_parsecommandline, SWAPXMSdirection, _SwapResidentSize
+-%define callXMS     call far [cs:_XMSdriverAdress]
+-%define currentSegmOfFreeCOM    _XMSsave+8
++callXMS macro
++	call dword ptr [cs:_XMSdriverAdress]
++	endm
+ 
+-    global myfar2e_parsecommandline
++currentSegmOfFreeCOM equ  _XMSsave+8
++
++    public myfar2e_parsecommandline
+ myfar2e_parsecommandline:
+     call _my2e_parsecommandline
+     retf
+ 
+-	global _lowlevel_int_2e_handler
++	public _lowlevel_int_2e_handler
+ _lowlevel_int_2e_handler:
+         cld
+         push si
+@@ -58,12 +63,12 @@
+ ;       add ax,bx
+ ;       mov ss,ax
+ ;       mov sp,[_mySP]
+-%if 0
++if 0
+         mov ax,[_mySS]
+         sub ax,10
+         mov ss,ax
+         mov sp,[_mySP]
+-%endif
++endif
+        ; calling stuff here
+ ;       push es
+         push ds
+@@ -72,18 +77,22 @@
+         mov ds,sp
+ ;       push word 1
+ ;       call _process_input
+-        call far [myfar2e_parsecommandline]
+-%if 0
++        call dword ptr [myfar2e_parsecommandline]
++if 0
+         push ax
+         mov ah,0bh       ; move into XMS again
+         mov si,_XMSsave
+         callXMS
+         call SWAPXMSdirection
+         pop ax
+-%endif
++endif
+         jmp finish
+ swaperr:
+         mov ax,0FFFFh
+ finish:
+         iret
+-%endif
++endif
++
++_TEXT  ends
++
++      end
+diff -urwN -x .git -x .github xx-orig/shell/xms_brk.asm freecom/shell/xms_brk.asm
+--- xx-orig/shell/xms_brk.asm	2023-01-25 22:26:31.135345973 +0300
++++ freecom/shell/xms_brk.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -2,10 +2,15 @@
+ ;	Criter and ^Break handler for external programs for XMS Swap
+ ;	variant
+ 
+-%include "../include/model.inc"
+-%include "../include/stuff.inc"
+-segment _TEXT
++include model.inc
++include stuff.inc
+ 
+-	cglobal lowlevel_cbreak_handler
+-lowlevel_cbreak_handler:
+-%include "../criter/dmy_cbrk.asm"
++_TEXT  segment word public 'CODE' use16
++
++	public _lowlevel_cbreak_handler
++_lowlevel_cbreak_handler:
++include "../criter/dmy_cbrk.asm"
++
++_TEXT  ends
++
++      end
+diff -urwN -x .git -x .github xx-orig/shell/xms_crit.asm freecom/shell/xms_crit.asm
+--- xx-orig/shell/xms_crit.asm	2023-01-25 22:26:31.139346056 +0300
++++ freecom/shell/xms_crit.asm	2023-01-25 22:30:35.860493335 +0300
+@@ -2,15 +2,14 @@
+ ;	Criter and ^Break handler for external programs for XMS Swap
+ ;	variant
+ 
+-%include "../include/model.inc"
+-segment _TEXT
++include model.inc
+ 
+ ;; If the include is in here, NASM locks up, suck all CPU
+ ;	global _lowlevel_cbreak_handler
+ ;_lowlevel_cbreak_handler:
+ ;%include "../criter/dmy_cbrk.asm"
+ 
+-%define XMS_SWAP_CRITER
+-%define NO_RESOURCE_BLOCK
++XMS_SWAP_CRITER equ 1
++NO_RESOURCE_BLOCK equ 1
+ 
+-%include "../criter/criter.asm"
++include "../criter/criter.asm"
+diff -urwN -x .git -x .github xx-orig/strings/fixstrs.c freecom/strings/fixstrs.c
+--- xx-orig/strings/fixstrs.c	2023-01-25 22:26:31.139346056 +0300
++++ freecom/strings/fixstrs.c	2023-01-25 22:30:35.864493420 +0300
+@@ -59,7 +59,6 @@
+ add: version number of strings and logfile entries
+ */
+ 
+-
+ #include <ctype.h>
+ #if defined(__TURBOC__)
+ #include <dir.h>
+@@ -77,26 +76,30 @@
+   return s;
+ }
+ #else
++#include <ctype.h>
++#include "tcc2wat.h"
++#ifndef __LINUX__
+ #include <direct.h>
+-#include <io.h>
++#endif
++//#define mkdir(x) mkdir(x, 0777)
++//#include <io.h>
+ #endif
+ #include <stdio.h>
+ #include <string.h>
+ #include <stdlib.h>
+-
+ #undef DEBUG
+ #include "../config.h"
+ #include "../include/strings.typ"
+ #include "../include/resource.h"
+ #include "../include/keys.h"
+ 
+-#define logfile "strings.log"
+-#define fDAT "strings.dat"
+-#define fTXT "DEFAULT.lng"
+-#define fH "strings.h"
+-#define fEXT ".lng"
+-#define fDMAKEFILE "makefile"
+-#define fTCMAKEFILE "strings.rsp"
++char *logfile = "strings.log";
++char *fDAT    = "strings.dat";
++char *fTXT    = "DEFAULT.lng";
++char *fH      = "strings.h";
++char *fEXT    = ".lng";
++char *fDMAKEFILE  = "makefile.mk";
++char *fTCMAKEFILE = "strings.rsp";
+ 
+ typedef enum STATE {
+ 	 LOOKING_FOR_START
+@@ -116,12 +119,20 @@
+ const char promptID[] = "PROMPT_";
+ #define promptIDlen (sizeof(promptID) - 1)
+ 
+-#define STRINGLIB_DIR "strings"
++//#define STRINGLIB_DIR "strings"
++//#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
++#define STRINGLIB_DIR "\0str45678.obj            "
++char name[] = STRINGLIB_DIR;
++char *cfilename = name;
++char *cfile = name;
++//#define STRINGLIB_DIR "strings"
+ #define stringdir cfile
+-#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
++//#define cfilename (&cfile[sizeof(STRINGLIB_DIR)])
++
+ #define cfmt "str%04x.c"
+ #define objfmt "str%04x.obj"
+-char cfile[] = STRINGLIB_DIR "\0str45678.obj";
++#define objfmt1 "$(p)str%04x$(e) "
++//char cfile[] = STRINGLIB_DIR "\0str45678.obj";
+ 
+ /*
+ 	Implementation details about to cache the strings within memory:
+@@ -159,11 +170,14 @@
+ string_count_t cnt = 0;		/* current string number */
+ string_count_t maxCnt = 0;	/* number of strings within array */
+ 
+-#if defined(__TINY__) || defined(__SMALL__) || defined(__MEDIUM__)
+-#error "This program must be compiled with far data pointers"
+-#endif
++//#if defined(__TINY__) || defined(__SMALL__) || defined(__MEDIUM__)
++//#error "This program must be compiled with far data pointers"
++//#endif
+ 
+ char temp[1024];
++char temp1[256];
++char temp2[256];
++char fDIR[256];
+ 
+ static const char besFromChar[] =
+  "abcdefghijklmnopqrstuvwxyz,.[{}]\\?0";
+@@ -650,7 +664,8 @@
+ 	string_size_t lsize;
+ 	int makeLib = 0;
+ 
+-	unlink(logfile);
++	//unlink(logfile);
++	*fDIR = '\0';
+ 
+ 	if(argv[1] && (stricmp(argv[1], "/lib") == 0 || stricmp(argv[1], "--lib") == 0)) {
+ 		--argc;
+@@ -658,6 +673,15 @@
+ 		makeLib = 1;
+ 	}
+ 
++        // output directory
++        if (argc > 1 && stricmp(argv[1], "/dir") == 0) {
++          --argc;
++          ++argv;
++          strcpy(fDIR, argv[1]);
++          --argc;
++          ++argv;
++        }
++
+ 	if(argc > 2) {
+ 		puts("FIXSTRS - Generate STRINGS.DAT and STRINGS.H for a language\n"
+ 			"Useage: FIXSTRS [/lib] [language]\n"
+@@ -667,13 +691,21 @@
+ 		return 127;
+ 	}
+ 
+-
+ 	in_file = 1;
++        if (*fDIR) {
++          strcpy(temp1, fDIR);
++          fTXT = strcat(temp1, fTXT);
++        }
++
+ 	if((rc = loadFile(fTXT)) != 0)
+ 		return rc;
++
+ 	in_file = 2;
+-	if(argc > 1 && (rc = loadFile(argv[1])) != 0)
++	if(argc > 1 && (rc = loadFile(argv[1])) != 0) {
++          --argc;
++          ++argv;
+ 		return rc;
++	}
+ 
+ /* Now all the strings are cached into memory */
+ 
+@@ -682,6 +714,12 @@
+ 		return 43;
+ 	}
+ 
++        /* Prepend a directory, if needed */
++        if (*fDIR) {
++          strcpy(temp1, fDIR);
++          logfile = strcat(temp1, logfile);
++        }
++
+ 	/* Create the LOG file */
+ 	if(argc > 1) {		/* Only if a local LNG file was specified */
+ 		lgf = NULL;			/* No LOG entry til this time */
+@@ -748,13 +786,26 @@
+ 		return 44;
+ 	}
+ 
++        if (*fDIR) {
++          strcpy(temp1, fDIR);
++          fDAT = strcat(temp1, fDAT);
++        }
++
+ 	/* 2. Open STRINGS.DAT and STRINGS.H and dump control information */
+ 	if ((dat = fopen(fDAT,"wb")) == NULL) {
+-		perror("creating " fDAT);
++                strcpy(temp2, "creating ");
++                strcpy(temp2, fDAT);
++                perror(temp2);
+ 		return 36;
+ 	}
++        if (*fDIR) {
++          strcpy(temp1, fDIR);
++          fH = strcat(temp1, fH);
++        }
+ 	if ((inc = fopen(fH,"wt")) == NULL) {
+-		perror("creating " fH);
++                strcpy(temp2, "creating ");
++                strcat(temp2, fH);
++                perror(temp2);
+ 		return 37;
+ 	}
+ 
+@@ -796,12 +847,18 @@
+ 
+ 	fflush(dat);
+ 	if(ferror(dat)) {
+-		fputs("Unspecific write error into " fDAT "\n", stderr);
++                strcpy(temp2, "Unspecific write error into ");
++                strcat(temp2, fDAT);
++                strcat(temp2, "\n");
++                fputs(temp2, stderr);
+ 		return 38;
+ 	}
+ 	fflush(inc);
+ 	if(ferror(inc)) {
+-		fputs("Unspecific write error into " fH "\n", stderr);
++                strcpy(temp2, "Unspecific write error into ");
++                strcat(temp2, fH);
++                strcat(temp2, "\n");
++                fputs(temp2, stderr);
+ 		return 39;
+ 	}
+ 
+@@ -809,11 +866,18 @@
+ 	fclose(inc);
+ 
+ 	if(makeLib) {
+-		mkdir(stringdir);
++		//mkdir(stringdir);
++		mkdir(fDIR);
+ #define fdmake inc
+ #define ftc101 dat
+-		cfilename[-1] = '/';
+-		strcpy(cfilename, fDMAKEFILE);
++                //cfilename[-1] = '/';
++                //strcpy(cfilename, fDMAKEFILE);
++                if (*fDIR) {
++                  strcpy(temp1, fDIR);
++                  cfile = strcat(temp1, fDMAKEFILE);
++                  cfilename = cfile + strlen(fDIR);
++                }
++                printf("cfile=%s\n", cfile);
+ 		if((fdmake = fopen(cfile, "wt")) == NULL) {
+ 			pxerror("creating ", cfile);
+ 			return 100;
+@@ -827,80 +891,60 @@
+ puts("FIXSTRS: building STRINGS library source files");
+ 		/********************** prologue */
+ 		fputs("\
+-MAXLINELENGTH := 8192\n\
+-# Project specific C compiler flags\n\
+-MYCFLAGS_DBG = -UNDEBUG $(null,$(DEBUG) $(NULL) -DDEBUG=1)\n\
+-MYCFLAGS_NDBG = -DNDEBUG=1 -UDEBUG\n\
+-MYCFLAGS = $(null,$(NDEBUG) $(MYCFLAGS_DBG) $(MYCFLAGS_NDBG))\n\
+-\n\
+-#	Default target\n\
+-all: $(CFG) strings.lib\n\
+-\n\
+-strings.lib .LIBRARY : ", fdmake);
++#\n\
++# A Makefile for ATTRIB\n\
++# (c) osFree project,\n\
++# author, date\n\
++#\n\
++\n\
++PROJ  = strings\n\
++TRGT  = $(PROJ).lib\n\
++DESC  = Control file attributes\n\
++#defines object file names in format objname.$(O)\n\
++srcfiles = ", fdmake);
+ 
+ 		/********************* individual files */
+ 		for(cnt = 0; cnt < maxCnt; ++cnt) {
+ 			dumpString(cnt);
+-			fprintf(fdmake, "\\\n\t" objfmt, cnt);
++                        fprintf(fdmake, " &\n\t" objfmt1, cnt);
+ 		}
+ 		for(cnt = 0; cnt < maxCnt - 1; ++cnt)
+-#if defined(__TURBOC__)
+-			fprintf(ftc101, "+" objfmt " &\n", cnt);
+-#elif defined(GCC)
+-			fprintf(ftc101, objfmt "\n", cnt);
+-#else
+ 			fprintf(ftc101, "+" objfmt "\n", cnt);
+-#endif
+-#if defined(GCC)
+-		fprintf(ftc101, objfmt " \n", cnt);
+-#else
+ 		fprintf(ftc101, "+" objfmt " \n", cnt);
+-#endif
+ 		/********************** epilogue */
+ 
+-		fputs("\n\
+-\n\
+-.IF $(CFG) != $(NULL)\n\
+-\n\
+-CONFIGURATION = $(CONF_BASE)\n\
++                fputs("\n\n\
++# defines additional options for C compiler\n\
++ADD_COPT = -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)suppl\n\
+ \n\
+-.IF $(_COMPTYPE) == BC\n\
+-CONF_BASE =	\\\n\
+--f- \\\n\
+--I$(INCDIR:s/;/ /:t\";\")	\\\n\
+--L$(LIBDIR:s/;/ /:t\";\")	\\\n\
+--w\n\
++!include $(%ROOT)/tools/mk/libsdos.mk\n\
+ \n\
+-.IF $(_COMPILER)==BC5\n\
+-CONFIGURATION += -RT- -x-\n\
+-.ENDIF\n\
++TARGETS  = lib\n\
+ \n\
+-CONF_DBG =	$(MYCFLAGS_DBG)\n\
+-CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
++.c: $(PATH)\n\
+ \n\
+-.ENDIF\n\
++.h: $(PATH)\n\
+ \n\
+-.IF $(_COMPTYPE) == TC\n\
+-CONF_BASE =	\\\n\
+--I$(INCDIR:s/;/ /:t\";\")	\\\n\
+--L$(LIBDIR:s/;/ /:t\";\")	\\\n\
+--w\n\
++lib: $(BLD)$(RELDIR)$(TRGT) .symbolic\n\
+ \n\
+-CONF_DBG =	$(MYCFLAGS_DBG)\n\
+-CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
++$(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\
++ @$(MAKE) $(MAKEOPT) -f $(BLD)$(RELDIR)makefile.mk library=$(BLD)$(RELDIR)$(TRGT) library # install\n\
+ \n\
+-.ENDIF\n\
+-.ENDIF\n", fdmake);
++\n", fdmake);
+ 
+ 		fflush(ftc101);
+ 		if(ferror(ftc101)) {
+-			puts("Unspecific error writing to " fTCMAKEFILE);
++			strcpy(temp2, "Unspecific error writing to ");
++			strcat(temp2, fTCMAKEFILE);
++			puts(temp2);
+ 			return 104;
+ 		}
+ 		fclose(ftc101);
+ 		fflush(fdmake);
+ 		if(ferror(fdmake)) {
+-			puts("Unspecific error writing to " fDMAKEFILE);
++			strcpy(temp2, "Unspecific error writing to ");
++			strcat(temp2, fDMAKEFILE);
++			puts(temp2);
+ 			return 105;
+ 		}
+ 		fclose(fdmake);
+diff -urwN -x .git -x .github xx-orig/suppl/src/intr.asm freecom/suppl/src/intr.asm
+--- xx-orig/suppl/src/intr.asm	2023-01-25 22:26:35.251432328 +0300
++++ freecom/suppl/src/intr.asm	2023-01-25 22:30:35.864493420 +0300
+@@ -25,45 +25,27 @@
+ ; 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA.
+ ;
+ 
+-%ifidn __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
+-%define COMPILE 1
++.8086
+ 
+-segment .text
++ifidni COMPILER, WATCOM 	; and Open Watcom
++COMPILE equ 1
+ 
+-bits 16
+-
+-global intr
+-
+-intr:
+-
+-%elifidni COMPILER, WATCOM 	; and Open Watcom
+-%define COMPILE 1
+-
+-segment _TEXT class=CODE
+-
+-
+-global intr_
+ 
+ intr_:
+-%endif
+-
+-%ifdef COMPILE
++_intr_:
++endif
++ifdef COMPILE
+ 		push	bp			; Standard C entry
+-%ifidn __OUTPUT_FORMAT__, elf
+-		mov	bp,sp
+-		mov	ax, [bp+4]		; interrupt number
+-		mov	bx, [bp+6]		; regpack structure
+-		push	es
+-%else
+ 		push	bx
+ 		push	cx
+ 		mov	bx, dx
+ 		push	dx
+-%endif
+ 		push	si
+ 		push	di
+ 		push	ds
+-		mov	[cs:intr_1-1], al
++		push	es
++
++		mov	byte ptr [cs:intr_1-1], al
+ 		jmp	short intr_2		; flush the instruction cache
+ intr_2:
+ 		mov	ah, [bx+18]		; SZAPC flags
+@@ -74,7 +56,7 @@
+ 		mov	bp, [bx+8]
+ 		mov	si, [bx+10]
+ 		mov	di, [bx+12]
+-		push	word [bx+14]		; ds
++		push	word ptr [bx+14]		; ds
+ 		mov	es, [bx+16]
+ 		mov	bx, [bx+2]
+ 		pop	ds
+@@ -85,38 +67,35 @@
+ 		push	bx
+ 		mov	bx, sp
+ 		mov	ds, [ss:bx+6]
+-%ifidn __OUTPUT_FORMAT__, elf
+-		mov	bx, [ss:bx+20]		; address of REGPACK
+-%else
+ 		mov	bx, [ss:bx+12]		; address of REGPACK
+-%endif
+ 		mov	[bx], ax
+-		pop	word [bx+2]
++		pop	word ptr [bx+2]
+ 		mov	[bx+4], cx
+ 		mov	[bx+6], dx
+ 		mov	[bx+8], bp
+ 		mov	[bx+10], si
+ 		mov	[bx+12], di
+-		pop	word [bx+14]
++		pop	word ptr [bx+14]
+ 		mov	[bx+16], es
+-		pop	word [bx+18]
++		pop	word ptr [bx+18]
+ 
++		pop	es
+ 		pop	ds
+ 		pop	di
+ 		pop	si
+-%ifidn __OUTPUT_FORMAT__, elf
+-		pop	es
+-		pop	bp
+-		ret	4
+-%else
+ 		pop	dx
+ 		pop	cx
+ 		pop	bx
+ 		pop	bp
+-%ifidn MODEL,m					; in medium & large call far, in small & compact call near
++ifidn MODEL,m					; in medium & large call far, in small & compact call near
+ 		retf
+-%else
++else
+ 		ret
+-%endif
+-%endif
+-%endif
++endif
++endif
++
++ifidni __OUTPUT_FORMAT__, elf 	; only for ia16-elf-gcc compilations
++_TEXT  ends
++endif
++
++       end

@@ -24,6 +24,9 @@ STACKSIZE = 4096
 # defines additional options for C compiler
 DEST = none
 
+!include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
+
 ADD_COPT    = &
 !ifdef XMS_SWAP
   -dXMS_SWAP=1 &
@@ -33,9 +36,9 @@ ADD_COPT    = &
 #  -d2 &
   -ml -dMODEL=l -bt=dos -i=$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR).. &
   -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PATH)..$(SEP)strings$(SEP)critstrs &
-  -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl &
-  -i=$(MYDIR)..$(SEP)contrib$(SEP)shell -i=$(MYDIR)..$(SEP)contrib$(SEP)include &
-  -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(MYDIR)..$(SEP)contrib
+  -i=$(PORT_BASE)strings -i=$(PORT_BASE)suppl &
+  -i=$(PORT_BASE)shell -i=$(PORT_BASE)include &
+  -i=$(MYDIR)..$(SEP)..$(SEP)include -i=$(PORT_BASE)
 
 ADD_ASMOPT  = &
 !ifdef XMS_SWAP
@@ -44,13 +47,11 @@ ADD_ASMOPT  = &
   -dNDEBUG &
 #  -dDEBUG &
 #  -d2 &
-  -ml -dMODEL=l -bt=dos -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(MYDIR)..$(SEP)contrib$(SEP)strings -i=$(MYDIR)..$(SEP)contrib$(SEP)suppl -i=$(MYDIR)..$(SEP)contrib$(SEP)include -i=$(MYDIR)..$(SEP)contrib$(SEP)shell -i=$(MYDIR)..$(SEP)contrib &
+  -ml -dMODEL=l -bt=dos -i=$(PATH)..$(SEP)criter$(SEP)criter1 -i=$(PORT_BASE)strings -i=$(PORT_BASE)suppl -i=$(PORT_BASE)include -i=$(PORT_BASE)shell -i=$(PORT_BASE) &
   -i=$(PATH)..$(SEP)strings$(SEP)critstrs
 
 ADD_LINKOPT = libpath $(%ROOT)build$(SEP)lib lib cmd.lib, lib.lib, suppl.lib, strings.lib
 
-!include $(%ROOT)tools/mk/appsdos.mk
+.c:   $(PORT_BASE)shell
 
-.c:   $(MYDIR)..$(SEP)contrib$(SEP)shell
-
-.asm: $(MYDIR)..$(SEP)contrib$(SEP)shell
+.asm: $(PORT_BASE)shell
