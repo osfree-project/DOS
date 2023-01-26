@@ -2,47 +2,64 @@
 	path = fapi
 	url = https://github.com/osfree-project/FamilyAPI
 	update = merge
+	branch = master
 [submodule "WIN16"]
 	path = WIN16
 	url = https://github.com/osfree-project/WIN16
 	update = merge
+	branch = master
 [submodule "Server"]
 	path = Server
 	url = https://github.com/osfree-project/MVM.git
 	update = merge
+	branch = master
 [submodule "macrolib"]
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
 	update = merge
+	branch = master
 [submodule "CMD/more/contrib"]
 	path = CMD/more/contrib
 	url = https://github.com/FDOS/more
 	update = merge
+	branch = master
 [submodule "CMD/diskcomp/contrib"]
 	path = CMD/diskcomp/contrib
 	url = https://github.com/FDOS/diskcomp
 	update = merge
+	branch = master
 [submodule "CMD/edlin/contrib"]
 	path = CMD/edlin/contrib
 	url = https://github.com/FDOS/edlin
 	update = merge
+	branch = master
 [submodule "CMD/find/contrib"]
 	path = CMD/find/contrib
 	url = https://github.com/FDOS/find
 	update = merge
+	branch = master
 [submodule "CMD/xcopy/contrib"]
 	path = CMD/xcopy/contrib
 	url = https://github.com/FDOS/xcopy
 	update = merge
+	branch = master
 [submodule "CMD/attrib/contrib"]
 	path = CMD/attrib/contrib
 	url = https://github.com/FDOS/attrib
 	update = merge
+	branch = master
 [submodule "CMD/basic/contrib"]
 	path = CMD/basic/contrib
 	url = https://github.com/nerun/bwbasic
 	update = merge
+	branch = master
 [submodule "CMD/mem/contrib"]
 	path = CMD/mem/contrib
 	url = https://gitlab.com/FreeDOS/base/mem.git
 	update = merge
+	branch = master
+[submodule "CMD/diskcopy/contrib"]
+	path = CMD/diskcopy/contrib
+	url = https://github.com/FDOS/diskcopy
+	update = merge
+	branch = master
