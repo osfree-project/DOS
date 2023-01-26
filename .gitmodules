@@ -58,3 +58,8 @@
 	url = https://gitlab.com/FreeDOS/base/mem.git
 	update = merge
 	branch = master
+[submodule "CMD/diskcopy/contrib"]
+	path = CMD/diskcopy/contrib
+	url = https://github.com/FDOS/diskcopy
+	update = merge
+	branch = master
