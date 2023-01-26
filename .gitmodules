@@ -52,7 +52,7 @@
 	path = CMD/basic/contrib
 	url = https://github.com/nerun/bwbasic
 	update = merge
-	branch = master
+	branch = main
 [submodule "CMD/mem/contrib"]
 	path = CMD/mem/contrib
 	url = https://gitlab.com/FreeDOS/base/mem.git
