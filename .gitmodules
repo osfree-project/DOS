@@ -1,48 +1,36 @@
 [submodule "fapi"]
 	path = fapi
 	url = https://github.com/osfree-project/FamilyAPI
-	update = merge
 [submodule "WIN16"]
 	path = WIN16
 	url = https://github.com/osfree-project/WIN16
-	update = merge
 [submodule "Server"]
 	path = Server
 	url = https://github.com/osfree-project/MVM.git
-	update = merge
 [submodule "macrolib"]
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
-	update = merge
 [submodule "CMD/more/contrib"]
 	path = CMD/more/contrib
 	url = https://github.com/FDOS/more
-	update = merge
 [submodule "CMD/diskcomp/contrib"]
 	path = CMD/diskcomp/contrib
 	url = https://github.com/FDOS/diskcomp
-	update = merge
 [submodule "CMD/edlin/contrib"]
 	path = CMD/edlin/contrib
 	url = https://github.com/FDOS/edlin
-	update = merge
 [submodule "CMD/find/contrib"]
 	path = CMD/find/contrib
 	url = https://github.com/FDOS/find
-	update = merge
 [submodule "CMD/xcopy/contrib"]
 	path = CMD/xcopy/contrib
 	url = https://github.com/FDOS/xcopy
-	update = merge
 [submodule "CMD/attrib/contrib"]
 	path = CMD/attrib/contrib
 	url = https://github.com/FDOS/attrib
-	update = merge
 [submodule "CMD/basic/contrib"]
 	path = CMD/basic/contrib
 	url = https://github.com/nerun/bwbasic
-	update = merge
 [submodule "CMD/mem/contrib"]
 	path = CMD/mem/contrib
 	url = https://gitlab.com/FreeDOS/base/mem.git
-	update = merge
