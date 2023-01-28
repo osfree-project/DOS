@@ -19,6 +19,7 @@ DIRS =   shared    &
          label     &
          mem       &
          more      &
+         sort      &
          stub      &
          subst     &
          xcopy
