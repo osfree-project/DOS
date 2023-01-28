@@ -11,16 +11,15 @@ $(p)calendar$(e) &
 $(p)asciitab$(e)
 
 
-#ADD_COPT = -ml -sg -i=$(MYDIR)..$(SEP)include #-sg -ml -zc -2 -bt=dos
 ADD_COPT = -ml -zc -zt -2 -ox -sg -i=$(MYDIR)..$(SEP)include
 ADD_LINKOPT = lib $(BLD)lib$(SEP)dflatp.lib, $(BLD)lib$(SEP)dtools.lib
-#UNI2H  = 1
 C      = s
-#HEAPSIZE = 65535
 STACKSIZE = 4096
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)edit.mk
 
-.c: $(MYDIR)contrib$(SEP)source$(SEP)edit
+.c: $(PORT_BASE)source$(SEP)edit
 
-#.h: $(MYDIR)..$(SEP)include
+.h: $(PORT_BASE)source$(SEP)edit
+

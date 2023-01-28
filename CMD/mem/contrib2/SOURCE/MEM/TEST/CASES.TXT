@@ -1,4 +1,0 @@
-plain
-xms
-hmamin15
-hmamin64

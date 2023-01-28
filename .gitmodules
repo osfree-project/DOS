@@ -14,14 +14,6 @@
 	path = macrolib
 	url = https://github.com/osfree-project/MacroLib.git
 	branch = master
-[submodule "CMD/xcopy/contrib"]
-	path = CMD/xcopy/contrib
-	url = https://github.com/FDOS/xcopy
-	branch = master
-[submodule "CMD/mem/contrib"]
-	path = CMD/mem/contrib
-	url = https://gitlab.com/FreeDOS/base/mem.git
-	branch = master
 [submodule "CMD/diskcopy/contrib"]
 	path = CMD/diskcopy/contrib
 	url = https://github.com/FDOS/diskcopy
