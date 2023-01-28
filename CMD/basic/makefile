@@ -28,12 +28,12 @@ $(p)bwx_tty$(e)
 
 # defines additional options for C compiler
 ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__ -3
-#STACKSIZE = 65535000
 
 # additions to install target
 INSTALL_ADD = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)basic.mk
 
 install_add: $(DEST)$(SEP)$(PROJ).com &
              $(DEST)$(SEP)$(PROJ)a.com &
@@ -53,6 +53,7 @@ $(DEST)$(SEP)gw$(PROJ).exe: $(PATH)$(PROJ).exe
  @$(SAY) INST     $^. $(LOG)
  @$(CP) $< $^@ $(BLACKHOLE)
 
-.c: $(MYDIR)contrib
+.c: $(PORT_BASE)
 
-.h: $(MYDIR)contrib
+.h: $(PORT_BASE)
+
