@@ -17,10 +17,12 @@ ADD_COPT = -mc -D__MSDOS__ -3 -oas -s
 STACKSIZE = 4096
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)more.mk
 
-.c: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)tnyprntf;$(MYDIR)contrib$(SEP)kitten
+.c: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;
 
-.h: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)tnyprntf;$(MYDIR)contrib$(SEP)kitten
+.h: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;
+
 
 #set COMFLAGS=-mt -lt
 #set EXEFLAGS=-mc

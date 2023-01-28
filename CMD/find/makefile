@@ -10,11 +10,14 @@ DESC = Find string in file
 #defines object file names in format $(p)objname$(e)
 srcfiles = $(p)find$(e) $(p)find_str$(e) $(p)kitten$(e) $(p)tnyprntf$(e)
 # defines additional options for C compiler
-#ADD_COPT  = -ml -i=$(MYDIR)contrib$(SEP)src
-#ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)find.mk
 
-.c: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)kitten;$(MYDIR)contrib$(SEP)tnyprntf
+.c: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;
 
-.h: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)kitten;$(MYDIR)contrib$(SEP)tnyprntf
+.h: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;
+
+#.c: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)kitten;$(MYDIR)contrib$(SEP)tnyprntf
+
+#.h: $(MYDIR)contrib$(SEP)src;$(MYDIR)contrib$(SEP)kitten;$(MYDIR)contrib$(SEP)tnyprntf

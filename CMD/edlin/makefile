@@ -11,7 +11,8 @@ srcfiles  = $(p)defines$(e) $(p)dynstr$(e) $(p)edlib$(e) $(p)edlin$(e)
 COM       = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)edlin.mk
 
-.c: $(MYDIR)contrib
+.c: $(PORT_BASE)
 
-.h: $(MYDIR)contrib
+.h: $(PORT_BASE)
