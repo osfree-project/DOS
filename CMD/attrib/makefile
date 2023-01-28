@@ -15,7 +15,9 @@ ADD_COPT  = -ms -3 -ox
 #ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)attrib.mk
 
-.c: $(MYDIR)contrib2
+.c: $(PORT_BASE)
 
-.h: $(MYDIR)contrib2
+.h: $(PORT_BASE)
+

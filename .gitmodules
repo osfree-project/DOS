@@ -34,10 +34,6 @@
 	path = CMD/xcopy/contrib
 	url = https://github.com/FDOS/xcopy
 	branch = master
-[submodule "CMD/attrib/contrib"]
-	path = CMD/attrib/contrib
-	url = https://github.com/FDOS/attrib
-	branch = master
 [submodule "CMD/basic/contrib"]
 	path = CMD/basic/contrib
 	url = https://github.com/nerun/bwbasic
