@@ -1,14 +1,16 @@
 #
-# A Makefile for SORT
+# A Makefile for MOVE
 # (c) osFree project,
 # author, date
 #
 
-PROJ = sort
+PROJ = move
 TRGT = $(PROJ).exe
-DESC = DOS sort
+DESC = DOS move
 srcfiles = &
-$(p)sort$(e) &
+$(p)move$(e) &
+$(p)misc$(e) &
+$(p)movedir$(e) &
 $(p)tnyprntf$(e) &
 $(p)kitten$(e)
 
@@ -17,7 +19,7 @@ ADD_COPT = -mc -D__MSDOS__ -3 -oas -s
 STACKSIZE = 4096
 
 !include $(%ROOT)tools/mk/appsdos.mk
-!include $(MYDIR)sort.mk
+!include $(MYDIR)move.mk
 
 .c: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;
 
