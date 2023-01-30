@@ -1,6 +1,6 @@
-diff -urN contrib\drive.c contrib2\drive.c
---- contrib\drive.c	Tue Jan 17 10:04:36 2023
-+++ contrib2\drive.c	Tue Jan 17 10:36:47 2023
+diff -urN contrib/drive.c contrib2/drive.c
+--- contrib/drive.c	Tue Jan 17 10:04:36 2023
++++ contrib2/drive.c	Tue Jan 17 10:36:47 2023
 @@ -4,12 +4,55 @@
  #include <stdlib.h> /* exit */
  #include <bios.h>   /* biosdisk */
