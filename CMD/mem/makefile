@@ -16,7 +16,7 @@ ADD_COPT  = -ms -oahls -j -s -3
 !include $(%ROOT)tools/mk/appsdos.mk
 !include $(MYDIR)mem.mk
 
-.c: $(PORT_BASE)SOURCE$(SEP)MEM
+.c: $(PORT_BASE)source$(SEP)mem
 
-.h: $(PORT_BASE)SOURCE$(SEP)MEM
+.h: $(PORT_BASE)source$(SEP)mem
 
