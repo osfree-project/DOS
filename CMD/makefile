@@ -26,4 +26,3 @@ DIRS =   shared    &
          xcopy
 
 !include $(%ROOT)tools/mk/all.mk
-
