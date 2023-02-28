@@ -1,0 +1,48 @@
+diff -urwN dflatp/source/dflatp/dfpcomp.h contrib/source/dflatp/dfpcomp.h
+--- dflatp/source/dflatp/dfpcomp.h	2008-03-22 03:00:48.000000000 +0300
++++ contrib/source/dflatp/dfpcomp.h	2023-01-08 21:56:03.813628827 +0300
+@@ -43,8 +43,8 @@
+ #include <bios.h>
+ #include <ctype.h>
+ #include <io.h>
+-#include <sys\types.h>
+-#include <sys\stat.h>
++#include <sys/types.h>
++#include <sys/stat.h>
+ #include <time.h>
+ #include <setjmp.h>
+ #include "dflatp.h"
+diff -urwN dflatp/source/dflatp/logger.c contrib/source/dflatp/logger.c
+--- dflatp/source/dflatp/logger.c	2008-03-22 10:15:42.000000000 +0300
++++ contrib/source/dflatp/logger.c	2023-01-08 21:56:03.817628910 +0300
+@@ -4,7 +4,7 @@
+ //#ifdef DFLATP_LOG
+ 
+ #include <dos.h>
+-#include <sys\types.h>
++#include <sys/types.h>
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
+diff -urwN dflatp/source/dflatp/menu.h contrib/source/dflatp/menu.h
+--- dflatp/source/dflatp/menu.h	2007-12-26 23:20:18.000000000 +0300
++++ contrib/source/dflatp/menu.h	2023-01-08 21:56:03.817628910 +0300
+@@ -50,5 +50,3 @@
+ int MenuWidth(struct PopDown *);
+ 
+ #endif
+-
+-
+diff -urwN dflatp/source/dflatp/portab.h contrib/source/dflatp/portab.h
+--- dflatp/source/dflatp/portab.h	2008-03-22 03:51:04.000000000 +0300
++++ contrib/source/dflatp/portab.h	2023-01-08 21:56:03.821628994 +0300
+@@ -7,6 +7,9 @@
+ #include <dos.h>
+ 
+ #if MSC | __WATCOMC__
++#if __WATCOMC__
++#include <stdlib.h>
++#endif
+ #include <direct.h>
+ #else
+ #include <dir.h>

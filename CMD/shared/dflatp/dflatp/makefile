@@ -53,8 +53,9 @@ ADD_LINKOPT =
 #UNI2H = 1
 
 !include $(%ROOT)tools/mk/libsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)dflatp.mk
 
-.c: $(MYDIR)..$(SEP)contrib$(SEP)source$(SEP)dflatp
+.c: $(PORT_BASE)source$(SEP)dflatp
 
 $(PATH)$(PROJ).lib: $(OBJS)
  @$(MAKE) $(MAKEOPT) library=$(PATH)$(PROJ).lib library
