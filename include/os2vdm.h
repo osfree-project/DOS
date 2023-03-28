@@ -97,7 +97,7 @@ Notes:  if CX is not 636Ch on entry, INT 21/AH=6Ch is invoked, because a bug
 SeeAlso: AH=52h
 */
 
-APIRET APIENTRY VdmQueryLastDrive(CHAR cDrive);
+APIRET APIENTRY VdmQueryLastDrive(PSZ cDrive);
 
 /*
 --------O-2164--DX0004-----------------------
