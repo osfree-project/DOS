@@ -27,6 +27,6 @@ JWASM  = 1
 # rem nasmw debug.asm -D PM=1 -D NASM=1 -O 2 -o debugx.com -l debugx.lst 
 # yasm debug.asm -D PM=1 -D NASM=0 -o debugx.com -l debugx.lst 
 
-.asm: $(PORT_BASE)
+.asm: $(PORT_BASE)src
 
-.inc: $(PORT_BASE)
+.inc: $(PORT_BASE)src
