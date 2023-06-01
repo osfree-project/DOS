@@ -18,7 +18,9 @@ call rename 'DFLATP.LSM',   'dflatp.lsm'
 call rename 'DFP100.HTM',   'dfp100.htm'
 call rename 'SOURCREF.TXT', 'sourcref.txt'
 
-call directory '../..'
+call directory '..'
+call directory '..'
+
 call directory 'source'
 
 call rename 'DFLATP',        'dflatp'
