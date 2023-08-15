@@ -21,6 +21,7 @@ DIRS =   shared    &
          more      &
          move      &
          neloader  &
+         qbasic    &
          sort      &
          stub      &
          subst     &
