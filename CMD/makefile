@@ -20,9 +20,12 @@ DIRS =   shared    &
          mem       &
          more      &
          move      &
+         neloader  &
          sort      &
          stub      &
          subst     &
          xcopy
+
+#         lxloader  &
 
 !include $(%ROOT)tools/mk/all.mk

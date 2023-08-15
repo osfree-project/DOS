@@ -1,1 +1,3 @@
 Use FreeDOS edit (and BW-BASIC) as base of QBASIC
+https://github.com/fancidev/DosHelp/blob/master/QuickHelp/Serialization/Format.txt
+

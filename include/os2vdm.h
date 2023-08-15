@@ -5,7 +5,31 @@
 #define PVOID void far *
 #define USHORT unsigned short
 #define PSZ char far *
-#define NULL (void *)0
+//#define NULL (void *)0
+
+typedef struct _STARTDATA {
+        unsigned int uLength;
+        unsigned int uRelated;
+        unsigned int uForeground;
+        unsigned int uTrace;
+        char far *lpTitle;
+        char far *lpPgmName;
+        char far *lpArgs;
+        unsigned long ulTermQ;
+        char far *lpEnvironment;
+        unsigned int uInherit;
+        unsigned int uSession;
+        char far *lpIcon;
+        unsigned long ulPgmHandle;
+        unsigned int uPgmControl;
+        unsigned int uColumn;
+        unsigned int uRow;
+        unsigned int uWidth;
+        unsigned int uHeight;
+        unsigned int uReserved;
+        unsigned long ulObjectBuffer;
+        unsigned long ulObjectBufferLen;
+} STARTDATA;
 
 /*
 INT 21 U - OS/2 v1.x FAPI - OS/2 FILE SYSTEM JOIN/SUBST
@@ -194,7 +218,10 @@ Values for OS/2 API ordinal:
  0155h  Dos32AddMuxWaitSem
  0156h  Dos32DeleteMuxWaitSem
  0157h  Dos32QueryMuxWaitSem
---------O-2164--BX0025-----------------------
+
+*/
+
+/*--------O-2164--BX0025-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - OS/2 API DOS32StartSession
         AH = 64h
         BX = 0025h (API ordinal)
@@ -232,6 +259,11 @@ Offset  Size    Description     (Table 01748)
  32h    WORD    reserved (0)
  34h    DWORD   "ObjectBuffer" (currently reserved, must be 00000000h)
  38h    DWORD   "ObjectBufferLen" (currently reserved, must be 00000000h)
+*/
+
+APIRET APIENTRY VdmStartSession(STARTDATA * StartData);
+
+/*
 --------O-2164--BX00B6-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - OS/2 API DosQFSAttach
         AH = 64h

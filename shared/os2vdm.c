@@ -260,3 +260,29 @@ APIRET APIENTRY VdmQueryLastDrive(PSZ cDrive)
 
   return 0; // error
 }
+
+/*
+
+INT 21 - OS/2 v2.1+ Virtual DOS Machine - OS/2 API DOS32StartSession
+
+	AH = 64h
+	BX = 0025h (API ordinal)
+	CX = 636Ch ("cl")
+	DS:SI -> STARTDATA structure (see #01748)
+Return: AX = return code
+SeeAlso: AH=64h/CX=636Ch,AH=64h/BX=00B6h
+
+*/
+APIRET APIENTRY VdmStartSession(STARTDATA * StartData)
+{
+  union REGPACK rp;
+
+  rp.h.ah=0x64;
+  rp.w.cx=0x636c;// ("cl")
+  rp.w.bx = 0x0025;
+  rp.w.si = (unsigned int)&StartData;
+
+  intr(0x21, &rp);
+
+  return rp.x.ax; // error
+}

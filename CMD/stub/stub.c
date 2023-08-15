@@ -4,34 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dos.h>
-
-typedef struct _STARTDATA {
-        unsigned int uLength;
-        unsigned int uRelated;
-        unsigned int uForeground;
-        unsigned int uTrace;
-        char _far *lpTitle;
-        char _far *lpPgmName;
-        char _far *lpArgs;
-        unsigned long ulTermQ;
-        char _far *lpEnvironment;
-        unsigned int uInherit;
-        unsigned int uSession;
-        char _far *lpIcon;
-        unsigned long ulPgmHandle;
-        unsigned int uPgmControl;
-        unsigned int uColumn;
-        unsigned int uRow;
-        unsigned int uWidth;
-        unsigned int uHeight;
-        unsigned int uReserved;
-        unsigned long ulObjectBuffer;
-        unsigned long ulObjectBufferLen;
-} STARTDATA;
+#include <os2vdm.h>
 
 extern char _far *_LpPgmName;
 extern char _far *_LpCmdLine;
-
 
 int main( void )
 {
@@ -40,7 +16,7 @@ int main( void )
 
         if ( _osmajor < 20 ) {
                 aRegs.h.ah = 0x09;
-                aRegs.w.dx = (unsigned int)"This is an osFree OS/2 Personality executable.\r\n$";
+                aRegs.w.dx = (unsigned int)"This is an OS/2 executable.\r\n$";
                 intdos( &aRegs, &aRegs );
                 return 2;
         }
@@ -68,11 +44,7 @@ int main( void )
         StartData.ulObjectBuffer = 0L;
         StartData.ulObjectBufferLen = 0L;
 
-        aRegs.h.ah = 0x64;
-        aRegs.w.bx = 0x25;
-        aRegs.w.cx = 0x636C;
-        aRegs.w.si = (unsigned int)&StartData;
-        intdos( &aRegs, &aRegs );
+        VdmStartSession(&StartData);
 
         return 0;
 }

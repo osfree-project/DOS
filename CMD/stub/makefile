@@ -7,9 +7,11 @@
 PROJ = os2stub
 TRGT = $(PROJ).exe
 DESC = DOS Stub for OS/2 executables
-#defines object file names in format objname.$(O)
+#defines object file names in format $(p)objname$(e)
 srcfiles = $(p)stub$(e)
 # defines additional options for C compiler
+ADD_COPT=-i=$(MYDIR)..$(SEP)..$(SEP)include
+ADD_LINKOPT = lib dos_shared.lib libpath $(ROOT)build$(SEP)lib
 
 DEST = os2$(SEP)mdos
 
