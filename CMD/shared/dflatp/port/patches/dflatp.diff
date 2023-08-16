@@ -33,14 +33,6 @@ diff -urN dflatp\source\dflatp\logger.c newdflatp\source\dflatp\logger.c
  #include <stdlib.h>
  #include <stdio.h>
  #include <string.h>
-diff -urN dflatp\source\dflatp\menu.h newdflatp\source\dflatp\menu.h
---- dflatp\source\dflatp\menu.h	Wed Dec 26 23:20:18 2007
-+++ newdflatp\source\dflatp\menu.h	Wed Aug 16 21:13:56 2023
-@@ -50,4 +50,3 @@
- int MenuWidth(struct PopDown *);
- 
- #endif
--
 diff -urN dflatp\source\dflatp\portab.h newdflatp\source\dflatp\portab.h
 --- dflatp\source\dflatp\portab.h	Sat Mar 22 03:51:04 2008
 +++ newdflatp\source\dflatp\portab.h	Wed Aug 16 21:13:56 2023
