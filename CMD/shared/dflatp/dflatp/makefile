@@ -45,7 +45,7 @@ $(p)syshelp$(e) &
 $(p)box$(e) &
 $(p)portab$(e)
 
-ADD_COPT = -ml -bc -zt  -2 -ox -zc -sg
+ADD_COPT = -ml -bc -zt -0 -ox -zc -sg
 
 	 # -zc -sg -bt=dos
 ADD_LINKOPT = 

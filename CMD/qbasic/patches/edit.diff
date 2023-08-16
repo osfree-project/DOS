@@ -1,6 +1,6 @@
 diff -urN edit\source\edit\config.c newedit\source\edit\config.c
---- edit\source\edit\config.c	Tue Aug 15 23:24:02 2023
-+++ newedit\source\edit\config.c	Mon Aug 14 22:55:14 2023
+--- edit\source\edit\config.c	Wed Aug 16 22:29:32 2023
++++ newedit\source\edit\config.c	Wed Aug 16 00:09:13 2023
 @@ -7,7 +7,7 @@
  
  /* ------ default configuration values ------- */
@@ -21,8 +21,8 @@ diff -urN edit\source\edit\config.c newedit\source\edit\config.c
  
  extern BOOL ConfigLoaded;
 diff -urN edit\source\edit\config.h newedit\source\edit\config.h
---- edit\source\edit\config.h	Tue Aug 15 23:24:02 2023
-+++ newedit\source\edit\config.h	Mon Aug 14 23:17:29 2023
+--- edit\source\edit\config.h	Wed Aug 16 22:29:32 2023
++++ newedit\source\edit\config.h	Wed Aug 16 00:09:13 2023
 @@ -35,6 +35,7 @@
  	int TopMargin;
  	int BottomMargin;
@@ -32,8 +32,8 @@ diff -urN edit\source\edit\config.h newedit\source\edit\config.h
  //    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
  } CONFIG;
 diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
---- edit\source\edit\edit.c	Tue Aug 15 23:24:02 2023
-+++ newedit\source\edit\edit.c	Tue Aug 15 23:17:32 2023
+--- edit\source\edit\edit.c	Wed Aug 16 22:29:32 2023
++++ newedit\source\edit\edit.c	Wed Aug 16 21:54:04 2023
 @@ -30,6 +30,8 @@
  #include "config.h"
  #include "edit.h"
@@ -60,7 +60,7 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +
 +MBAR MainMenu;
 +
-+int bwb_ladd (char *buffer, LineType * p, int IsUser);
++int bwb_ladd (char *buffer, LineType * p, int IsUser, int LineNum);
 +int bwb_init (void);
 +
 +extern MODULE EditModule;
@@ -185,12 +185,12 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
  		case ID_ABOUTDFP:
  		    DFlatpAboutBox ();
  		    return TRUE;
-@@ -718,6 +774,135 @@
+@@ -718,6 +774,160 @@
  		ErrorMessage("No printer selected");
  }
  
 +// str (in/out): the unconsumed portion of the input string
-+static char *sgets(char *buf, int n, const char **str)
++static char *sgets(char *buf, int n, char **str)
 +{
 +    const char *s = *str;
 +    const char *lf = strchr(s, '\n');
@@ -219,9 +219,11 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +   */
 +  char *tbuf;
 +  int tlen;
++  int linenum; // Line number in original file
 +
 +  tbuf = My->MaxLenBuffer;
 +  tlen = MAXLEN;
++  linenum = 0;
 +
 +//printf("%s\n\r", buf);
 +
@@ -234,6 +236,7 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +  My->NextValidLineNumber = MINLIN;
 +  while (sgets (tbuf, tlen, &buf))        /* bwb_fload */
 +  {
++    linenum++;
 +    tbuf[tlen] = NulChar;
 +//printf("%s\n\r", tbuf);
 +    CleanLine (tbuf);
@@ -245,7 +248,7 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +    else
 +    {
 +      /* normal */
-+      bwb_ladd (tbuf, My->StartMarker, FALSE);
++      bwb_ladd(tbuf, My->StartMarker, FALSE, linenum);
 +    }
 +  }
 +
@@ -261,32 +264,51 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +extern WINDOW ApplicationWindow;
 +extern int ScreenHeight;
 +
-+static void SwitchCursor(void)
++void SwitchCursor(void)
 +{
 +    SendMessage(NULL, SAVE_CURSOR, 0, 0);
 +    SwapCursorStack();
 +    SendMessage(NULL, RESTORE_CURSOR, 0, 0);
 +}
 +
++void break_mes (int x);
++
 +/* --- start program in current notepad --- */
 +static void StartProgram(WINDOW wnd)
 +{
-+	size_t howmuch = strlen(GetText(wnd));
-+//	howmuch = fwrite(GetText(wnd), howmuch, 1, fp); /* ONE item, SIZE howmuch */
++
 +  My->NextValidLineNumber = MINLIN;
 +  My->IsCommandLineFile = TRUE;
 +  if (bwb_fload (GetText(wnd)) == FALSE)
 +  {
-+    fprintf (My->SYSOUT->cfp, "Failed to open file \n");
-+    /* the file load has failed, so do NOT run the program */
-+    exit (1);
++	MessageBox("Error","Failed to parse program source");
++    return;
 +  }
 +  if (My->ERR < 0 /* in execute_program(), file load failed */ )
 +  {
 +    /* the file load has failed, so do NOT run the program */
-+    exit (1);
++    return;
 +  }
++
++
 +  bwb_RUN (My->StartMarker);
++
++    /* 
++     **
++     ** set a buffer for jump: program execution returns to this point in
++     ** case of a jump (error, interrupt, or finish program) 
++     **
++     */
++    My->program_run = 0;
++    signal (SIGINT, break_mes);
++    setjmp (My->mark);
++    if (My->program_run > 0)
++    {
++      /* error in console mode */
++      return;
++    }
++    My->program_run++;
++
 +
 +	oldFocus = inFocus;
 +    SendMessage(ApplicationWindow, HIDE_WINDOW, 0, 0);
@@ -297,11 +319,14 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +
 +    fflush(stdout);
 +
++
++  /* main program loop */
++  My->NextValidLineNumber = MINLIN;
++
 +  while (My->StackHead)
 +  {
 +    /* BASIC program running */
 +    bwb_execline ();                /* execute one line of program */
-+  //  return;
 +  }
 +
 +    if (SCREENHEIGHT != SysConfig.VideoCurrentResolution.VRes)
@@ -321,7 +346,7 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
  /* ---------- save a file to disk ------------ */
  static void SaveFile(WINDOW wnd, int Saveas)
  {
-@@ -1095,6 +1280,27 @@
+@@ -1095,6 +1305,27 @@
  	        ActivateCommand(&MainMenu, ID_REPLACE);
  	    }
  	    ActivateCommand(&MainMenu, ID_SEARCHNEXT);
@@ -350,8 +375,8 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
      }
  }
 diff -urN edit\source\edit\edit.h newedit\source\edit\edit.h
---- edit\source\edit\edit.h	Tue Aug 15 23:24:02 2023
-+++ newedit\source\edit\edit.h	Tue Aug 15 23:10:40 2023
+--- edit\source\edit\edit.h	Wed Aug 16 22:29:32 2023
++++ newedit\source\edit\edit.h	Wed Aug 16 00:09:13 2023
 @@ -28,6 +28,7 @@
  void PrepEditMenu(void *, struct Menu *);
  void PrepSearchMenu(void *, struct Menu *);
@@ -378,13 +403,12 @@ diff -urN edit\source\edit\edit.h newedit\source\edit\edit.h
      /* -------------- TabStops menu ------------- */
      ID_TAB0, /* tab-as-char mode -ea */
 diff -urN edit\source\edit\menus.c newedit\source\edit\menus.c
---- edit\source\edit\menus.c	Tue Aug 15 23:24:02 2023
-+++ newedit\source\edit\menus.c	Tue Aug 15 23:07:17 2023
-@@ -6,17 +6,114 @@
+--- edit\source\edit\menus.c	Wed Aug 16 22:29:32 2023
++++ newedit\source\edit\menus.c	Wed Aug 16 00:09:13 2023
+@@ -6,6 +6,14 @@
  
  
  DEFPROGRAM
--  MOD_DESCRIPTION("FreeDOS EDIT 0.9a")
 +  MOD_DESCRIPTION("osFree QBASIC 0.9b")
 +  MOD_VERSION(0,9,1,1)
 +  MOD_COPYRIGHT("    Yuri Prokushev")
@@ -393,10 +417,10 @@ diff -urN edit\source\edit\menus.c newedit\source\edit\menus.c
 +END_DEFMODULE
 +
 +MODULE EditModule = {
-+  MOD_DESCRIPTION("FreeDOS EDIT 0.9a")
+   MOD_DESCRIPTION("FreeDOS EDIT 0.9a")
    MOD_VERSION(0,9,1,0)
    MOD_COPYRIGHT("    Joe Cosentino, Eric Auer")
-   MOD_LICENSE("GNU GPL 2.0")
+@@ -13,10 +21,99 @@
    MOD_ABOUT("FreeDOS Edit is a clone of MS-DOS|editor for the FreeDOS Project")
  END_DEFMODULE
  
@@ -499,8 +523,8 @@ diff -urN edit\source\edit\menus.c newedit\source\edit\menus.c
          SELECTION( "~New",        ID_NEW,     CTRL_N, 0) /* 0.7a */
 diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 --- edit\source\edit\qbasic.c	Thu Jan 01 07:00:00 1970
-+++ newedit\source\edit\qbasic.c	Tue Aug 15 16:59:13 2023
-@@ -0,0 +1,3545 @@
++++ newedit\source\edit\qbasic.c	Wed Aug 16 21:54:42 2023
+@@ -0,0 +1,3566 @@
 +/***************************************************************
 +  
 +        bwbasic.c       Main Program File
@@ -542,18 +566,18 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +/*---------------------------------------------------------------*/
 +
 +
++#include "dflatp.h"
 +
 +#include "bwbasic.h"
 +
 +static void break_handler (void);
-+static void break_mes (int x);
++void break_mes (int x);
 +int bwb_init (void);
 +static void bwb_initialize_warnings (void);
-+static void bwb_interact (void);
-+int bwb_ladd (char *buffer, LineType * p, int IsUser);
++//static void bwb_interact (void);
++int bwb_ladd (char *buffer, LineType * p, int IsUser, int LineNum);
 +static void bwb_single_step (char *buffer);
 +static void bwb_xtxtline (char *buffer);
-+static int bwx_signon (void);
 +static void execute_profile (char *FileName);
 +static void execute_program (char *FileName);
 +static char *FindClassicStatementEnd (char *C);
@@ -667,6 +691,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  My->AutomaticLineNumber = 0;
 +  My->AutomaticLineIncrement = 0;
 +
++printf("-- %d --", My->IsInteractive);
 +  if (My->IsInteractive)
 +  {
 +    /* INTERACTIVE: terminate program */
@@ -701,7 +726,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  
 +***************************************************************/
 +
-+static void
++void
 +break_mes (int x /* Parameter 'x' is never used */ )
 +{
 +  /*
@@ -716,6 +741,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  assert( My->SYSOUT->cfp != NULL );
 +  assert( My->CurrentVersion != NULL );
 +
++printf("tst");
 +   
 +  if (My->ERR < 0)                /* in break_mes(), do not make a bad situation worse */
 +  {
@@ -1111,9 +1137,10 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  {
 +    /* If there is a line number, then add it to the BASIC program */
 +    /* 100 REM */
-+    bwb_ladd (buffer, My->StartMarker, FALSE);
++    bwb_ladd (buffer, My->StartMarker, FALSE, 0);
 +  }
 +}
++
 +static void
 +bwb_single_step (char *buffer)
 +{
@@ -1367,7 +1394,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +         and processes it.
 +  
 +***************************************************************/
-+
++#if 0
 +static void
 +bwb_interact (void)
 +{
@@ -1455,7 +1482,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +    process_basic_line (tbuf);
 +  }
 +}
-+
++#endif
 +
 +
 +/***************************************************************
@@ -2049,7 +2076,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  
 +***************************************************************/
 +int
-+bwb_ladd (char *buffer, LineType * p, int IsUser)
++bwb_ladd (char *buffer, LineType * p, int IsUser, int LineNum)
 +{
 +  LineType *l;
 +  LineType *previous;
@@ -2181,6 +2208,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +        return FALSE;
 +      }
 +
++      l->LineNum=LineNum; // line number in original file
 +      /* this line has not been executed or numbered */
 +      l->LineFlags = 0;
 +      if (IsUser)
@@ -2279,12 +2307,15 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +      }
 +      else
 +      {
++        char buf[255];
 +        /* ERROR */
-+        fprintf (My->SYSOUT->cfp,
++        sprintf (buf,
 +                 "ILLEGAL COMMAND AFTER LINE NUMBER: %d %s\n", l->number,
 +                 l->buffer);
++        MessageBox ("Error", buf);
 +        ResetConsoleColumn ();
 +        My->ERR = -1;                /* bwb_ladd, ILLEGAL COMMAND AFTER LINE NUMBER */
++        return FALSE;
 +      }
 +      /*
 +       **
@@ -2371,7 +2402,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  }
 +
 +  /* add to the user line list */
-+  bwb_ladd (buffer, My->UserMarker, TRUE);
++  bwb_ladd (buffer, My->UserMarker, TRUE, 0);
 +
 +  /* execute the line as BASIC command line */
 +  if (bwb_incexec ())
@@ -2479,7 +2510,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +    return;
 +  }
 +  /* BASIC program completed */
-+
++#if 0
 +  if (My->ExternalInputFile != NULL)
 +  {
 +    /* for automated testing, --TAPE command line parameter */
@@ -2491,6 +2522,7 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +    }
 +  }
 +  /* TAPE command inactive or completed */
++#endif
 +
 +#if 0
 +  if (My->IsCommandLineFile)
@@ -2622,6 +2654,10 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +  }
 +  return TRUE;                        /* abort processing */
 +}
++
++extern WINDOW ApplicationWindow;
++extern int ScreenHeight;
++void SwitchCursor(void);
 +
 +void
 +bwb_execline (void)
@@ -2911,9 +2947,18 @@ diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
 +    }
 +    else
 +    {
++      char buf[255];
++
++    if (SCREENHEIGHT != SysConfig.VideoCurrentResolution.VRes)
++        SetScreenHeight(SysConfig.VideoCurrentResolution.VRes);
++    SwitchCursor();
++	SendMessage(ApplicationWindow, SHOW_WINDOW, 0, 0);
++    SendMessage(oldFocus, SETFOCUS, TRUE, 0);
++    SendMessage(NULL, SHOW_MOUSE, 0, 0);
++
 +      /* BASIC program line */
-+      fprintf (My->SYSOUT->cfp, "\nERROR in line %d: %s\n", l->number,
-+               My->ERROR4);
++      sprintf (buf, "ERROR in line %d: %s", l->number, My->ERROR4);
++      MessageBox("Error", buf);
 +      ResetConsoleColumn ();
 +      /*
 +       **

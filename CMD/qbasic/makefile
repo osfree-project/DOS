@@ -30,10 +30,11 @@ $(p)qbasic$(e)
 # defines additional options for C compiler
 #ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__ -3
 
-ADD_COPT = -fpi87 -bc -ml -zc -zt -3 -ox -wx -q -zm -DHAVE_MSDOS -D__WATCOM__ -i=$(MYDIR)..$(SEP)include -i=$(PORT_BASE)..$(SEP)basic
+ADD_COPT = -fpi87 -sg -bc -ml -zc -zt -0 -st -ox -wx -q -zm -DHAVE_MSDOS -D__WATCOM__ -i=$(MYDIR)..$(SEP)include -i=$(PORT_BASE)..$(SEP)basic
 ADD_LINKOPT = lib $(BLD)lib$(SEP)dflatp.lib, $(BLD)lib$(SEP)dtools.lib
 #C      = l
-STACKSIZE = 4096
+HEAPSIZE = 18k
+STACKSIZE = 18k
 
 !include $(%ROOT)tools/mk/appsdos.mk
 !include $(MYDIR)edit.mk

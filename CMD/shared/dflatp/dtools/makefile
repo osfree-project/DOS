@@ -11,7 +11,7 @@ srcfiles = &
 	$(p)decomp$(e)
 
 
-ADD_COPT = -ml -bc -zt -2 -ox -sg -zc
+ADD_COPT = -ml -bc -zt -0 -ox -sg -zc
 # -zc -sg -bt=dos
 ADD_LINKOPT = 
 
