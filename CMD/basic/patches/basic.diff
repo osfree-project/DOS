@@ -1,0 +1,11 @@
+diff -urN basic\bwbasic.h newbasic\bwbasic.h
+--- basic\bwbasic.h	Sat Aug 19 12:32:08 2023
++++ newbasic\bwbasic.h	Thu Aug 17 10:18:31 2023
+@@ -1346,6 +1346,7 @@
+   struct LineStructure *OtherLine; /* pointer to other line in loops */
+   char *buffer;                    /* buffer to hold the line */
+   int number;                      /* line number */
++  int LineNum;                     /* line number in original source */
+   int position;                    /* current position in line */
+   int cmdnum;                      /* C_... */
+   int Startpos;                    /* start of rest of line read from buffer */
