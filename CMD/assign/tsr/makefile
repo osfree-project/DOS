@@ -1,16 +1,21 @@
 #
-# A Makefile for APPEND
+# A Makefile for ATTRIB
 # (c) osFree project,
 # author, date
 #
 
-PROJ      = assign
-TRGT      = $(PROJ).com
-DESC      = Binary comparison of files
-srcfiles  = $(p)asgn_tsr$(e)
-COM       = 1
-NOLIBS    = 1
+PROJ = asgn_tsr
+TRGT = $(PROJ).com
+DESC = Assign TSR part
+srcfiles = $(p)asgn_tsr$(e)
+COM = 1
+NOLIBS = 1
+ADD_COPT = -i=$(PORT_BASE)include
 
 !include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)..$(SEP)port$(SEP)assign.mk
 
-.asm: $(BASE)..
+
+.asm: $(PORT_BASE)SOURCE$(SEP)ASSIGN
+
+#$(PATH)asgn_tsr.exe: .symbolic
