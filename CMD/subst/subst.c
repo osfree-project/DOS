@@ -1,6 +1,9 @@
+#include <stdio.h>
+#include <string.h>
+
 #define INCL_VDM
 #include <os2vdm.h> /* system header */
-#include <stdio.h>
+
 
 //int main(void)
 //{
@@ -20,6 +23,9 @@ APIRET syntax(void)
 int main (int argc, char* argv[], char* envp[])
 {
   int argi;
+  int iteration;
+  char drive[3];
+  char path[256];
 
     if (argc == 1)
     {
@@ -43,7 +49,18 @@ int main (int argc, char* argv[], char* envp[])
                     fprintf(stderr, "Unknown options '%s'.\n", argv[argi]);
                     return 0;//NO_ERROR;
             }
-        }
+        } else {
+			iteration++;
+			if (iteration==1)
+			{
+				strcpy(drive, argv[argi]);
+			} else if (iteration==2)
+			{
+				strcpy(path, argv[argi]);
+				VdmSubstSet(drive[0], path);
+				return 0;
+			}
+		}
     }
   return 0;
 }
