@@ -10,3 +10,5 @@ Micro-C)
 To compile with Borland C and DMake:
 just set up the programming environment as described within the
 supplemental library, then run DMAKE.
+
+https://www.ibiblio.org/pub/micro/pc-stuff/freedos/files/devel/libs/msglib/msglib.zip
