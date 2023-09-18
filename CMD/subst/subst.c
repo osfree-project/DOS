@@ -4,13 +4,6 @@
 #define INCL_VDM
 #include <os2vdm.h> /* system header */
 
-
-//int main(void)
-//{
-//  CHAR path[1024]="C:\\OS2";
-//  VdmSubstSet('H', path);
-//}
-
 APIRET syntax(void)
 {
 //   cmd_ShowSystemMessage(cmd_MSG_DISKCOPY_HELP,0L);
@@ -24,8 +17,8 @@ int main (int argc, char* argv[], char* envp[])
 {
   int argi;
   int iteration;
-  char drive[3];
-  char path[256];
+  char drive[3] = {0};
+  char path[256] = {0};
 
     if (argc == 1)
     {
@@ -61,6 +54,6 @@ int main (int argc, char* argv[], char* envp[])
 				return 0;
 			}
 		}
-    }
-  return 0;
+	}
+	return syntax();
 }
