@@ -1,0 +1,5 @@
+#define MSG_FEAT_ANSI
+#define MSG_FEAT_MINC
+#define MSG_FEAT_MINCA
+#define MSG_FEAT_REORDER
+#define MSG_FEAT_NUL
