@@ -1,6 +1,6 @@
 diff -urN assign\SOURCE\ASSIGN\ASSIGN.C newassign\SOURCE\ASSIGN\ASSIGN.C
---- assign\SOURCE\ASSIGN\ASSIGN.C	Wed Sep 20 15:27:18 2023
-+++ newassign\SOURCE\ASSIGN\ASSIGN.C	Wed Sep 20 15:26:30 2023
+--- assign\SOURCE\ASSIGN\ASSIGN.C	Wed Sep 20 16:26:03 2023
++++ newassign\SOURCE\ASSIGN\ASSIGN.C	Wed Sep 20 16:23:50 2023
 @@ -58,33 +58,113 @@
  #define getdisk get_drive
  #define assert(a)
@@ -55,21 +55,21 @@ diff -urN assign\SOURCE\ASSIGN\ASSIGN.C newassign\SOURCE\ASSIGN\ASSIGN.C
 +#define M_assignment "%c: => %c:"
 +#define E_noMem "Memory full"
 +
-+#define E_hlpScreen "%-%normal%ASSIGN: Replace a drive letter by another.\n\r \
++#define E_hlpScreen "ASSIGN: Replace a drive letter by another.\n\r \
 +\n\r \
-+usage: %s [/%-%bright%SHADOW%-%normal%] /%-%bright%STATUS%-%normal%\n\r \
-+or: 	[/%-%bright%SHADOW%-%normal%] [/{%-%bright%mu%-%normal%}] [{%-%bright%dr1%-%normal%[:]=%-%bright%dr2%-%normal%[:]}]\n\r \
++usage: %s [/SHADOW] /STATUS\n\r \
++or: 	[/SHADOW] [/{mu}] [{dr1[:]=dr2[:]}]\n\r \
 +\n\r \
 +Options:\n\r \
-+	%-%bright%SHADOW%-%normal%: Hide ASSIGN from installation check.\n\r \
-+	%-%bright%STATUS%-%normal%: Display all assigned drive letters.\n\r \
++	SHADOW: Hide ASSIGN from installation check.\n\r \
++	STATUS: Display all assigned drive letters.\n\r \
 +		If ASSIGN is not already loaded, a message reflects that,\n\r \
 +		but ASSIGN is not loaded.\n\r \
-+	%-%bright%M%-%normal%: Move the resident portion into UMB, if possible.\n\r \
-+	%-%bright%U%-%normal%: Uninstall a previous installed ASSIGN.\n\r \
++	M: Move the resident portion into UMB, if possible.\n\r \
++	U: Uninstall a previous installed ASSIGN.\n\r \
 +\n\r \
-+%-%bright%dr1%-%normal%: Drive letter to be replaced.\n\r \
-+%-%bright%dr2%-%normal%: Drive letter to point to.\n\r \
++dr1: Drive letter to be replaced.\n\r \
++dr2: Drive letter to point to.\n\r \
 +\n\r \
 +The ':' characters are optional, between the drive letters and the \n\r \
 +equal sign '=' no whitespaces are allowed."
