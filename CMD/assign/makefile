@@ -1,31 +1,20 @@
-#
-# A main Makefile for osFree Command Line tools project
-# (c) osFree project,
-# valerius, 2006/10/30
-#
-
-32_BITS = 0
-PROJ      = assign
-DESC      = DOS ASSIGN
-
 DIRS = port tsr
-DEST = os2$(SEP)mdos
-#XMS_SWAP=1
+PROJ = assign
+TRGT = $(PROJ).exe
+DESC = ASSIGN
+#defines object file names in format objname.$(O)
+srcfiles = $(p)assign$(e)
+# defines additional options for C compiler
+ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__
 
-!include $(%ROOT)tools/mk/all.mk
+# additions to install target
+INSTALL_ADD = 1
 
-TARGETS=$(PATH)$(PROJ).com
+!include $(%ROOT)tools/mk/appsdos.mk
+!include $(MYDIR)port$(SEP)assign.mk
 
-$(PATH)$(PROJ).lnk: .symbolic
 
-$(PATH)$(PROJ).com: $(PATH)shell$(SEP)$(PROJ).exe $(PATH)infores
-!ifneq UNIX TRUE
-  @copy /b $(PATH)shell$(SEP)command.exe + $(PATH)infores + $(PATH)criter$(SEP)criter1$(SEP)criter1.com + $(PATH)criter$(SEP)criter.com + $(BLD)$(RELDIR)strings$(SEP)strings.dat $(PATH)command.com
-  @copy $(PATH)command.com $(DEST)
-!else
-  @cat $(PATH)shell$(SEP)command.exe $(PATH)infores $(PATH)criter$(SEP)criter1$(SEP)criter1.com $(PATH)criter$(SEP)criter.com $(BLD)$(RELDIR)strings$(SEP)strings.dat >$(PATH)command.com
-  @cp $(PATH)command.com $(DEST)
-!endif
+.c: $(PORT_BASE)SOURCE$(SEP)ASSIGN
 
-$(PATH)infores: $(PATH)shell$(SEP)command.wmp $(PATH)shell$(SEP)command.exe
- @$(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)utils$(SEP)mkinfres.exe -T$(PATH)info.txt $^@ $(PATH)shell$(SEP)command.wmp $(PATH)shell$(SEP)command.exe
+.h: $(PORT_BASE)SOURCE$(SEP)ASSIGN
+
