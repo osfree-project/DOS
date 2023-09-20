@@ -547,9 +547,164 @@ Notes:  this function was introduced by LAN Manager but is also supported by
 SeeAlso: AX=5F39h,AX=5F3Bh,INT 2F/AX=118Fh
 */
 
+/* From Undocumented DOS: 2nd ed.
+
+FSFILTER is just a DOS device driver that hooks INT 21h. How then does it communicate with the OS/2 kernel?
+Disassembly of FSETLTER reveals some calls to INT 66h, with AX«I and ST point: ing to strings such
+as VCOM, VDISK, and VLP'T. However, this doesn't seem sufficient for a DOS _
+device driver mining at Ring 3 in V8 moe to communicate with OS2KRNL. running 
+at Ring 0 in protected mode, FSFILTER uses HLT instruction to communicate with OS2KRNL,
+We asked one of the IBM MVDM engineers how this works:
+
+HLT is our magic pill
+
+ing 8, 4 tap occurs, A part of OS2KRNL called EM86 (Emulation 8086) receives the fault
+and takes action. EM86 looks at the registers and the _two_bytes_following_the_HLT_ and
+determines that this special request and not areal HLT instruction, The cove ses
+
+The HLT instruction is a Ring 0 instruction; since V86 mode is
+a SVC xxx macro, where xxx ts the ordinal number of the function
+to call in OS2KRNL; the dispatcher in MVDM (part of OS2KRNL) knows 
+all the valid xxx calls
+
+‘Many opcodes that 8086 provides are now Ring. 0 only, and EMB86 emulates 
+the 8086 actions of these privileged instructions, If a special request HLT
+is found, MVDM (also part of OS2KRNL) is given the request for dispatching
+and action. ‘There is a second magic pill EM86 uses, the ARPL instruction.
+VDD stubs use the ARPL; DOSKRNL and FSFILTER
+
+More similarities to Windows! Windows Enhanced mode uses ARPL, for the
+same reasons, in the Install_V86_Break Point function. Later on we'll
+see that DOS device drivers running under Windows NT can use a very
+similar mechanism, invahd opcodes, for communicating with NT VDDs,
+
+Even though OS/2 can use FSFILTER to run ap actual DOS in V86 mode,
+emulating DOS is preferable, For one thing, running an actual copy
+of DOS makes it more difficult to control polling in the DOS kernel,
+which wastes cycles. In addition, FSFILTER must catch DOS calls at a
+lower level than the normal DOS emulation code
+*/
+
+/* 
+  According above info, to find all 0xF4 xx yy sequences in
+  DOSKRNL and FSFILTER.SYS small script was born. After
+  small deduction: yy=not xx.
+  
+  So, SVC macro is something like this
+  SVC	MACRO xx
+		HLT
+		DB	xx, not xx
+		ENDM
+	
+	Seems it so.
+	
+	Minimal opcode xx is 0. Maximal (in DOSKRNL) - 0x55 or (in FSFILTER.SYS) - 0x4F.
+	
+	For now only known opcode is a 02h (thanks to RBIL).
+	
+	OPCODE		Description
+	00
+	01
+	02			Terminate VDM and return code to parent process from AX
+	03
+	04
+	05
+	06
+	07
+	08
+	09
+	0a
+	0b
+	0c
+	0d
+	0e
+	0f
+	10
+	11
+	12
+	13
+	14
+	15
+	16
+	17
+	18
+	19
+	1a
+	1b
+	1c
+	1d
+	1e
+	1f
+	20
+	21
+	22
+	23
+	24
+	25
+	26
+	27
+	28
+	29
+	2a
+	2b
+	2c
+	2d
+	2e
+	2f
+	30
+	31
+	32
+	33
+	34
+	35
+	36
+	37
+	38
+	39
+	3a
+	3b
+	3c
+	3d
+	3e
+	3f
+	40
+	41
+	42
+	43
+	44
+	45
+	46
+	47
+	48
+	49
+	4a
+	4b
+	4c
+	4d
+	4e
+	4f
+	50
+	51
+	52
+	53
+	54
+	55
+*/
+
+/* RBIL says this sequence, but also found: xor ax,ax; hlt; db 02h,0fdh.
+  It seems AX is a exit code for VDM. */
+
+/*
 VOID VdmExit(VOID);
 #pragma aux VdmExit = \
         "mov ah, 4dh"   \
         "int 21h"       \
         "hlt"    \
 	"db 02h, 0fdh";
+*/
+
+VOID VdmExit(USHORT rc);
+#pragma aux VdmExit = \
+	"hlt"    \
+	"db 02h, not 02h" parm [ax];
+

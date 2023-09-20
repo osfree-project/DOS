@@ -5,6 +5,7 @@
 #
 
 DIRS =   shared    &
+         assign    &
          append    &
          attrib    &
          basic     &

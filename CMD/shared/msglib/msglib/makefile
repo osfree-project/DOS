@@ -62,7 +62,7 @@ ADD_LINKOPT =
 
 #UNI2H = 1
 
-!include $(%ROOT)tools/mk/libs.mk
+!include $(%ROOT)tools/mk/libsdos.mk
 !include $(MYDIR)..$(SEP)port$(SEP)msglib.mk
 
 .c: $(PORT_BASE)fdos$(SEP)source$(SEP)lib$(SEP)msglib

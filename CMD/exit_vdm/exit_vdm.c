@@ -2,5 +2,5 @@
 
 void main(void)
 {
-  VdmExit();
+  VdmExit(0);
 }
