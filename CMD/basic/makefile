@@ -39,7 +39,7 @@ install_add: $(DEST)$(SEP)$(PROJ).com &
              $(DEST)$(SEP)$(PROJ)a.com &
              $(DEST)$(SEP)gw$(PROJ).exe .SYMBOLIC
 
-$(PATH)$(PROJ1).com:
+#$(PATH)$(PROJ1).com:
 
 $(DEST)$(SEP)$(PROJ).com: $(PATH)$(PROJ).exe
  @$(SAY) INST     $^. $(LOG)
