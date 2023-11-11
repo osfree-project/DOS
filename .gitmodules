@@ -18,3 +18,6 @@
 	path = CMD/diskcopy/contrib
 	url = https://github.com/FDOS/diskcopy
 	branch = master
+[submodule "doskrnl"]
+	path = doskrnl
+	url = https://github.com/osfree-project/doskrnl
