@@ -21,3 +21,6 @@
 [submodule "doskrnl"]
 	path = doskrnl
 	url = https://github.com/osfree-project/doskrnl
+[submodule "expserver"]
+	path = expserver
+	url = https://github.com/osfree-project/Bochs
