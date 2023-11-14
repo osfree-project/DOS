@@ -28,7 +28,11 @@
 #ifndef HI_TECH_C
 #include <fcntl.h>
 #include <io.h>
+#ifdef __WATCOM__
+#include <direct.h>
+#else
 #include <dir.h>
+#endif
 #endif
 
 #include <stdlib.h>
@@ -122,6 +126,7 @@ static int KeyTokens[] =
 #define AMOFKWTOKENS (int) (sizeof(KeyTokens) / sizeof(*KeyTokens))
 
 #ifndef HI_TECH_C
+#ifndef __WATCOM__
 
 #if AMOFKEYWORDS > AMOFKWTOKENS
 #error Too many keywords
@@ -131,6 +136,7 @@ static int KeyTokens[] =
 #error Too many keyword tokens
 #endif
 
+#endif
 #endif
 
 #define LONGESTKEYWORD 12

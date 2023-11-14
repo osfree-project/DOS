@@ -5,8 +5,9 @@
 #
 
 DIRS =   shared    &
-         assign    &
+         stub      &
          append    &
+         assign    &
          attrib    &
          basic     &
          command   &
@@ -24,7 +25,6 @@ DIRS =   shared    &
          neloader  &
          qbasic    &
          sort      &
-         stub      &
          subst     &
          xcopy
 

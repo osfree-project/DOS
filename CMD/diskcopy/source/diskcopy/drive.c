@@ -30,7 +30,11 @@
 #include <dos.h>
 
 #ifndef HI_TECH_C
+#ifdef __WATCOM__
+#include <dirent.h>
+#else
 #include <dir.h>
+#endif
 #else
 #include <sys.h>
 #endif

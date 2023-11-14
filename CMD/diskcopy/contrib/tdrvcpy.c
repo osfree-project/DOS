@@ -31,6 +31,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef __WATCOM__
+#include "tcc2wat.h"
+#endif
+
 #include "diskcopy.h"
 #include "tdrvcpy.h"
 #include "memtypes.h"

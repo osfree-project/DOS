@@ -36,6 +36,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef __WATCOM__
+#include "tcc2wat.h"
+#endif
+
 #include "drive.h"
 #include "diskcopy.h"
 #include "memtypes.h"
@@ -51,6 +55,7 @@
 #include "lfnapi.h"
 #include "simplcpy.h"
 #include "serialnm.h"
+
 
 int SavedCBreak;
 
