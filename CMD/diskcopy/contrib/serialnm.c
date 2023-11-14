@@ -28,6 +28,10 @@
 #include <string.h>
 #include <time.h>
 
+#ifdef __WATCOM__
+#include <tcc2wat.h>
+#endif
+
 #include "nlsaspct.h"
 #include "boot.h"
 

@@ -57,8 +57,10 @@ struct FAT32Specific
                                      BYTESPERSECTOR == 512                   */
 };
 
+#ifndef __WATCOM__
 #if sizeof(struct FAT32Specific) != 476
 #error Wrong struct FAT32Specific
+#endif
 #endif
 
 struct FAT1216Specific
@@ -77,8 +79,10 @@ struct FAT1216Specific
                                     BYTESPERSECTOR == 512                   */
 };
 
+#ifndef __WATCOM__
 #if sizeof(struct FAT1216Specific) != 476
 #error Wrong struct FAT1216Specific
+#endif
 #endif
 
 union FATSpecific
@@ -111,8 +115,10 @@ struct BootSectorStruct
                                         FAT 12/16 and FAT32               */
 };
 
+#ifndef __WATCOM__
 #if sizeof(struct BootSectorStruct) != 512
 #error WRONG BOOT SECTOR STRUCT LENGTH
+#endif
 #endif
 
 /* A few simple defines */

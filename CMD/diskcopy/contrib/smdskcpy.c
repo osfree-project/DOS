@@ -34,10 +34,15 @@
 #include <stdio.h>
 
 #ifndef HI_TECH_C
+#ifdef __WATCOM__
+#include <direct.h>
+#include <malloc.h>
+#else
 #include <dir.h>
+#include <alloc.h>
+#endif
 #include <io.h>
 #include <fcntl.h>
-#include <alloc.h>
 #include <sys\stat.h>
 #endif
 

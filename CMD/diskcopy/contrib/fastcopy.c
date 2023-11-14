@@ -25,7 +25,12 @@
 
 #include <dos.h>
 #include <mem.h>
+#ifdef __WATCOM__
+#include <malloc.h>
+#include <tcc2wat.h>
+#else
 #include <alloc.h>
+#endif
 #include <stdlib.h>
 #include <io.h>
 #include <fcntl.h>

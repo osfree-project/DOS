@@ -26,7 +26,12 @@
 #include <string.h>
 #include <stdlib.h>
 #ifndef HI_TECH_C
+#ifndef __WATCOM__
 #include <dir.h>
+#else
+#include <direct.h>
+#include <tcc2wat.h>
+#endif
 #endif
 #include <stdio.h>
 
