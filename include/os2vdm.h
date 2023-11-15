@@ -708,3 +708,12 @@ VOID VdmExit(USHORT rc);
 	"hlt"    \
 	"db 02h, not 02h" parm [ax];
 
+typedef
+	struct tagDOSINIT
+	{
+		USHORT	start;		// 0 	2 	First free segment after DOSKRNL
+		USHORT	size;		// 2 	2 	Size of memory - first free segment
+		USHORT	init;		// 4 	2 	Size of init area
+		CHAR	unk[16];	// 6 	16 	Unknown
+		PVOID	VDDs;	// 22 	4 	Pointer to linked list of VDD 
+	} DOSINIT;
