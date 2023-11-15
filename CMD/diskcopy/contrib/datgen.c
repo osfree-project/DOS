@@ -31,6 +31,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef __WATCOM__
+#include "tcc2wat.h"
+#endif
+
 #include "drive.h"
 #include "parser.h"
 #include "scanner.h"

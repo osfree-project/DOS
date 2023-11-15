@@ -24,7 +24,11 @@
  */
 
 #include <stdio.h>
+#ifdef __WATCOM__
+#include <malloc.h>
+#else
 #include <alloc.h>
+#endif
 
 #ifndef HI_TECH_C
 #include <io.h>			/* for access */

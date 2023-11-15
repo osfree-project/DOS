@@ -17,6 +17,7 @@
 #ifndef __TCC2WAT
 #define __TCC2WAT 1
 #ifdef __WATCOMC__
+#include <malloc.h>
 #include <graph.h>
 #include <time.h>
 #include <sys/types.h>
@@ -102,8 +103,12 @@ struct text_info
 #define getdfree _dos_getdiskfree
 #define dfree diskfree_t
 #define df_avail avail_clusters
+#define df_total total_clusters
 #define df_sclus sectors_per_cluster
 #define df_bsec bytes_per_sector
+
+#define farfree _ffree
+#define farmalloc _fmalloc
 
 #define fnmerge(a,b,c,d,e) _makepath(a,b,c,d,e)
 #define SKIPSEP 0x1

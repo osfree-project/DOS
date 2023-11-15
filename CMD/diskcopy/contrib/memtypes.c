@@ -30,10 +30,15 @@
 #include <string.h>
 
 #ifndef HI_TECH_C
+#ifdef __WATCOM__
+#include <direct.h>
+#include <tcc2wat.h>
+#else
 #include <dir.h>
+#include <alloc.h>
+#endif
 #include <io.h>
 #include <fcntl.h>
-#include <alloc.h>
 #endif
 #include <ctype.h>
 #include <errno.h>

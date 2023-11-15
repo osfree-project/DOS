@@ -5,6 +5,11 @@
 osFree DOS subsystem is a (mostly) FreeDOS version adopted to
 run under osFree MVM (OS/2 VDM/MVDM).
 
+## DOSKRNL
+
+DOSKRNL is a modified FreeDOS kernel to be used in osFree MVM
+and uses SVC API to call host services.
+
 ## API
 
 osFree DOS subsystem consist of standard DOS API with some small
@@ -21,7 +26,6 @@ for more info
 ## Libraries
 
 - DFlat+
-- MsgLib
 - Supplimental
 
 ## Command processor

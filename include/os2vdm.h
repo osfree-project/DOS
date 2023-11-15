@@ -550,10 +550,11 @@ SeeAlso: AX=5F39h,AX=5F3Bh,INT 2F/AX=118Fh
 /* From Undocumented DOS: 2nd ed.
 
 FSFILTER is just a DOS device driver that hooks INT 21h. How then does it communicate with the OS/2 kernel?
-Disassembly of FSETLTER reveals some calls to INT 66h, with AX«I and ST point: ing to strings such
-as VCOM, VDISK, and VLP'T. However, this doesn't seem sufficient for a DOS _
-device driver mining at Ring 3 in V8 moe to communicate with OS2KRNL. running 
+Disassembly of FSFILTER reveals some calls to INT 66h, with AX«I and SI pointing to strings such
+as VCOM, VDISK, and VLPT. However, this doesn't seem sufficient for a DOS
+device driver mining at Ring 3 in V86 mode to communicate with OS2KRNL. running 
 at Ring 0 in protected mode, FSFILTER uses HLT instruction to communicate with OS2KRNL,
+
 We asked one of the IBM MVDM engineers how this works:
 
 HLT is our magic pill
@@ -578,11 +579,11 @@ same reasons, in the Install_V86_Break Point function. Later on we'll
 see that DOS device drivers running under Windows NT can use a very
 similar mechanism, invahd opcodes, for communicating with NT VDDs,
 
-Even though OS/2 can use FSFILTER to run ap actual DOS in V86 mode,
+Even though OS/2 can use FSFILTER to run actual DOS in V86 mode,
 emulating DOS is preferable, For one thing, running an actual copy
 of DOS makes it more difficult to control polling in the DOS kernel,
 which wastes cycles. In addition, FSFILTER must catch DOS calls at a
-lower level than the normal DOS emulation code
+lower level than the normal DOS emulation code.
 */
 
 /* 
@@ -591,7 +592,8 @@ lower level than the normal DOS emulation code
   small deduction: yy=not xx.
   
   So, SVC macro is something like this
-  SVC	MACRO xx
+
+	SVC	MACRO xx
 		HLT
 		DB	xx, not xx
 		ENDM
