@@ -27,12 +27,12 @@
 ;***                                                                    ***
 ;*** Parameter: %1: coordinate to convert to text coordinate.           ***
 ;**************************************************************************
-ToTextCos	macro xx1  
-	shr  xx1, 1
-	shr  xx1, 1
-	shr  xx1, 1
-	inc  xx1
-	endm
+%macro ToTextCos 1  
+ shr  %1, 1
+ shr  %1, 1
+ shr  %1, 1
+ inc  %1
+%endmacro
 
 ;**************************************************************************
 ;***                            FromTextCos                             ***
@@ -42,16 +42,16 @@ ToTextCos	macro xx1
 ;*** Parameter: %1: coordinate to convert to text coordinate.           ***
 ;**************************************************************************
 
-FromTextCos	macro  xx1
-	shl  xx1, 1
-	shl  xx1, 1
-	shl  xx1, 1
-	dec  xx1 
-	endm
+%macro FromTextCos 1
+ shl  %1, 1
+ shl  %1, 1
+ shl  %1, 1
+ dec  %1 
+%endmacro
 
 ;--------------------------------- DATA ----------------------------------
 
-_DATA	segment word public 'DATA' use16
+segment _DATA class=DATA
 
 before db 0           ;Remembers wether any of these routines have been
                       ;called before.
@@ -59,9 +59,8 @@ before db 0           ;Remembers wether any of these routines have been
 mousepresent db 0     ;Remembers wether a mouse driver is present.
 
 ;--------------------------------- CODE ----------------------------------
-_DATA	ends
 
-_TEXT	segment word public 'CODE' use16
+segment _TEXT class=CODE
 
 ;=========================================================================        
 ;===                           InitMouse                               ===
@@ -74,8 +73,8 @@ _TEXT	segment word public 'CODE' use16
 ;===          1 if mouse driver installed.                             ===
 ;=========================================================================                                                                   
         
-        public _CloseMouse
-        public _InitMouse
+        global _CloseMouse
+        global _InitMouse
 _CloseMouse:
 _InitMouse:
         push es
@@ -89,22 +88,22 @@ _InitMouse:
 
         mov  dx, es
         cmp  dx, 0                   ; Check to be sure that the vector is
-        jne  installed              ; not 0000:0000.
+        jne  .installed              ; not 0000:0000.
 
         cmp  bx, 0
-        jne  installed
+        jne  .installed
 
-        jmp  EndOfProc        ; Exit if 0000:000, return value 
+        jmp  short .EndOfProc        ; Exit if 0000:000, return value 
                                      ; already in ax.
 
-installed:
+.installed:
         int  33h                     ; Initialise mouse driver.
         neg  ax
         
         mov  [mousepresent], al      ; and return wether initialisation
                                      ; worked.
 
-EndOfProc:
+.EndOfProc:
         pop  es
         ret
 
@@ -120,23 +119,23 @@ EndOfProc:
 ;===          1 if mouse installed(assembly: zf == 0).                 ===
 ;=========================================================================                                                                   
        
-        public _MousePresent
+        global _MousePresent
 _MousePresent:
         cmp  [before], byte 0        ; Check wether we already have
-        jne  gotit                  ; initialised.
+        jne  .gotit                  ; initialised.
 
         mov  [before], byte 1        
 
         call _InitMouse              ; Initialise if we haven't done this
                                      ; before.
 
-gotit:
+.gotit:
         mov  al, [mousepresent]      ; return wether mouse available.
         xor  ah, ah
         cmp  ax,  0
         ret
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           ShowMouse                               ===
@@ -157,9 +156,9 @@ _ShowMouse:
 .EndOfProc:
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           HideMouse                               ===
@@ -181,9 +180,9 @@ _HideMouse:
 .EndOfProc:
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           WhereMouse                              ===
@@ -229,9 +228,9 @@ _WhereMouse:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           MouseGotoXY                             ===
@@ -265,9 +264,9 @@ _MouseGotoXY:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 1
+%if 1
 
 ;=========================================================================        
 ;===                      CountButtonPresses                           ===
@@ -283,13 +282,13 @@ _MouseGotoXY:
 ;===        + status mouse buttons.                                    ===
 ;=========================================================================                                                                   
 
-        public _CountButtonPresses
+        global _CountButtonPresses
 _CountButtonPresses:
         push bp
         mov  bp, sp
 
         call _MousePresent           ; If mouse not available.
-        jnz  available
+        jnz  .available
 
         mov  ax, 0                   ; Return:
         mov  bx, [bp+06h]
@@ -299,8 +298,8 @@ _CountButtonPresses:
         mov  bx, [bp+0Ah]
         mov  [bx], word 0            ;  *y = 0
         
-        jmp  EndOfProc2
-available:
+        jmp  short .EndOfProc
+.available:
         push di        
         mov  ax, 5                   
         mov  bx, [bp+04h]            ; Count for given button.
@@ -319,13 +318,13 @@ available:
         mov  [di], dx                ; Return y.
 
         pop  di
-EndOfProc2:
+.EndOfProc:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                      CountButtonReleases                          ===
@@ -382,9 +381,9 @@ _CountButtonReleases:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           MouseWindow                             ===
@@ -425,9 +424,9 @@ _MouseWindow:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                     DefineTextMouseCursor                         ===
@@ -463,9 +462,9 @@ _DefineTextMouseCursor:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                          GetMouseMoved                            ===
@@ -508,9 +507,9 @@ _GetMouseMoved:
         pop  bp
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                          SetLightPenOn                            ===
@@ -532,9 +531,9 @@ _SetLightPenOn:
 .EndOfProc:
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                          SetLightPenOff                           ===
@@ -556,9 +555,9 @@ _SetLightPenOff:
 .EndOfProc:
         ret
 
-	endif
+%endif
 
-	if 0
+%if 0
 
 ;=========================================================================        
 ;===                           SetMickey                               ===
@@ -587,8 +586,4 @@ _SetMickey:
 .EndOfProc:
         pop  bp
         ret
-	endif
-	
-_TEXT	ends
-	end
-	
+%endif

@@ -41,41 +41,37 @@
 ;; version: 24 dec 1999
 ;;
 
-.8086
-
 ;; just to be on the save side.
-SaveRegs macro
-	push si
-	push di
-	push ds
-	endm
+%macro SaveRegs 0
+push si
+push di
+push ds
+%endmacro
 
-RestoreRegs macro
-	pop  ds
-	pop  di
-	pop  si
-	endm
+%macro RestoreRegs 0
+pop  ds
+pop  di
+pop  si
+%endmacro
 
-XMS_INT	EQU	002fh     ;; DOS Multiplex interrupt
+%define XMS_INT  002fh     ;; DOS Multiplex interrupt
 
-_DATA	segment word public 'DATA' use16
+segment _DATA class=DATA
         
         XMSDriver DD   0
         initFlag  DB  -1
 
 ;;struct XMSRequestBlock bd.
-bd struct
+        bd 
 nbytes  dd 0    ;; Number of bytes to move
 shandle dw 0    ;; Handle of source memory
 soffset dd 0    ;; Offset of source in handle's memory area
 dhandle dw 0    ;; Handle of destination memory
 doffset dd 0    ;; Offset of destination in memory
-bd	ends
 
 UMBsize dw 0    ;; size of the last successfully allocated UMB.
-_DATA	ends
 
-_TEXT	segment word public 'CODE' use16
+segment _TEXT class=CODE
 
 ;*********************** routines for the EMB's **************************
 
@@ -91,41 +87,41 @@ _TEXT	segment word public 'CODE' use16
 ;=== NOTE:This function should be called before any other XMS function! ===
 ;==========================================================================
 
-        public _XMSinit
-        public _XMMinit
+        global _XMSinit
+        global _XMMinit
 _XMSinit:
 _XMMinit:
         push  bp
         SaveRegs
 
-        cmp  [ds:initFlag], -1
-        jne  EndOfProc
+        cmp  [initFlag], byte -1
+        jne  .EndOfProc
 
-        mov  [ds:initFlag], 0
+        mov  [initFlag], byte 0
 
         mov  ax, 4300h                ;; Verify XMS manager present.
         int  XMS_INT
         cmp  al, 80h
-        je   next
+        je   .next
         xor  ax, ax
-        jmp  EndOfProc
+        jmp  .EndOfProc
 
-next:
+.next:
         mov  ax, 4310h                ;; Get XMS manager entry point.
         int  XMS_INT
-        mov  [ds:XMSDriver], bx     ;; Save entry point.
-        mov  [ds:XMSDriver+02h], es
+        mov  [word XMSDriver], bx     ;; Save entry point.
+        mov  [word XMSDriver+02h], es
 
         xor  ah, ah
-        call dword ptr [ds: XMSDriver]    ;; See if at least version 2.0
+        call far [dword XMSDriver]    ;; See if at least version 2.0
         cmp  ax, 0200h
-        jb   EndOfProc
+        jb   .EndOfProc
         
-        mov  [ds:initFlag], 1
+        mov  [initFlag], byte 1
         
-EndOfProc:
+.EndOfProc:
         xor  ah, ah
-        mov  al, [ds:initFlag]
+        mov  al, [initFlag]
 
         RestoreRegs
         pop  bp
@@ -139,25 +135,25 @@ EndOfProc:
 ;=== Returns number of bytes available in largest free block.          ===
 ;=========================================================================
 
-        public _XMScoreleft
+        global _XMScoreleft
 _XMScoreleft:
         push bp
         SaveRegs
 
         cmp  [initFlag], byte 0
-        jne  next2
+        jne  .next
 
         xor  ax, ax
         xor  dx, dx
-        jmp  EndOfProc2
+        jmp  .EndOfProc
 
-next2:
+.next:
         mov  ax, 0800h
         call far [dword XMSDriver]
         mov  bx, 1024
         mul  bx
 
-EndOfProc2:
+.EndOfProc:
         RestoreRegs
         pop  bp
         ret
@@ -175,7 +171,7 @@ EndOfProc2:
 ;===       that is larger than size.                                    ===
 ;==========================================================================
 
-        public _XMSalloc
+        global _XMSalloc
 _XMSalloc:
         push bp
         mov  bp, sp
@@ -183,11 +179,11 @@ _XMSalloc:
         SaveRegs
 
         cmp  [initFlag], byte 0
-        jne  next3
+        jne  .next
 
         xor  ax, ax
-        jmp  EndOfProc3
-next3:
+        jmp  .EndOfProc
+.next:
 
       ;;Get the number of 1024 byte units required by size.
         mov  ax, [bp+04h]
@@ -197,31 +193,31 @@ next3:
         div  bx
 
         cmp  dx, 0
-        je   next31
+        je   .next1
 
       ;;Add a block for any excess.
         inc  ax
 
-next31:
+.next1:
         mov  dx, ax
         mov  ax, 0900h
 
         call far [dword XMSDriver]
         cmp  ax, 1
-        je   next32
+        je   .next2
 
         xor  ax, ax
-        jmp  EndOfProc3
+        jmp  .EndOfProc
 
-next32:
+.next2:
         mov  ax, dx
 
-EndOfProc3:
+.EndOfProc:
         RestoreRegs
         pop  bp
         ret
 
-	if 0
+%if 0
 ;==========================================================================
 ;===                            XMSrealloc                              ===
 ;==========================================================================
@@ -244,12 +240,12 @@ _XMSrealloc:
         div  bx
 
         cmp  dx, 0
-        je   next41
+        je   .next1
 
       ;;Add a block for any excess.
         inc  ax
 
-next41:
+.next1:
         mov  dx, [bp+04h]
         mov  bx, ax
         mov  ax, 0f00h
@@ -257,7 +253,7 @@ next41:
         
         pop  bp
         ret
-	endif
+%endif
 ;===========================================================================
 ;===                            XMSfree                                  ===
 ;===========================================================================
@@ -267,7 +263,7 @@ next41:
 ;=== if successful, 0 if not.                                            ===
 ;===========================================================================
 
-        public _XMSfree
+        global _XMSfree
 _XMSfree:
 
         push bp
@@ -276,18 +272,18 @@ _XMSfree:
         SaveRegs
 
         cmp  [byte initFlag], byte 0
-        jne  next5
+        jne  .next
 
         xor  ax, ax
-        jmp  EndOfProc5
+        jmp  .EndOfProc
 
-next5:
+.next:
         mov  dx, [bp+04h]
         mov  ax, 0a00h
 
         call far [dword XMSDriver]
 
-EndOfProc5:
+.EndOfProc:
         RestoreRegs
         pop  bp
         ret
@@ -314,11 +310,11 @@ XMSmove:
         call far [dword XMSDriver]
         pop  dx
         cmp  ax, 0
-        je   EndOfProc6
+        je   .EndOfProc
 
         mov  ax, dx
 
-EndOfProc6:
+.EndOfProc
         ret
 
 ;===========================================================================
@@ -332,7 +328,7 @@ EndOfProc6:
 ;=== Returns number of bytes copied, or 0 on error.                      ===
 ;===========================================================================
 
-        public _DOStoXMSmove
+        global _DOStoXMSmove
 _DOStoXMSmove:
 
         push bp
@@ -341,12 +337,12 @@ _DOStoXMSmove:
         SaveRegs
 
         cmp  [initFlag], byte 0
-        jne  next7
+        jne  .next
 
         xor  ax, ax
-        jmp  EndOfProc7
+        jmp  .EndOfProc
 
-next7:
+.next:
         mov  [shandle], word 0
 
         mov  ax, [bp+04h]
@@ -365,7 +361,7 @@ next7:
         mov  ax, [bp+0Ch]
         call XMSmove
 
-EndOfProc7:
+.EndOfProc:
         RestoreRegs
         pop  bp
         ret
@@ -382,7 +378,7 @@ EndOfProc7:
 ;=== Returns number of bytes copied, or 0 on error.                     ===
 ;==========================================================================
 
-        public _XMStoDOSmove
+        global _XMStoDOSmove
 _XMStoDOSmove:
 
         push bp
@@ -391,12 +387,12 @@ _XMStoDOSmove:
         SaveRegs
 
         cmp  [initFlag], byte 0
-        jne  next8
+        jne  .next
 
         xor  ax, ax
-        jmp  EndOfProc8
+        jmp  .EndOfProc
 
-next8:
+.next:
         mov  [dhandle], word 0
 
         mov  ax, [bp+04h]
@@ -415,13 +411,13 @@ next8:
         mov  ax, [bp+0Ch]
         call XMSmove
 
-EndOfProc8:
+.EndOfProc:
         RestoreRegs
         pop  bp
         ret
 
 ;*********************** routines for the HMA ****************************
-	ifdef INCLUDEHMA
+%ifdef INCLUDEHMA
 ;==========================================================================
 ;===                           HMAalloc                                 ===
 ;==========================================================================
@@ -432,7 +428,7 @@ EndOfProc8:
 ;=== Returns: 1 on success, 0 on failure.                               ===
 ;==========================================================================
 
-        public _HMAalloc
+        global _HMAalloc
 _HMAalloc:
         SaveRegs
 
@@ -441,19 +437,19 @@ _HMAalloc:
         call far [dword XMSDriver]       ;; Allocate HMA.
 
         cmp  ax, 0
-        je   EndOfProc9                  ;; exit on error.
+        je   .EndOfProc                  ;; exit on error.
 
         mov  ah, 03h
         call far [dword XMSDriver]       ;; Open gate A20.
 
         cmp  ax, 0                       ;; exit on success.
-        jne  EndOfProc9
+        jne  .EndOfProc
 
         mov  ah, 02h
         call far [dword XMSDriver]       ;; release the HMA on failure.
         xor  ax, ax
 
-EndOfProc9
+.EndOfProc
         RestoreRegs
         ret
 
@@ -468,7 +464,7 @@ EndOfProc9
 ;===         succesfully allocated.                                     ===
 ;==========================================================================
 
-        public _HMAcoreleft
+        global _HMAcoreleft
 _HMAcoreleft:
 
         mov  ax, 65520
@@ -485,7 +481,7 @@ _HMAcoreleft:
 ;=== Only call if the HMA has been successfully allocated.              ===
 ;==========================================================================
 
-        public _HMAfree
+        global _HMAfree
 _HMAfree:
         SaveRegs
 
@@ -497,9 +493,9 @@ _HMAfree:
 
         RestoreRegs
         ret
-	endif
+%endif
 ;*********************** routines for the UMB's ****************************
-	ifdef INCLUDEUMB
+%ifdef INCLUDEUMB
 ;==========================================================================
 ;===                             UMBalloc                               ===
 ;==========================================================================
@@ -511,7 +507,7 @@ _HMAfree:
 ;=== Remark: UMB's work with 16 byte blocks.                            ===
 ;==========================================================================
 
-        public _UMBalloc
+        global _UMBalloc
 _UMBalloc:
         SaveRegs
 
@@ -522,12 +518,12 @@ _UMBalloc:
         call far [dword XMSDriver]        ;; Allocate largest UMB.
         
         cmp  ax, 1
-        jne  EndOfProc0
+        jne  .EndOfProc
 
         mov  ax, bx
         mov  [UMBsize], dx
 
-EndOfProc0:
+.EndOfProc:
         RestoreRegs
         ret
 
@@ -539,7 +535,7 @@ EndOfProc0:
 ;===  Returns the size of the most recent successfully allocated UMB.   ===
 ;==========================================================================
 
-        public _GetUMBSize
+        global _GetUMBSize
 _GetUMBSize:
 
         mov  ax, [UMBsize]
@@ -554,7 +550,7 @@ _GetUMBSize:
 ;=== Releases an UMB (returns 1 on success, 0 on error).                ===
 ;==========================================================================
 
-        public _UMBfree
+        global _UMBfree
 _UMBfree:
         mov  bx, sp
 
@@ -567,7 +563,4 @@ _UMBfree:
 
         RestoreRegs
         ret
-	endif
-
-_TEXT	ends
-	end
+%endif

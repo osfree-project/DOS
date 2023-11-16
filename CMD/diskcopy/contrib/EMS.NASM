@@ -38,34 +38,30 @@
 ;;
 ;;      april 16, 2001: Fixed situation where si and di not saved.
 ;;
-.8086
 
+%assign EMS_INT      67h      ;; EMS interrupt number.
+%assign EMS_VERSION  32h      ;; Version 3.2 of EMS. 
+%assign RES_VERSION  40h      ;; At least version 4.0 to be resizable.
+
+; EMS service codes.
+%assign EMSservice1  40h    ;; Get EMS status.
+%assign EMSservice2  41h    ;; Get segment address of page 0. 
+%assign EMSservice3  42h    ;; Get total number of expanded pages.
+%assign EMSservice4  43h    ;; Get handle and assign pages to it.
+%assign EMSservice5  44h    ;; Map a page into one of the page frames.
+%assign EMSservice6  45h    ;; Close EMS handle.
+%assign EMSservice7  46h    ;; Get the EMS version number.
 
 ;=============================== DATA =====================================
 
-_DATA	segment word public 'DATA' use16
+segment _DATA class=DATA
 
-EMS_INT		EQU	67h      ;; EMS interrupt number.
-EMS_VERSION	EQU	32h      ;; Version 3.2 of EMS. 
-RES_VERSION	EQU	40h      ;; At least version 4.0 to be resizable.
-
-; EMS service codes.
-EMSservice1  EQU	40h    ;; Get EMS status.
-EMSservice2  EQU	41h    ;; Get segment address of page 0. 
-EMSservice3  EQU	42h    ;; Get total number of expanded pages.
-EMSservice4  EQU	43h    ;; Get handle and assign pages to it.
-EMSservice5  EQU	44h    ;; Map a page into one of the page frames.
-EMSservice6  EQU	45h    ;; Close EMS handle.
-EMSservice7  EQU	46h    ;; Get the EMS version number.
-
-ID_LEN 	EQU	8/2
-EMS_ID	db "EMMXXXX0" ;; EMS identification string.
+%assign ID_LEN 8/2
+        EMS_ID db "EMMXXXX0" ;; EMS identification string.
 
 ;=============================== CODE =====================================
 
-_DATA	ends
-
-_TEXT	segment  word public 'CODE' use16
+segment _TEXT class=CODE
 
 ;==========================================================================
 ;===                           EMSbaseaddress                           ===
@@ -78,7 +74,7 @@ _TEXT	segment  word public 'CODE' use16
 ;=== EMSmap() below).                                                   ===
 ;==========================================================================
 
-	public _EMSbaseaddress
+        global _EMSbaseaddress
 _EMSbaseaddress:
         push  es
 	push  si
@@ -89,35 +85,34 @@ _EMSbaseaddress:
         mov  ax, 3567h
         int  21h
 
-        mov  si, offset EMS_ID
+        mov  si, EMS_ID
         mov  cx, ID_LEN
         mov  di, 10              ;; EMS_ID must be at offset 10
 
         repe cmpsw
-        je   next
+        je   .next
 
         xor  ax, ax
-        jmp  EndOfProc1
+        jmp  short .EndOfProc
 
-next:
+.next:
         mov  ah, EMSservice2     ;; Get page frame segment.
         int  EMS_INT
 
         cmp  ah, 0
-        je   GotFrame
+        je   .GotFrame
 
         xor  ax, ax
-        jmp  EndOfProc1
+        jmp  short .EndOfProc
 
-GotFrame:
+.GotFrame:
         mov  ax, bx
         
-EndOfProc1:
+.EndOfProc:
 	pop  di
 	pop  si
         pop  es
         ret
-
 
 ;==========================================================================
 ;===                              EMSversion                            ===
@@ -127,23 +122,23 @@ EndOfProc1:
 ;=== Returns current EMS version, -1 if not found or obsolete.          ===
 ;==========================================================================
 
-        public _EMSversion
+        global _EMSversion
 _EMSversion:
 
         mov  ah, EMSservice7
         int  EMS_INT
 
         cmp  ah, 0
-        jne  NotGood
+        jne  .NotGood
 
         cmp  al, EMS_VERSION
-        jb   NotGood
-        jmp  EndOfProc2
+        jb   .NotGood
+        jmp  short .EndOfProc
 
-NotGood:
+.NotGood:
         mov  ax, -1
 
-EndOfProc2:
+.EndOfProc:
         ret
 
 ;==========================================================================
@@ -154,22 +149,22 @@ EndOfProc2:
 ;=== Returns 0 if EMS system OK, -1 if not.                             ===
 ;==========================================================================
 
-        public _EMSstatus
+        global _EMSstatus
 _EMSstatus:
 
         mov  ah, EMSservice1
         int  EMS_INT
 
         cmp  ah, 0
-        je   next1
+        je   .next1
 
         mov  ax, -1
-        jmp  EndOfProc3
+        jmp  short .EndOfProc
 
-next1:
+.next1:
         xor  ax, ax
 
-EndOfProc3:
+.EndOfProc:
         ret
 
 ;==========================================================================
@@ -180,22 +175,22 @@ EndOfProc3:
 ;=== Returns number of free EMS pages (each page is 16k), -1 if error.  === 
 ;==========================================================================
 
-        public _EMSpages
+        global _EMSpages
 _EMSpages:
 
         mov  ah, EMSservice3
         int  EMS_INT
 
         cmp  ah, 0
-        je   next01
+        je   .next
 
         mov  ax, -1
-        jmp  EndOfProc4
+        jmp  short .EndOfProc
 
-next01:
+.next:
         mov  ax, bx
 
-EndOfProc4:
+.EndOfProc:
         ret
 
 ;==========================================================================
@@ -208,7 +203,7 @@ EndOfProc4:
 ;=== NOTE: always free any handles when you are done!.                  ===
 ;==========================================================================
 
-        public _EMSalloc
+        global _EMSalloc
 _EMSalloc:
         mov  bx, sp
 
@@ -217,15 +212,15 @@ _EMSalloc:
         int  EMS_INT
 
         cmp  ah, 0
-        je   next2
+        je   .next
 
         mov  ax, -1
-        jmp  EndOfProc5
+        jmp  short .EndOfProc
 
-next2:
+.next:
         mov  ax, dx
 
-EndOfProc5:
+.EndOfProc:
         ret
 
 ;==========================================================================
@@ -236,7 +231,7 @@ EndOfProc5:
 ;=== Frees handle block, returns 0 if successful, -1 if error.          ===
 ;==========================================================================
 
-        public _EMSfree
+        global _EMSfree
 _EMSfree:
         mov   bx, sp
 
@@ -245,15 +240,15 @@ _EMSfree:
         int  EMS_INT
 
         cmp  ah, 0
-        je   next3
+        je   .next
 
         mov  ax, -1
-        jmp  EndOfProc6
+        jmp  short .EndOfProc
 
-next3:
+.next:
         xor  ax, ax
 
-EndOfProc6:
+.EndOfProc:
         ret
 
 ;=============================================================================
@@ -267,7 +262,7 @@ EndOfProc6:
 ;=== EMSbaseaddress(), bank 1 starts at that segment with offset 16k, etc. ===
 ;=============================================================================
 
-        public _EMSmap
+        global _EMSmap
 _EMSmap:
         push bp
         mov  bp, sp
@@ -279,15 +274,15 @@ _EMSmap:
         int  EMS_INT
 
         cmp  ah, 0
-        je   EndOfProc7
+        je   .EndOfProc
 
         mov  ax, -1
 
-EndOfProc7:
+.EndOfProc:
         pop  bp
         ret
 
-	if 0
+%if 0
 ;=========================================================================
 ;===                            EMSResizable                           ===
 ;=========================================================================
@@ -297,22 +292,22 @@ EndOfProc7:
 ;=== changed.                                                          ===
 ;=========================================================================
 
-        public _EMSResizable
+        global _EMSResizable
 _EMSResizable:
 
         mov  ah, EMSservice7                    ;; Get version number, 
         int  EMS_INT
 
         cmp  al, RES_VERSION                    ;; and see if it is at 
-        jb   NotSupported                      ;; least version 4.0.
+        jb   .NotSupported                      ;; least version 4.0.
 
         mov  ax, 1
-        jmp  EndOfProc8
+        jmp  short .EndOfProc
 
-NotSupported:
+.NotSupported:
         xor  ax, ax
 
-EndOfProc8:
+.EndOfProc:
         ret
 
 ;=========================================================================
@@ -327,7 +322,7 @@ EndOfProc8:
 ;=== Returns: 0 on success, -1 or error.                               ===
 ;=========================================================================
 
-        public _EMSResize
+        global _EMSResize
 _EMSResize:
 
         push bp
@@ -339,19 +334,15 @@ _EMSResize:
         int  EMS_INT
 
         cmp  ah, 0
-        je   next4
+        je   .next
 
         mov  ax, -1
-        jmp  EndOfProc9
+        jmp  short .EndOfProc
 
-next4:
+.next:
         xor  ax, ax
 
-EndOfProc9:
+.EndOfProc:
         pop  bp
         ret
-
-	endif
-
-_TEXT	ends
-	end
+%endif

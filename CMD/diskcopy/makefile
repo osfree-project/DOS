@@ -13,6 +13,8 @@ srcfiles  = $(p)diskcopy$(e) $(p)drive$(e) $(p)memtypes$(e) $(p)simplcpy$(e) $(p
 
 ADD_COPT = -i=$(MYDIR)..$(SEP)include
 
+JWASM = 1
+
 !include $(%ROOT)tools/mk/appsdos.mk
 
 .c: $(MYDIR)contrib
