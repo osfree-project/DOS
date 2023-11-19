@@ -26,12 +26,14 @@
 ;=== Returns the DOS switch character.                                ===
 ;========================================================================
 
-segment _TEXT class=CODE
+_TEXT segment word public 'CODE' use16
 
-        global _SwitchChar
+        public _SwitchChar
 _SwitchChar:
 
         mov  ax, 3700h      ; Get DOS switch character
         int  21h
         mov  al, dl         ; and return it.
         ret
+_TEXT ends
+	end

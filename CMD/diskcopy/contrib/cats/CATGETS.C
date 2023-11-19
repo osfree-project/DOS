@@ -24,7 +24,12 @@
 #include <string.h>        /* strtok, strchr */
 
 #ifndef HI_TECH_C
+#ifndef __WATCOM__
 #include <dir.h>           /* fnmerge */
+#else
+#include <direct.h>
+#include <tcc2wat.h>
+#endif
 #endif
 
 #include "db.h"

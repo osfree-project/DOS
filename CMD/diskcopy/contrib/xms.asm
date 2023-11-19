@@ -64,17 +64,17 @@ _DATA	segment word public 'DATA' use16
         initFlag  DB  -1
 
 ;;struct XMSRequestBlock bd.
-bd struct
+bd equ $
 nbytes  dd 0    ;; Number of bytes to move
 shandle dw 0    ;; Handle of source memory
 soffset dd 0    ;; Offset of source in handle's memory area
 dhandle dw 0    ;; Handle of destination memory
 doffset dd 0    ;; Offset of destination in memory
-bd	ends
 
 UMBsize dw 0    ;; size of the last successfully allocated UMB.
 _DATA	ends
 
+	assume ds:_DATA
 _TEXT	segment word public 'CODE' use16
 
 ;*********************** routines for the EMB's **************************
@@ -113,8 +113,8 @@ _XMMinit:
 next:
         mov  ax, 4310h                ;; Get XMS manager entry point.
         int  XMS_INT
-        mov  [ds:XMSDriver], bx     ;; Save entry point.
-        mov  [ds:XMSDriver+02h], es
+        mov  word ptr [ds:XMSDriver], bx     ;; Save entry point.
+        mov  word ptr [ds:XMSDriver+02h], es
 
         xor  ah, ah
         call dword ptr [ds: XMSDriver]    ;; See if at least version 2.0
@@ -144,7 +144,7 @@ _XMScoreleft:
         push bp
         SaveRegs
 
-        cmp  [initFlag], byte 0
+        cmp  [initFlag], 0
         jne  next2
 
         xor  ax, ax
@@ -153,7 +153,7 @@ _XMScoreleft:
 
 next2:
         mov  ax, 0800h
-        call far [dword XMSDriver]
+        call [XMSDriver]
         mov  bx, 1024
         mul  bx
 
@@ -182,7 +182,7 @@ _XMSalloc:
 
         SaveRegs
 
-        cmp  [initFlag], byte 0
+        cmp  [initFlag], 0
         jne  next3
 
         xor  ax, ax
@@ -206,7 +206,7 @@ next31:
         mov  dx, ax
         mov  ax, 0900h
 
-        call far [dword XMSDriver]
+        call [XMSDriver]
         cmp  ax, 1
         je   next32
 
@@ -253,7 +253,7 @@ next41:
         mov  dx, [bp+04h]
         mov  bx, ax
         mov  ax, 0f00h
-        call far [dword XMSDriver]
+        call [XMSDriver]
         
         pop  bp
         ret
@@ -275,7 +275,7 @@ _XMSfree:
 
         SaveRegs
 
-        cmp  [byte initFlag], byte 0
+        cmp  byte ptr [initFlag], 0
         jne  next5
 
         xor  ax, ax
@@ -285,7 +285,7 @@ next5:
         mov  dx, [bp+04h]
         mov  ax, 0a00h
 
-        call far [dword XMSDriver]
+        call [XMSDriver]
 
 EndOfProc5:
         RestoreRegs
@@ -306,12 +306,12 @@ EndOfProc5:
 
 XMSmove:
         push ax
-        mov  [word nbytes],     ax
-        mov  [word nbytes+02h], word 0
+        mov  word ptr [nbytes], ax
+        mov  word ptr [nbytes+02h], 0
 
-        mov  si, bd
+        mov  si, word ptr bd
         mov  ah, 0Bh
-        call far [dword XMSDriver]
+        call [XMSDriver]
         pop  dx
         cmp  ax, 0
         je   EndOfProc6
@@ -340,27 +340,27 @@ _DOStoXMSmove:
 
         SaveRegs
 
-        cmp  [initFlag], byte 0
+        cmp  byte ptr [initFlag], 0
         jne  next7
 
         xor  ax, ax
         jmp  EndOfProc7
 
 next7:
-        mov  [shandle], word 0
+        mov  word ptr [shandle], 0
 
         mov  ax, [bp+04h]
         mov  [dhandle], ax
 
         mov  ax, [bp+06h]
-        mov  [doffset], ax
+        mov  word ptr [doffset], ax
         mov  ax, [bp+08h]
-        mov  [doffset+02h], ax
+        mov  word ptr [doffset+02h], ax
 
         mov  ax, [bp+0Ah]
-        mov  [word soffset],     ax
+        mov  word ptr [soffset],     ax
         mov  ax, ds
-        mov  [word soffset+02h], ax
+        mov  word ptr [soffset+02h], ax
 
         mov  ax, [bp+0Ch]
         call XMSmove
@@ -390,27 +390,27 @@ _XMStoDOSmove:
 
         SaveRegs
 
-        cmp  [initFlag], byte 0
+        cmp  byte ptr [initFlag], 0
         jne  next8
 
         xor  ax, ax
         jmp  EndOfProc8
 
 next8:
-        mov  [dhandle], word 0
+        mov  word ptr [dhandle], 0
 
         mov  ax, [bp+04h]
-        mov  [word doffset], ax
+        mov  word ptr [doffset], ax
         mov  ax, ds
-        mov  [word doffset+02h], ax
+        mov  word ptr [doffset+02h], ax
       
         mov  ax, [bp+06h]
-        mov  [word shandle], ax
+        mov  word ptr [shandle], ax
 
         mov  ax, [bp+08h]
-        mov  [word soffset], ax
+        mov  word ptr [soffset], ax
         mov  ax, [bp+0Ah]
-        mov  [word soffset+02h], ax
+        mov  word ptr [soffset+02h], ax
 
         mov  ax, [bp+0Ch]
         call XMSmove

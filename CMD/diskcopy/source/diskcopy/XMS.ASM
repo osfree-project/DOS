@@ -109,11 +109,11 @@ _XMMinit:
 .next:
         mov  ax, 4310h                ;; Get XMS manager entry point.
         int  XMS_INT
-        mov  [word XMSDriver], bx     ;; Save entry point.
-        mov  [word XMSDriver+02h], es
+        mov  word ptr [XMSDriver], bx     ;; Save entry point.
+        mov  word ptr XMSDriver+02h], es
 
         xor  ah, ah
-        call far [dword XMSDriver]    ;; See if at least version 2.0
+        call dword ptr [XMSDriver]    ;; See if at least version 2.0
         cmp  ax, 0200h
         jb   .EndOfProc
         

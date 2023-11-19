@@ -61,6 +61,7 @@ mousepresent db 0     ;Remembers wether a mouse driver is present.
 ;--------------------------------- CODE ----------------------------------
 _DATA	ends
 
+	assume ds:_DATA
 _TEXT	segment word public 'CODE' use16
 
 ;=========================================================================        
@@ -122,10 +123,10 @@ EndOfProc:
        
         public _MousePresent
 _MousePresent:
-        cmp  [before], byte 0        ; Check wether we already have
+        cmp  byte ptr [before], 0        ; Check wether we already have
         jne  gotit                  ; initialised.
 
-        mov  [before], byte 1        
+        mov  byte ptr [before], 1        
 
         call _InitMouse              ; Initialise if we haven't done this
                                      ; before.
@@ -293,11 +294,11 @@ _CountButtonPresses:
 
         mov  ax, 0                   ; Return:
         mov  bx, [bp+06h]
-        mov  [bx], word 0            ;  *presses = 0
+        mov  word ptr [bx], 0            ;  *presses = 0
         mov  bx, [bp+08h]
-        mov  [bx], word 0            ;  *x = 0
+        mov  word ptr [bx], 0            ;  *x = 0
         mov  bx, [bp+0Ah]
-        mov  [bx], word 0            ;  *y = 0
+        mov  word ptr [bx], 0            ;  *y = 0
         
         jmp  EndOfProc2
 available:
