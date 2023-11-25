@@ -18,6 +18,7 @@ DIRS =   shared    &
          exit_vdm  &
          find      &
          help      &
+         join      &
          label     &
          mem       &
          more      &
