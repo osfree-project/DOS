@@ -13,4 +13,4 @@ COM       = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk
 
-$(PATH)append.exe: .symbolic
+#$(PATH)append.exe: .symbolic
