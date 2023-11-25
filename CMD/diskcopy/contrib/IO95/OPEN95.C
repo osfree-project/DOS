@@ -149,25 +149,25 @@ Bit(s)  Description     (Table 1112)
 **************/
 
 int open95(const char * const fnam, long omode, int flags)
-{  struct REGPACK r, r1;
+{  union REGPACK r, r1;
    int h;
 
    assert(fnam);
    /* Frist try the Win95 API */
-   r.r_flags = 1;          /* make sure the carru is set */
-   r.r_ds = FP_SEG(fnam);     /* pointer to file name */
-   r.r_si = FP_OFF(fnam);
-   r.r_ax = 0x716c;        /* Win95 open/create */
-   r.r_cx = flags ^ S95_IWRITE;
+   r.w.flags = 1;          /* make sure the carru is set */
+   r.w.ds = FP_SEG(fnam);     /* pointer to file name */
+   r.w.si = FP_OFF(fnam);
+   r.w.ax = 0x716c;        /* Win95 open/create */
+   r.w.cx = flags ^ S95_IWRITE;
    if(omode & O95_CREAT)         /* creation behaviour */
-      r.r_dx = (omode & O95_EXCL)? OPEN_CREATE
+      r.w.dx = (omode & O95_EXCL)? OPEN_CREATE
        : (omode & O95_TRUNC)? OPEN_CREATE | OPEN_TRUNC
        : OPEN_CREATE | OPEN_OPEN;
    else
-      r.r_dx = (omode & O95_TRUNC)? OPEN_TRUNC: OPEN_OPEN;
-   r.r_bx = omode & OPEN_FLAGS;
-   if(!(r.r_bx & OPEN_SHARE))
-      r.r_bx |= O95_DENYWRITE;
+      r.w.dx = (omode & O95_TRUNC)? OPEN_TRUNC: OPEN_OPEN;
+   r.w.bx = omode & OPEN_FLAGS;
+   if(!(r.w.bx & OPEN_SHARE))
+      r.w.bx |= O95_DENYWRITE;
 
    /* because the call the DOS 4 style function is nearly the same
       the structure is preserved for the next try */
@@ -175,20 +175,20 @@ int open95(const char * const fnam, long omode, int flags)
 
    intr(0x21, &r);      /* Perform the Win95 API call */
 
-   if((r.r_flags & 1)         /* failed */
-    && r.r_ax == 1) {      /* Win95 not present -> call DOS 4 API */
-      r1.r_ax = 0x6c00;
+   if((r.w.flags & 1)         /* failed */
+    && r.w.ax == 1) {      /* Win95 not present -> call DOS 4 API */
+      r1.w.ax = 0x6c00;
          /* Suppress Win95 specific flags */
-      r1.r_bx &= O95_AUTOCOMMIT | O95_NOCRIT | O95_NOINHERIT | OPEN_SHARE | 3;
+      r1.w.bx &= O95_AUTOCOMMIT | O95_NOCRIT | O95_NOINHERIT | OPEN_SHARE | 3;
 
       intr(0x21, &r1);  /* Perform DOS 4 API call */
 
-      if(r1.r_flags & 1) { /* failed, too */
-         errno = r1.r_ax;  /* preserve this error */
+      if(r1.w.flags & 1) { /* failed, too */
+         errno = r1.w.ax;  /* preserve this error */
          return -1;
       }
 
-      r.r_ax = r1.r_ax;    /* re-join both APIs */
+      r.w.ax = r1.w.ax;    /* re-join both APIs */
    }
 
    /* One of the API returned successfully -> do whatever is needed */
@@ -201,22 +201,22 @@ int open95(const char * const fnam, long omode, int flags)
       patch our handle onto that one. */
    if((h = open("nul", (omode & O95_TEXT? O_TEXT: O_BINARY) | (omode & 3))) == -1) {
       /* Oops, something went a bit wrong here -> bail out immediately */
-      close(r.r_ax);
+      close(r.w.ax);
       return -1;
    }
    /* Now, we duplicate our handle over the returned one; DOS duplicates
       all necessary flags etc, but because we bypass the C library,
       the internal structure remains OK */
-   r1.r_ax = 0x4600;    /* duplicate file handle to other file handle */
-   r1.r_bx = r.r_ax;
-   r1.r_cx = h;
+   r1.w.ax = 0x4600;    /* duplicate file handle to other file handle */
+   r1.w.bx = r.w.ax;
+   r1.w.cx = h;
    intr(0x21, &r1);
-   if(r1.r_flags & 1) { /* should never arise */
+   if(r1.w.flags & 1) { /* should never arise */
       close(h);
-      close(r.r_ax);
+      close(r.w.ax);
       return -1;
    }
-   close(r.r_ax);       /* is not needed anylonger! */
+   close(r.w.ax);       /* is not needed anylonger! */
 
    if(omode & O95_APPEND)     /* seek to EOF */
       lseek(h, 0l, 1);

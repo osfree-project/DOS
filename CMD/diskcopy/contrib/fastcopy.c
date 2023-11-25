@@ -25,7 +25,7 @@
 
 #include <dos.h>
 #include <mem.h>
-#ifdef __WATCOM__
+#ifdef __WATCOMC__
 #include <malloc.h>
 #include <tcc2wat.h>
 #else
@@ -143,7 +143,7 @@ FileReader (int handle, int nsects, long lsect, void *buffer)
 
 static int
 ReadBootInfo (int drive, struct dfree *free,
-	      int (*readfunc) (int drive, int nsects, long lsect,
+	      int (*readfunc) (int drive, int nsects, int lsect,
 			       void *buffer))
 {
   if (readfunc (drive, 1, 0, (void *) &bsect) != 0)

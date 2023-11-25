@@ -53,6 +53,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include <tcc2wat.h>
+
 #include "io95.h"
 #include "find95.h"
 
@@ -71,21 +73,21 @@ static char const rcsid[] =
 
 #ifndef HAVE_GETSETDTA
 void setdta(char far *dta)
-{  struct REGPACK rp;
+{  union REGPACK rp;
 
    assert(dta);
-   rp.r_ds = FP_SEG(dta);
-   rp.r_dx = FP_OFF(dta);
-   rp.r_ax = 0x1a00;
+   rp.w.ds = FP_SEG(dta);
+   rp.w.dx = FP_OFF(dta);
+   rp.w.ax = 0x1a00;
    intr(0x21, &rp);
 }
 char far *getdta(void)
-{  struct REGPACK rp;
+{  union REGPACK rp;
 
-   rp.r_ax = 0x2f00;
+   rp.w.ax = 0x2f00;
    intr(0x21, &rp);
 
-   return MK_FP(rp.r_es, rp.r_bx);
+   return MK_FP(rp.w.es, rp.w.bx);
 }
 #endif
 
@@ -108,7 +110,7 @@ int findfirst(char *name, FF_Block95 *ff, int attr)
 */
 int findnext(FF_Block95 *ff)
 /**Warning: Call to function 'findfile' with no prototype */
-{  return findfile(ff, FIND_NEXT);
+{  return findfile(ff, FIND_NEXT, NULL, 0);
 }
 
 
@@ -128,7 +130,7 @@ static void convDOS(FF_Block95 *ff)
  * Return: OS error code
  */
 static int findfile(FF_Block95 *ff, int mode, char *name, int attr)
-{  struct REGPACK rp;
+{  union REGPACK rp;
    char far *curDTA;
 
    /* first swap the DTA */
@@ -137,10 +139,10 @@ static int findfile(FF_Block95 *ff, int mode, char *name, int attr)
    setdta((char far*)ff);
 
    /* second peform the desired command */
-   if((rp.r_ax = mode) == FIND_FIRST) {
-      rp.r_ds = FP_SEG(name);
-      rp.r_dx = FP_OFF(name);
-      rp.r_cx = attr;
+   if((rp.w.ax = mode) == FIND_FIRST) {
+      rp.w.ds = FP_SEG(name);
+      rp.w.dx = FP_OFF(name);
+      rp.w.cx = attr;
    }
    intr(0x21, &rp);
 
@@ -150,7 +152,7 @@ static int findfile(FF_Block95 *ff, int mode, char *name, int attr)
    convDOS(ff);
 
    /* forth check for an error */
-   return (rp.r_flags & 1)? errno = rp.r_ax: 0;
+   return (rp.w.flags & 1)? errno = rp.w.ax: 0;
 }
 
 /* Convert win95 style FF_Block95 into DOS style */
@@ -165,38 +167,38 @@ static void conv95(FF_Block95 *ff)
 
 
 static int find95(char *name, FF_Block95 *ff, int attr)
-{  struct REGPACK r;
+{  union REGPACK r;
 
-   r.r_ax = 0x714e;
-   r.r_cx = attr;
-   r.r_si = 1;       /* MS-DOS style time */
-   r.r_ds = FP_SEG(name);
-   r.r_dx = FP_OFF(name);
-   r.r_es = FP_SEG(&ff->ff_95);
-   r.r_di = FP_OFF(&ff->ff_95);
-   r.r_flags = 0;
+   r.w.ax = 0x714e;
+   r.w.cx = attr;
+   r.w.si = 1;       /* MS-DOS style time */
+   r.w.ds = FP_SEG(name);
+   r.w.dx = FP_OFF(name);
+   r.w.es = FP_SEG(&ff->ff_95);
+   r.w.di = FP_OFF(&ff->ff_95);
+   r.w.flags = 0;
    intr(0x21, &r);
-   if(r.r_flags & 1) {     /* Failure */
+   if(r.w.flags & 1) {     /* Failure */
       ff->ff_95.ff_status = NOFIND95;
-      return r.r_ax;
+      return r.w.ax;
    }
-   ff->ff_95.ff_status = r.r_ax;
+   ff->ff_95.ff_status = r.w.ax;
    conv95(ff);
    return 0;            /* OK */
 }
 
 static int next95(FF_Block95 *ff)
-{  struct REGPACK r;
+{  union REGPACK r;
 
-   r.r_ax = 0x714f;
-   r.r_bx = ff->ff_95.ff_status;
-   r.r_si = 1;          /* MS-DOS style time/date */
-   r.r_es = FP_SEG(&ff->ff_95);
-   r.r_di = FP_OFF(&ff->ff_95);
-   r.r_flags = 0;
+   r.w.ax = 0x714f;
+   r.w.bx = ff->ff_95.ff_status;
+   r.w.si = 1;          /* MS-DOS style time/date */
+   r.w.es = FP_SEG(&ff->ff_95);
+   r.w.di = FP_OFF(&ff->ff_95);
+   r.w.flags = 0;
    intr(0x21, &r);
-   if(r.r_flags & 1)
-      return r.r_ax;
+   if(r.w.flags & 1)
+      return r.w.ax;
    conv95(ff);
    return 0;
 }
@@ -217,10 +219,10 @@ int findnext95(FF_Block95 *ff)
 void findstop95(FF_Block95 *ff)
 {  assert(ff);
    if(ff->ff_95.ff_status != NOFIND95) {
-      struct REGPACK r;
+      union REGPACK r;
 
-      r.r_ax = 0x71a1;
-      r.r_bx = ff->ff_95.ff_status;
+      r.w.ax = 0x71a1;
+      r.w.bx = ff->ff_95.ff_status;
       intr(0x21, &r);
    }
 }

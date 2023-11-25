@@ -34,7 +34,7 @@
 #include <errno.h>
 #include <string.h>
 #include <dos.h>
-#include <dir.h>
+#include <direct.h>
 
 #include "dir95.h"
 #include "io95.h"

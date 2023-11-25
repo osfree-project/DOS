@@ -23,15 +23,15 @@ static char const rcsid[] =
 #endif
 
 int rename95(const char * const oldnam, const char * const newnam)
-{	struct REGPACK r;
+{	union REGPACK r;
 
 	assert(oldnam);
 	assert(newnam);
-	r.r_ds = FP_SEG(oldnam);
-	r.r_dx = FP_OFF(oldnam);
-	r.r_es = FP_SEG(newnam);
-	r.r_di = FP_OFF(newnam);
-	r.r_si = 0;
-	r.r_cx = 0;
+	r.w.ds = FP_SEG(oldnam);
+	r.w.dx = FP_OFF(oldnam);
+	r.w.es = FP_SEG(newnam);
+	r.w.di = FP_OFF(newnam);
+	r.w.si = 0;
+	r.w.cx = 0;
 	return callWin95(0x56, &r);
 }

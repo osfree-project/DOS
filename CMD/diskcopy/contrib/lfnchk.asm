@@ -47,8 +47,8 @@ _TEXT segment public word 'CODE' use16
 ;===          LFN supported on this disk: 1                            ===
 ;=========================================================================
 
-	public _CheckDriveOnLFN
-_CheckDriveOnLFN:
+	public CheckDriveOnLFN_
+CheckDriveOnLFN_:
 	push  es
 	push  di
 

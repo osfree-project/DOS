@@ -29,7 +29,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <dos.h>
-#include <dir.h>
+#include <direct.h>
 
 #include "io95.h"
 

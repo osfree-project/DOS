@@ -25,8 +25,8 @@ srcfiles  = $(p)diskcopy$(e) $(p)drive$(e) $(p)memtypes$(e) $(p)simplcpy$(e) $(p
     $(p)open95$(e)
 
 
-ADD_COPT = -i=$(MYDIR)..$(SEP)include
-
+ADD_COPT = -ms -i=$(MYDIR)..$(SEP)include -i=$(MYDIR)..$(SEP)..$(SEP)include
+ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 JWASM = 1
 
 !include $(%ROOT)tools/mk/appsdos.mk

@@ -284,8 +284,8 @@ _MouseGotoXY:
 ;===        + status mouse buttons.                                    ===
 ;=========================================================================                                                                   
 
-        public _CountButtonPresses
-_CountButtonPresses:
+        public CountButtonPresses_
+CountButtonPresses_:
         push bp
         mov  bp, sp
 

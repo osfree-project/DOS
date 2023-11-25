@@ -22,7 +22,7 @@
 
 FAIL	EQU 3              ;; fail on critical error.
 
-extern _SetCriticalHandler: near
+extern SetCriticalHandler_: near
 
 _DATA segment public word 'DATA' use16
 
@@ -63,12 +63,12 @@ criticalhandler:
 ;*** Installs our critical error handler.                            ***
 ;***********************************************************************
 
-        public _CriticalHandlerOn
-_CriticalHandlerOn:
+        public CriticalHandlerOn_
+CriticalHandlerOn_:
 
         mov  ax, criticalhandler       ;; Point the real critical handler
         push ax                        ;; to our handler.
-        call _SetCriticalHandler
+        call SetCriticalHandler_
         pop  ax
         
         mov  [CriterrOccured], 0  ;; Make sure that there is no pending
@@ -85,8 +85,8 @@ _CriticalHandlerOn:
 ;*** Remark: can only be called once.                                ***
 ;***********************************************************************
         
-        public _CriticalErrorOccured
-_CriticalErrorOccured:
+        public CriticalErrorOccured_
+CriticalErrorOccured_:
 
         xor  ax, ax
         mov  al, [CriterrOccured]      ;; See if there hasn't been a critical
@@ -103,8 +103,8 @@ _CriticalErrorOccured:
 ;*** Returns the cause of the critical error.                        ***
 ;***********************************************************************
 
-        global _GetCriticalCause
-_GetCriticalCause:
+        global GetCriticalCause_
+GetCriticalCause_:
 
         xor  ax, ax                    ;; Return critical error cause.
         mov  al, [cause]
@@ -118,8 +118,8 @@ _GetCriticalCause:
 ;*** Returns the status byte for the critical error.                 ***
 ;***********************************************************************
 
-        global _GetCriticalStatus
-_GetCriticalStatus:
+        global GetCriticalStatus_
+GetCriticalStatus_:
 
         xor  ax, ax
         mov  al, [status]              ;; Return status byte.

@@ -35,21 +35,21 @@ static char const rcsid[] =
    "$Id: WIN95API.C,v 1.1 2006-07-04 19:07:58 perditionc Exp $";
 #endif
 
-int callWin95(int fct, struct REGPACK * const rp)
-{  struct REGPACK r;       /* temporary stack for the registers */
+int callWin95(int fct, union REGPACK * const rp)
+{  union REGPACK r;       /* temporary stack for the registers */
 
    assert(rp);
-   rp->r_flags = 1;           /* asure that the carry is set */
+   rp->w.flags = 1;           /* asure that the carry is set */
    memcpy(&r, rp, sizeof(r));
-   rp->r_ax = 0x7100 | fct;
+   rp->w.ax = 0x7100 | fct;
    intr(0x21, rp);            /* call Win95 API */
-   if((rp->r_flags & 1) && (rp->r_ax == 1 || rp->r_ax == 0x7100)) {
+   if((rp->w.flags & 1) && (rp->w.ax == 1 || rp->w.ax == 0x7100)) {
       /* try DOS API */
-      r.r_ax = fct << 8;
+      r.w.ax = fct << 8;
       memcpy(rp, &r, sizeof(r));
       intr(0x21, rp);      /* call DOS API */
    }
-   if(rp->r_flags & 1)
-      return errno = rp->r_ax;      /* keep error code */
+   if(rp->w.flags & 1)
+      return errno = rp->w.ax;      /* keep error code */
    return 0;      /* success */
 }

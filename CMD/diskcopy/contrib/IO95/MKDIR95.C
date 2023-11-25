@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <dos.h>
+#include "tcc2wat.h"
 #include "io95.h"
 #include "io95_loc.h"
 
@@ -31,11 +32,11 @@ static char const rcsid[] =
 #endif
 
 static int callAPI(int fct, const char * const dnam)
-{	struct REGPACK r;
+{	union REGPACK r;
 
 	assert(dnam);
-	r.r_ds = FP_SEG(dnam);
-	r.r_dx = FP_OFF(dnam);
+	r.w.ds = FP_SEG(dnam);
+	r.w.dx = FP_OFF(dnam);
 	return callWin95(fct, &r);
 }
 

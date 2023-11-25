@@ -29,6 +29,8 @@
 #include "drive.h"
 #include "nlsaspct.h"
 
+#include "tcc2wat.h"
+
 #include <dos.h>
 #include <stdio.h>
 

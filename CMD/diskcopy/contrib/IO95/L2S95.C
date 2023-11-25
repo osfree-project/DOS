@@ -29,24 +29,24 @@ static char const rcsid[] =
 #endif
 
 static int conv95(int fct, const char * const fnam, char * const buf)
-{	struct REGPACK r;
+{	union REGPACK r;
 
 	assert(fnam);
 	assert(buf);
-	r.r_ax = 0x7160;
-	r.r_cx = 0x8000 | fct;
-	r.r_ds = FP_SEG(fnam);
-	r.r_si = FP_OFF(fnam);
-	r.r_es = FP_SEG(buf);
-	r.r_di = FP_OFF(buf);
-	r.r_flags = 0;
+	r.w.ax = 0x7160;
+	r.w.cx = 0x8000 | fct;
+	r.w.ds = FP_SEG(fnam);
+	r.w.si = FP_OFF(fnam);
+	r.w.es = FP_SEG(buf);
+	r.w.di = FP_OFF(buf);
+	r.w.flags = 0;
 	*buf = '\0';
 	intr(0x21, &r);
-	if(r.r_flags & 1) {
-		if(*buf && r.r_ax == 3 && strlen(buf) > 255)
+	if(r.w.flags & 1) {
+		if(*buf && r.w.ax == 3 && strlen(buf) > 255)
 			/* assume the bug */
 			return 0;
-		return r.r_ax;
+		return r.w.ax;
 	}
 	return 0;
 }

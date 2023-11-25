@@ -91,10 +91,10 @@ _TEXT	segment word public 'CODE' use16
 ;=== NOTE:This function should be called before any other XMS function! ===
 ;==========================================================================
 
-        public _XMSinit
-        public _XMMinit
-_XMSinit:
-_XMMinit:
+        public XMSinit_
+        public XMMinit_
+XMSinit_:
+XMMinit_:
         push  bp
         SaveRegs
 
@@ -139,8 +139,8 @@ EndOfProc:
 ;=== Returns number of bytes available in largest free block.          ===
 ;=========================================================================
 
-        public _XMScoreleft
-_XMScoreleft:
+        public XMScoreleft_
+XMScoreleft_:
         push bp
         SaveRegs
 
@@ -175,8 +175,8 @@ EndOfProc2:
 ;===       that is larger than size.                                    ===
 ;==========================================================================
 
-        public _XMSalloc
-_XMSalloc:
+        public XMSalloc_
+XMSalloc_:
         push bp
         mov  bp, sp
 
@@ -232,8 +232,8 @@ EndOfProc3:
 ;===  Returns 1 if successful, 0 if not.                                ===
 ;==========================================================================
 
-        global _XMSrealloc
-_XMSrealloc:
+        global XMSrealloc_
+XMSrealloc_:
         push bp
         mov  bp, sp
         
@@ -267,8 +267,8 @@ next41:
 ;=== if successful, 0 if not.                                            ===
 ;===========================================================================
 
-        public _XMSfree
-_XMSfree:
+        public XMSfree_
+XMSfree_:
 
         push bp
         mov  bp, sp
@@ -332,8 +332,8 @@ EndOfProc6:
 ;=== Returns number of bytes copied, or 0 on error.                      ===
 ;===========================================================================
 
-        public _DOStoXMSmove
-_DOStoXMSmove:
+        public DOStoXMSmove_
+DOStoXMSmove_:
 
         push bp
         mov  bp, sp
@@ -382,8 +382,8 @@ EndOfProc7:
 ;=== Returns number of bytes copied, or 0 on error.                     ===
 ;==========================================================================
 
-        public _XMStoDOSmove
-_XMStoDOSmove:
+        public XMStoDOSmove_
+XMStoDOSmove_:
 
         push bp
         mov  bp, sp

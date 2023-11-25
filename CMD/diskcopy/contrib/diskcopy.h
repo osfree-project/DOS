@@ -68,4 +68,24 @@ int OnCBreak (void);
 void ReadSectors (int drive, int nsects, int lsect, void *buffer,
 		  int bytespersector);
 
+#pragma aux absread =  \
+      "push bp"           \
+      "int 0x25"          \
+      "sbb ax, ax"        \
+      "popf"              \
+      "pop bp"            \
+      parm [ax] [cx] [dx] [bx] \
+      modify [si di] \
+      value [ax];
+
+#pragma aux abswrite =  \
+      "push bp"           \
+      "int 0x26"          \
+      "sbb ax, ax"        \
+      "popf"              \
+      "pop bp"            \
+      parm [ax] [cx] [dx] [bx] \
+      modify [si di] \
+      value [ax];
+
 #endif

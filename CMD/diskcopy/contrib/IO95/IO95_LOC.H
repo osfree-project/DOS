@@ -12,7 +12,7 @@
 #ifndef __IO95_LOC_H
 #define __IO95_LOC_H
 
-int callWin95(int fct, struct REGPACK * const rp);
+int callWin95(int fct, union REGPACK * const rp);
 /*	Invoke Win95/DOS function fct. It assumes that both APIs are the
 	same except for the function number itself.
 

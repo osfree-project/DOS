@@ -76,8 +76,8 @@ call_real_handler:
 ;*** to handler.                                                      ***
 ;************************************************************************
 
-        public _SetCriticalHandler      
-_SetCriticalHandler:
+        public SetCriticalHandler_
+SetCriticalHandler_:
         push bp
         mov  bp, sp
         push es
@@ -97,7 +97,7 @@ _SetCriticalHandler:
         pop  bp
         ret
 
-%if 0
+if 0
 ;**************************************************************************
 ;***                       RenewCriticalHandler                         ***
 ;**************************************************************************
@@ -106,8 +106,8 @@ _SetCriticalHandler:
 ;*** Sets the routine to call to handler.                               ***
 ;**************************************************************************
 
-        public _RenewCriticalHandler
-_RenewCriticalHandler:
+        public RenewCriticalHandler_
+RenewCriticalHandler_:
         push ds
 
         mov  bx, sp
@@ -117,6 +117,6 @@ _RenewCriticalHandler:
         pop  ds
         ret
 
-%endif
+endif
 _TEXT	ends
 	end

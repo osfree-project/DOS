@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __WATCOM__
+#ifdef __WATCOMC__
 #include "tcc2wat.h"
 #endif
 

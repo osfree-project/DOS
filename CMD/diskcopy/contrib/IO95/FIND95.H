@@ -30,12 +30,15 @@ typedef unsigned char QWORD[8];
 typedef struct ffblk95 {
    char   ff_fcb[0x15];
    unsigned char   ff_attr;
+#undef ff_attrib
 #define ff_attrib ff_attr
    unsigned short  ff_time;
+#undef ff_ftime
 #define ff_ftime ff_time
    unsigned short  ff_date;
 #define ff_fdate ff_date
    long   ff_size;
+#undef ff_fsize
 #define ff_fsize ff_size
    char   ff_name[14];
 /* block for Win95 */

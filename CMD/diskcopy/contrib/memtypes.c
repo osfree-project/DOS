@@ -30,7 +30,7 @@
 #include <string.h>
 
 #ifndef HI_TECH_C
-#ifdef __WATCOM__
+#ifdef __WATCOMC__
 #include <direct.h>
 #include <tcc2wat.h>
 #else

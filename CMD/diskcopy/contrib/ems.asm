@@ -78,8 +78,8 @@ _TEXT	segment  word public 'CODE' use16
 ;=== EMSmap() below).                                                   ===
 ;==========================================================================
 
-	public _EMSbaseaddress
-_EMSbaseaddress:
+	public EMSbaseaddress_
+EMSbaseaddress_:
         push  es
 	push  si
 	push  di
@@ -127,8 +127,8 @@ EndOfProc1:
 ;=== Returns current EMS version, -1 if not found or obsolete.          ===
 ;==========================================================================
 
-        public _EMSversion
-_EMSversion:
+        public EMSversion_
+EMSversion_:
 
         mov  ah, EMSservice7
         int  EMS_INT
@@ -154,8 +154,8 @@ EndOfProc2:
 ;=== Returns 0 if EMS system OK, -1 if not.                             ===
 ;==========================================================================
 
-        public _EMSstatus
-_EMSstatus:
+        public EMSstatus_
+EMSstatus_:
 
         mov  ah, EMSservice1
         int  EMS_INT
@@ -180,8 +180,8 @@ EndOfProc3:
 ;=== Returns number of free EMS pages (each page is 16k), -1 if error.  === 
 ;==========================================================================
 
-        public _EMSpages
-_EMSpages:
+        public EMSpages_
+EMSpages_:
 
         mov  ah, EMSservice3
         int  EMS_INT
@@ -208,8 +208,8 @@ EndOfProc4:
 ;=== NOTE: always free any handles when you are done!.                  ===
 ;==========================================================================
 
-        public _EMSalloc
-_EMSalloc:
+        public EMSalloc_
+EMSalloc_:
         mov  bx, sp
 
         mov  ah, EMSservice4
@@ -236,8 +236,8 @@ EndOfProc5:
 ;=== Frees handle block, returns 0 if successful, -1 if error.          ===
 ;==========================================================================
 
-        public _EMSfree
-_EMSfree:
+        public EMSfree_
+EMSfree_:
         mov   bx, sp
 
         mov  ah, EMSservice6
@@ -267,8 +267,8 @@ EndOfProc6:
 ;=== EMSbaseaddress(), bank 1 starts at that segment with offset 16k, etc. ===
 ;=============================================================================
 
-        public _EMSmap
-_EMSmap:
+        public EMSmap_
+EMSmap_:
         push bp
         mov  bp, sp
 
@@ -297,8 +297,8 @@ EndOfProc7:
 ;=== changed.                                                          ===
 ;=========================================================================
 
-        public _EMSResizable
-_EMSResizable:
+        public EMSResizable_
+EMSResizable_:
 
         mov  ah, EMSservice7                    ;; Get version number, 
         int  EMS_INT
@@ -327,8 +327,8 @@ EndOfProc8:
 ;=== Returns: 0 on success, -1 or error.                               ===
 ;=========================================================================
 
-        public _EMSResize
-_EMSResize:
+        public EMSResize_
+EMSResize_:
 
         push bp
         mov  bp, sp

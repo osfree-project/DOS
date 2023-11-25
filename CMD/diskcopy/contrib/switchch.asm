@@ -28,8 +28,8 @@
 
 _TEXT segment word public 'CODE' use16
 
-        public _SwitchChar
-_SwitchChar:
+        public SwitchChar_
+SwitchChar_:
 
         mov  ax, 3700h      ; Get DOS switch character
         int  21h

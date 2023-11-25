@@ -22,7 +22,7 @@
 #include <errno.h>
 #include <string.h>
 #include <dos.h>
-#include <dir.h>
+#include <direct.h>
 
 #ifdef USE_IO95
 #undef USE_IO95
@@ -46,16 +46,16 @@ static char const rcsid[] =
 		-1: error
 */
 int getcurdir95(int drive, char * const dir)
-{	struct REGPACK rp;
+{	union REGPACK rp;
 
 	assert(dir);
-	rp.r_ax = 0x7147;
-	rp.r_si = FP_OFF(dir);
-	rp.r_ds = FP_SEG(dir);
-	rp.r_dx = drive;
+	rp.w.ax = 0x7147;
+	rp.w.si = FP_OFF(dir);
+	rp.w.ds = FP_SEG(dir);
+	rp.w.dx = drive;
 
 	if(callWin95(0x47, &rp)) {
-		errno = rp.r_ax;
+		errno = rp.w.ax;
 		return -1;
 	}
 
