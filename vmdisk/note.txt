@@ -1,1 +1,0 @@
-VMDISK is image file creation of FDD disks for boot into MVM.
