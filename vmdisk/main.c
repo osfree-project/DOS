@@ -1,4 +1,18 @@
-/* VMDISK is image file creation of FDD disks for boot into MVM. */
+/*!
+
+   @file
+
+   @ingroup vmdisk
+
+   @brief VMDISK command - image file creation of FDD disks for boot into MVM.
+
+   (c) osFree Project 2002-2023, <http://www.osFree.org>
+   for licence see licence.txt in root directory, or project website
+
+   @author Yuri Prokushev (yuri.prokushev@gmail.com)
+
+*/
+
 
 #include <os2.h>
 #include <bsedev.h>
@@ -9,11 +23,11 @@
 typedef
 	struct tagIMAGEHEADER
 	{
-		BYTE	Flags;
-		BYTE	Heads;
-		WORD	Tracks;
-		WORD	Sectors;
-		WORD	Bytes;
+		BYTE	Flags;		// Most probably. For known images always 0
+		BYTE	Heads;		// Number of heads
+		WORD	Tracks;		// Number of tracks
+		WORD	Sectors;	// Number of sectors per track
+		WORD	Bytes;		// Bytes per sector
 	} IMAGEHEADER;
 
 typedef struct tagparmList
@@ -60,14 +74,14 @@ void main(void)
 	*/
 	rc = DosDevIOCtl(
         	hfDrive,
-	        IOCTL_DISK,                  /* device catagory          */
-	        DSK_LOCKDRIVE,                  /* function code            */
-	        0,                      /* parameter packet address */
-	        0,                      /* parm list length         */
-	        0,                      /* parm list length address */
-	        0,                      /* address of extended BPB  */
-	        0,                      /* length of extended BPB   */
-	        0);                     /* address of ext BPB len   */
+	        IOCTL_DISK,			/* device catagory          */
+	        DSK_LOCKDRIVE,			/* function code            */
+	        0,				/* parameter packet address */
+	        0,				/* parm list length         */
+	        0,				/* parm list length address */
+	        0,				/* address of extended BPB  */
+	        0,				/* length of extended BPB   */
+	        0);				/* address of ext BPB len   */
 	if (rc != NO_ERROR)
 		error("DosDevIOCtl lock", rc);
 
@@ -75,17 +89,17 @@ void main(void)
 	 * Get the device parameters
 	 * (BPB = BIOS Parameter Block)
 	*/
-	parm.command = 1;           /* return the BPB for the media
-                                   currently in the drive   */
+	parm.command = 1;			/* return the BPB for the media
+						currently in the drive   */
 	rc = DosDevIOCtl(
         	hfDrive,
-	        IOCTL_DISK,             /* device catagory          */
-	        DSK_GETDEVICEPARAMS,    /* function code            */
-	        &parm,                  /* parameter packet address */
-	        parmLength,             /* parm list length         */
+	        IOCTL_DISK,			/* device catagory          */
+	        DSK_GETDEVICEPARAMS,		/* function code            */
+	        &parm,				/* parameter packet address */
+	        parmLength,			/* parm list length         */
 	        &parmLength,
-	        &bpb,                /* address of extended BPB  */
-	        bpbLength,           /* length of extended BPB   */
+	        &bpb,				/* address of extended BPB  */
+	        bpbLength,			/* length of extended BPB   */
 	        &bpbLength);
 
 	/*
@@ -93,14 +107,14 @@ void main(void)
 	*/      	
 	rc = DosDevIOCtl(
 		hfDrive,
-		IOCTL_DISK,                  /* device catagory          */
-		DSK_UNLOCKDRIVE,                  /* function code            */
-		0,                      /* parameter packet address */
-	        0,                      /* parm list length         */
-	        0,                      /* parm list length address */
-	        0,                      /* address of extended BPB  */
-	        0,                      /* length of extended BPB   */
-	        0);                     /* address of ext BPB len   */
+		IOCTL_DISK,			/* device catagory          */
+		DSK_UNLOCKDRIVE,		/* function code            */
+		0,				/* parameter packet address */
+	        0,				/* parm list length         */
+	        0,				/* parm list length address */
+	        0,				/* address of extended BPB  */
+	        0,				/* length of extended BPB   */
+	        0);				/* address of ext BPB len   */
 	if (rc != NO_ERROR)
 		error("DosDevIOCtl unlock", rc);
 
@@ -116,30 +130,30 @@ void main(void)
 
 	/* Open the file.  Use an existing file or create a new */
 	/* one if it doesn't exist.                                      */
-	rc = DosOpen("test.img",                    /* File path name */
-		&hfFile,                  /* File handle */
-		&ulActionTaken,                      /* Action taken */
-                100L,                           /* File primary allocation */
-                FILE_ARCHIVED | FILE_NORMAL,    /* File attribute */
+	rc = DosOpen("test.img",		/* File path name */
+		&hfFile,			/* File handle */
+		&ulActionTaken,			/* Action taken */
+                100L,				/* File primary allocation */
+                FILE_ARCHIVED | FILE_NORMAL,	/* File attribute */
                 OPEN_ACTION_CREATE_IF_NEW |
-                OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
+                OPEN_ACTION_OPEN_IF_EXISTS,	/* Open function type */
                 OPEN_FLAGS_NOINHERIT |
                 OPEN_SHARE_DENYNONE  |
-                OPEN_ACCESS_READWRITE,          /* Open mode of the file */
-                0L);                            /* No extended attribute */
+                OPEN_ACCESS_READWRITE,		/* Open mode of the file */
+                0L);				/* No extended attribute */
 
 	if (rc != NO_ERROR)
 		error("DosOpen", rc);
 
-	rc = DosWrite(hfFile,                /* File handle */
-		(PVOID)&ihImageHeader,         /* String to be written */
-		sizeof(ihImageHeader),        /* Size of string to be written */
-		&ulWrote);                   /* Bytes actually written */
+	rc = DosWrite(hfFile,			/* File handle */
+		(PVOID)&ihImageHeader,		/* String to be written */
+		sizeof(ihImageHeader),		/* Size of string to be written */
+		&ulWrote);			/* Bytes actually written */
 
 	if (rc != NO_ERROR)
 		error("DosWrite", rc);
 
-	rc = DosClose(hfFile);                /* Close the file */
+	rc = DosClose(hfFile);			/* Close the file */
 
 	if (rc != NO_ERROR)
 		error("DosClose", rc);
