@@ -34,12 +34,14 @@ void error(char *msg, int error)
 void main(void)
 {
 	HFILE hfDrive;
+	HFILE hfFile;
 	ULONG ulActionTaken;
 	IMAGEHEADER ihImageHeader;
 	BIOSPARAMETERBLOCK bpb;
 	ULONG bpbLength = sizeof(bpb);
 	parmList parm;
 	ULONG parmLength   = sizeof(parm);
+	ULONG ulWrote;
 	APIRET rc;      /* return code */
 
 	rc=DosOpen("A:",
@@ -112,7 +114,36 @@ void main(void)
 	ihImageHeader.Sectors = bpb.usSectorsPerTrack;
 	ihImageHeader.Bytes = bpb.usBytesPerSector;
 
-	// Write header
+	/* Open the file.  Use an existing file or create a new */
+	/* one if it doesn't exist.                                      */
+	rc = DosOpen("test.img",                    /* File path name */
+		&hfFile,                  /* File handle */
+		&ulActionTaken,                      /* Action taken */
+                100L,                           /* File primary allocation */
+                FILE_ARCHIVED | FILE_NORMAL,    /* File attribute */
+                OPEN_ACTION_CREATE_IF_NEW |
+                OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
+                OPEN_FLAGS_NOINHERIT |
+                OPEN_SHARE_DENYNONE  |
+                OPEN_ACCESS_READWRITE,          /* Open mode of the file */
+                0L);                            /* No extended attribute */
+
+	if (rc != NO_ERROR)
+		error("DosOpen", rc);
+
+	rc = DosWrite(hfFile,                /* File handle */
+		(PVOID)&ihImageHeader,         /* String to be written */
+		sizeof(ihImageHeader),        /* Size of string to be written */
+		&ulWrote);                   /* Bytes actually written */
+
+	if (rc != NO_ERROR)
+		error("DosWrite", rc);
+
+	rc = DosClose(hfFile);                /* Close the file */
+
+	if (rc != NO_ERROR)
+		error("DosClose", rc);
+
 	// Read track by track and write to image file
 
 }
