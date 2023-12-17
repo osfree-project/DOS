@@ -50,10 +50,10 @@ DEFMENU(MainMenu)
         SELECTION( "~Find File...",        ID_FIND,     0, 0)
         SELECTION( "~Print Report ...",    ID_PRINT,    0, 0)
         SEPARATOR
-        SELECTION( "1 AUTOEXEC.BAT",       ID_AUTOEXEC,    0, 0)
-        SELECTION( "2 CONFIG.SYS", ID_CONFIG,       0, 0)
-        SELECTION( "3 SYSTEM.INI",      ID_SYSTEM,        0, 0)
-        SELECTION( "4 WIN.INI",      ID_WIN,        0, 0)
+        SELECTION( "~1 AUTOEXEC.BAT",       ID_AUTOEXEC,    0, 0)
+        SELECTION( "~2 CONFIG.SYS", ID_CONFIG,       0, 0)
+        SELECTION( "~3 SYSTEM.INI",      ID_SYSTEM,        0, 0)
+        SELECTION( "~4 WIN.INI",      ID_WIN,        0, 0)
         SEPARATOR
         SELECTION( "E~xit",       ID_EXIT,     F3, 0)
     ENDPOPDOWN
@@ -85,7 +85,7 @@ int DfpMain(int argc, char *argv[])
 {
     WINDOW wnd;
 
-    wnd = CreateWindow(APPLICATION, "", 0, 0, -1, -1, &MainMenu, NULL, MainAppProc,  HASBORDER | MINMAXBOX | HASSTATUSBAR);
+    wnd = CreateWindow(APPLICATION, "", 0, 0, -1, -1, &MainMenu, NULL, MainAppProc,  HASSTATUSBAR);
 
     ProcessMessages();
 
@@ -100,9 +100,12 @@ static int MainAppProc(WINDOW wnd,MESSAGE msg,PARAM p1,PARAM p2)
 
     switch (msg)
         {
+        case CREATE_WINDOW:
+            rtn = DefaultWndProc(wnd, msg, p1, p2);
+            return rtn;
    	case CLOSE_WINDOW:
-    				UnLoadHelpFile();
-    				break;
+		UnLoadHelpFile();
+		break;
         case COMMAND:
 	    switch ((int)p1)
                 {
