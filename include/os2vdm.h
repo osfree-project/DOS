@@ -136,6 +136,11 @@ Notes:  if CX is not 636Ch on entry, INT 21/AH=6Ch is invoked, because a bug
         in an OS/2 VDM, the DOS Job File Table in the PSP contains an index
           into the OS/2 JFT in the Per-Task Data Area rather than an SFT index
           because the OS/2 SFT can contain more than 255 entries
+*/
+
+APIRET APIENTRY VdmQueryJFTSize(VOID);
+
+/*
 --------O-2164--DX0005-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - GET SECOND SFT FLAGS WORD
         AH = 64h
@@ -148,6 +153,11 @@ Notes:  if CX is not 636Ch on entry, INT 21/AH=6Ch is invoked, because a bug
           in OS/2 1.x FAPI erroneously called AH=64h instead of AH=6Ch
         the OS/2 SFT has two flags words rather than DOS's one word, and this
           function provides access to the word which is not present in DOS
+*/
+
+APIRET APIENTRY VdmQuerySecondSFT(VOID);
+
+/*
 --------O-2164--DX0006-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - UNLOAD DOSKRNL SYMBOLS & LOAD PROGR
         AH = 64h
@@ -171,6 +181,9 @@ Notes:  if CX is not 636Ch on entry, INT 21/AH=6Ch is invoked, because a bug
           in OS/2 1.x FAPI erroneously called AH=64h instead of AH=6Ch
         used by WinOS2 to make direct calls to OS2KRNL, bypassing the overhead
           of DOSKRNL
+*/
+
+/*
 --------O-2164--DX0008-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - GET LOADING MESSAGE
         AH = 64h
@@ -182,6 +195,11 @@ Notes:  if CX is not 636Ch on entry, INT 21/AH=6Ch is invoked, because a bug
           in OS/2 1.x FAPI erroneously called AH=64h instead of AH=6Ch
         this function permits National Language Support for the initial message
           displayed while WinOS2 starts a full-screen session
+*/
+
+APIRET APIENTRY VdmQueryLoading(PSZ pszMessage);
+
+/*
 --------O-2164--CX636C-----------------------
 INT 21 U - OS/2 v2.1+ Virtual DOS Machine - OS/2 API support
         AH = 64h
@@ -561,17 +579,17 @@ HLT is our magic pill
 
 ing 8, 4 tap occurs, A part of OS2KRNL called EM86 (Emulation 8086) receives the fault
 and takes action. EM86 looks at the registers and the _two_bytes_following_the_HLT_ and
-determines that this special request and not areal HLT instruction, The cove ses
+determines that this special request and not a real HLT instruction, The cove ses
 
 The HLT instruction is a Ring 0 instruction; since V86 mode is
 a SVC xxx macro, where xxx ts the ordinal number of the function
 to call in OS2KRNL; the dispatcher in MVDM (part of OS2KRNL) knows 
 all the valid xxx calls
 
-‘Many opcodes that 8086 provides are now Ring. 0 only, and EMB86 emulates 
+‘Many opcodes that 8086 provides are now Ring 0 only, and EM86 emulates 
 the 8086 actions of these privileged instructions, If a special request HLT
 is found, MVDM (also part of OS2KRNL) is given the request for dispatching
-and action. ‘There is a second magic pill EM86 uses, the ARPL instruction.
+and action. There is a second magic pill EM86 uses, the ARPL instruction.
 VDD stubs use the ARPL; DOSKRNL and FSFILTER
 
 More similarities to Windows! Windows Enhanced mode uses ARPL, for the
