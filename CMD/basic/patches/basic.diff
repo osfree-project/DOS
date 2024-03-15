@@ -9,3 +9,3131 @@ diff -urN basic\bwbasic.h newbasic\bwbasic.h
    int position;                    /* current position in line */
    int cmdnum;                      /* C_... */
    int Startpos;                    /* start of rest of line read from buffer */
+diff -urN basic\bwb_inp.c newbasic\bwb_inp.c
+--- basic\bwb_inp.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwb_inp.c	Mon Dec 18 20:57:13 2023
+@@ -185,6 +185,10 @@
+   assert(My->SYSIN != NULL);
+   assert(My->SYSIN->cfp != NULL);
+ 
++// save position
++// write status line
++// restore position
++
+   if (prompt != NULL)
+   {
+     while (*prompt)
+diff -urN basic\bwb_tbl.c newbasic\bwb_tbl.c
+--- basic\bwb_tbl.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwb_tbl.c	Sun Dec 17 21:55:14 2023
+@@ -1147,6 +1147,51 @@
+    '\\',                        /* OptionUsingLength */
+    }
+   ,
++  {
++   "GW-BASIC",                        /* Name */
++   M86,                                /* OptionVersionBitmask */
++   "M86",                        /* ID */
++   "Microsoft GW-BASIC 3.23",        /* Description */
++   "Microsoft BASIC Reference Manual",        /* Reference Title */
++   "by Microsoft",                /* Reference Author */
++   "(c) 1983, 1984, 1985, 1986, 1987, 1988, Microsoft",        /* Reference Copyright */
++   "???",        /* Reference URL1 */
++   "???",        /* Reference URL2 */
++   OPTION_BUGS_ON,                /* OptionFlags */
++   128,                                /* OptionReclenInteger */
++   0,                                /* OptionBaseInteger */
++   "%m/%d/%Y",                        /* OptionDateFormat */
++   "%H:%M:%S",                        /* OptionTimeFormat */
++   '$',                                /* OptionStringChar */
++   '#',                                /* OptionDoubleChar */
++   '!',                                /* OptionSingleChar */
++   '\0',                                /* OptionCurrencyChar */
++   '&',                                /* OptionLongChar */
++   '%',                                /* OptionIntegerChar */
++   '\0',                                /* OptionByteChar */
++   '"',                                /* OptionQuoteChar */
++   '\'',                        /* OptionCommentChar */
++   ':',                                /* OptionStatementChar */
++   '?',                                /* OptionPrintChar */
++   '\0',                        /* OptionInputChar */
++   '\0',                        /* OptionImageChar */
++   '(',                                /* OptionLparenChar */
++   ')',                                /* OptionRparenChar */
++   '#',                                /* OptionFilenumChar */
++   '\0',                        /* OptionAtChar */
++   '#',                                /* OptionUsingDigit */
++   ',',                                /* OptionUsingComma */
++   '.',                                /* OptionUsingPeriod */
++   '+',                                /* OptionUsingPlus */
++   '-',                                /* OptionUsingMinus */
++   '^',                                /* OptionUsingExrad */
++   '$',                                /* OptionUsingDollar */
++   '*',                                /* OptionUsingFiller */
++   '_',                                /* OptionUsingLiteral */
++   '!',                                /* OptionUsingFirst */
++   '&',                                /* OptionUsingAll */
++   '\\',                        /* OptionUsingLength */
++   }
+ };
+ 
+ 
+diff -urN basic\bwb_var.c newbasic\bwb_var.c
+--- basic\bwb_var.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwb_var.c	Mon Dec 18 21:11:22 2023
+@@ -3167,6 +3167,17 @@
+ }
+ 
+ LineType *
++bwb_OPTION_TERMINAL_PC (LineType * l)
++{
++  /* OPTION TERMINAL ANSI */
++  assert (l != NULL);
++  assert( My != NULL );
++  
++  My->OptionTerminalType = C_OPTION_TERMINAL_PC;
++  return (l);
++}
++
++LineType *
+ bwb_OPTION_TIME (LineType * l)
+ {
+   /* OPTION TIME format$ */
+diff -urN basic\bwbasic.c newbasic\bwbasic.c
+--- basic\bwbasic.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwbasic.c	Mon Dec 18 21:26:23 2023
+@@ -65,27 +65,11 @@
+ GlobalType *My = NULL;
+ 
+ static char *Banner[] = {
+-  "########  ##    ## ##      ##    ###    ######## ######## ########            ",
+-  "##     ##  ##  ##  ##  ##  ##   ## ##      ##    ##       ##     ##           ",
+-  "##     ##   ####   ##  ##  ##  ##   ##     ##    ##       ##     ##           ",
+-  "########     ##    ##  ##  ## ##     ##    ##    ######   ########            ",
+-  "##     ##    ##    ##  ##  ## #########    ##    ##       ##   ##             ",
+-  "##     ##    ##    ##  ##  ## ##     ##    ##    ##       ##    ##            ",
+-  "########     ##     ###  ###  ##     ##    ##    ######## ##     ##           ",
+-  "                                                                              ",
+-  "                                                                              ",
+-  "                                    ########     ###     ######  ####  ###### ",
+-  "                                    ##     ##   ## ##   ##    ##  ##  ##    ##",
+-  "                                    ##     ##  ##   ##  ##        ##  ##      ",
+-  "                                    ########  ##     ##  ######   ##  ##      ",
+-  "                                    ##     ## #########       ##  ##  ##      ",
+-  "                                    ##     ## ##     ## ##    ##  ##  ##    ##",
+-  "                                    ########  ##     ##  ######  ####  ###### ",
+-  "                                                                              ",
+-  "Bywater BASIC Interpreter, version 3.20                                       ",
++  "Bywater BASIC Interpreter, version 3.23                                       ",
+   "Copyright (c) 1993, Ted A. Campbell                                           ",
+   "Copyright (c) 1995-1997, Jon B. Volkoff                                       ",
+   "Copyright (c) 2014-2017, Howard Wulf, AF5NE                                   ",
++  "Copyright (c) 2024, osFree                                                    ",
+   "                                                                              ",
+   NULL
+ };
+@@ -302,7 +286,7 @@
+   assert( My->SYSOUT != NULL );
+   assert( My->SYSOUT->cfp != NULL );
+ 
+-   
++  bwx_CLS();
+   for (i = 0; Banner[i] != NULL; i++)
+   {
+     fprintf (My->SYSOUT->cfp, "%s\n", Banner[i]);
+@@ -509,7 +493,7 @@
+   My->IsInteractive = TRUE;
+   My->OptionSleepDouble = 1;
+   My->OptionIndentInteger = 2;
+-  My->OptionTerminalType = C_OPTION_TERMINAL_NONE;
++  My->OptionTerminalType = C_OPTION_TERMINAL_PC; // !!TODO!! Implement IBM PC terminal
+   My->OptionRoundType = C_OPTION_ROUND_BANK;
+   My->NextValidLineNumber = MINLIN;
+   My->IncludeLevel = 0;                /* %INCLUDE */
+@@ -602,7 +586,7 @@
+   var_init ();
+   IntrinsicFunction_init ();
+   UserFunction_init ();
+-  OptionVersionSet (0);
++  OptionVersionSet (24);
+   /* OK */
+   return TRUE;
+ }
+@@ -3393,6 +3377,9 @@
+       break;
+    case C_OPTION_TERMINAL_ANSI:
+       r = bwb_OPTION_TERMINAL_ANSI( l );
++      break;
++   case C_OPTION_TERMINAL_PC:
++      r = bwb_OPTION_TERMINAL_PC( l );
+       break;
+    case C_OPTION_TERMINAL_NONE:
+       r = bwb_OPTION_TERMINAL_NONE( l );
+diff -urN basic\bwbasic.h newbasic\bwbasic.h
+--- basic\bwbasic.h	Fri Mar 15 21:00:38 2024
++++ newbasic\bwbasic.h	Mon Dec 18 21:10:57 2023
+@@ -317,7 +317,7 @@
+ **
+ */
+ #ifndef   DEF_PROMPT
+-#define   DEF_PROMPT         "bwBASIC:\n"
++#define   DEF_PROMPT         "Ok\n"
+ #endif /* DEF_PROMPT */
+ #endif /* FALSE */
+ 
+@@ -536,7 +536,7 @@
+ ** default value for OPTION PROMPT
+ **
+ */
+-#define   DEF_PROMPT          "bwBASIC: "
++#define   DEF_PROMPT          "Ok\n"
+ #endif /* DEF_PROMPT */
+ 
+ #ifndef   DEF_EXTENSION
+@@ -1559,30 +1559,31 @@
+ extern VersionType bwb_vertable[ /* NUM_VERSIONS  */ ];        /* table of predefined versions  */
+ extern const size_t NUM_VERSIONS;        /* upto 32 BASIC dialects */
+ /* OptionVersionValue */
+-#define B15 (1UL<< 0)                /* Bywater    */
+-#define S70 (1UL<< 1)                /* CALL/360   */
+-#define C77 (1UL<< 2)                /* CBASIC-II  */
+-#define D64 (1UL<< 3)                /* Dartmouth  */
+-#define E78 (1UL<< 4)                /* ECMA-55    */
+-#define E86 (1UL<< 5)                /* ECMA-116   */
+-#define G74 (1UL<< 6)                /* GCOS       */
+-#define HB1 (1UL<< 7)                /* Handbook1  */
+-#define HB2 (1UL<< 8)                /* Handbook2  */
+-#define H80 (1UL<< 9)                /* Heath      */
+-#define G65 (1UL<<10)                /* Mark-I     */
+-#define G67 (1UL<<11)                /* Mark-II    */
+-#define M80 (1UL<<12)                /* MBASIC     */
+-#define D73 (1UL<<13)                /* PDP-8      */
+-#define D70 (1UL<<14)                /* PDP-11     */
+-#define R86 (1UL<<15)                /* RBASIC     */
+-#define D71 (1UL<<16)                /* RSTS-11    */
+-#define I70 (1UL<<17)                /* System/360 */
+-#define I73 (1UL<<18)                /* System/370 */
+-#define T80 (1UL<<19)                /* TRS-80     */
+-#define V09 (1UL<<20)                /* Vintage    */
+-#define T79 (1UL<<21)                /* XBASIC     */
+-#define H14 (1UL<<22)                /* Haart      */
+-#define B93 (1UL<<23)                /* Bywater-2  */
++#define B15 (1UL<< 0)                /* Bywater       */
++#define S70 (1UL<< 1)                /* CALL/360      */
++#define C77 (1UL<< 2)                /* CBASIC-II     */
++#define D64 (1UL<< 3)                /* Dartmouth     */
++#define E78 (1UL<< 4)                /* ECMA-55       */
++#define E86 (1UL<< 5)                /* ECMA-116      */
++#define G74 (1UL<< 6)                /* GCOS          */
++#define HB1 (1UL<< 7)                /* Handbook1     */
++#define HB2 (1UL<< 8)                /* Handbook2     */
++#define H80 (1UL<< 9)                /* Heath         */
++#define G65 (1UL<<10)                /* Mark-I        */
++#define G67 (1UL<<11)                /* Mark-II       */
++#define M80 (1UL<<12)                /* MBASIC        */
++#define D73 (1UL<<13)                /* PDP-8         */
++#define D70 (1UL<<14)                /* PDP-11        */
++#define R86 (1UL<<15)                /* RBASIC        */
++#define D71 (1UL<<16)                /* RSTS-11       */
++#define I70 (1UL<<17)                /* System/360    */
++#define I73 (1UL<<18)                /* System/370    */
++#define T80 (1UL<<19)                /* TRS-80        */
++#define V09 (1UL<<20)                /* Vintage       */
++#define T79 (1UL<<21)                /* XBASIC        */
++#define H14 (1UL<<22)                /* Haart         */
++#define B93 (1UL<<23)                /* Bywater-2     */
++#define M86 (1UL<<24)                /* GW-BASIC 3.23 */
+ 
+ /* OptionFlags */
+ #define OPTION_STRICT_ON      0x0001        /* Do NOT allow implicit DIM */
+@@ -1981,6 +1982,7 @@
+ extern LineType *bwb_OPTION_TERMINAL (LineType * l);
+ extern LineType *bwb_OPTION_TERMINAL_ADM (LineType * l);
+ extern LineType *bwb_OPTION_TERMINAL_ANSI (LineType * l);
++extern LineType *bwb_OPTION_TERMINAL_PC (LineType * l);
+ extern LineType *bwb_OPTION_TERMINAL_NONE (LineType * l);
+ extern LineType *bwb_OPTION_TIME (LineType * l);
+ extern LineType *bwb_OPTION_TRACE (LineType * l);
+@@ -2645,6 +2647,8 @@
+ #define C_WEND                         298 /* WEND                           */
+ #define C_WHILE                        299 /* WHILE                          */
+ #define C_WRITE                        300 /* WRITE                          */
++
++#define C_OPTION_TERMINAL_PC           301 /* OPTION TERMINAL PC             */
+ 
+ 
+ /*-------------------------------------------------------------
+diff -urN basic\bwd_cmd.c newbasic\bwd_cmd.c
+--- basic\bwd_cmd.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwd_cmd.c	Mon Dec 18 21:12:09 2023
+@@ -67,7 +67,7 @@
+   "AS",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "AS",  /* Name */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79   /* OptionVersionBitmask */
+ },
+ {
+   C_AUTO,  /* UniqueID */
+@@ -80,7 +80,7 @@
+   "AUTO mode.  AUTO mode is also terminated by any ERROR or by pressing "
+   "control-C.",  /* Description */
+   "AUTO",  /* Name */
+-  B15 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_BACKSPACE,  /* UniqueID */
+@@ -169,7 +169,7 @@
+   "Load and execute another BASIC program, without clearing common "
+   "variables.  For System/370, the syntax is CHAIN filename$,parameter$.",  /* Description */
+   "CHAIN",  /* Name */
+-  B15 | B93 | S70 | C77 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_CHANGE,  /* UniqueID */
+@@ -191,21 +191,21 @@
+   "Sets all numeric variables to 0, and all string variables to "
+   "empty strings.",  /* Description */
+   "CLEAR",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_CLOAD,  /* UniqueID */
+   "CLOAD [filename$]",  /* Syntax */
+   "Loads an ASCII BASIC program into memory.",  /* Description */
+   "CLOAD",  /* Name */
+-  B15 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_CLOAD8,  /* UniqueID */
+   "CLOAD* arrayname",  /* Syntax */
+   "Loads a numeric array from a file saved using CSAVE*.",  /* Description */
+   "CLOAD*",  /* Name */
+-  B15 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_CLOSE,  /* UniqueID */
+@@ -248,7 +248,7 @@
+   "COMMON variable [, ...]",  /* Syntax */
+   "Designates variables to be passed to a CHAINed program.",  /* Description */
+   "COMMON",  /* Name */
+-  B15 | B93 | C77 | E86 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_CONSOLE,  /* UniqueID */
+@@ -272,7 +272,7 @@
+   "Continue a BASIC program after a STOP has been executed.  Program "
+   "resumes at the line after the STOP.",  /* Description */
+   "CONT",  /* Name */
+-  B15 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_CONTINUE,  /* UniqueID */
+@@ -304,21 +304,21 @@
+   "CSAVE [filename$]",  /* Syntax */
+   "Saves the current program into the file filename$ in ASCII format.",  /* Description */
+   "CSAVE",  /* Name */
+-  B15 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_CSAVE8,  /* UniqueID */
+   "CSAVE* ArrayName",  /* Syntax */
+   "Saves a numeric array into a file for later loading by CLOAD*.",  /* Description */
+   "CSAVE*",  /* Name */
+-  B15 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DATA,  /* UniqueID */
+   "DATA constant [, ...]",  /* Syntax */
+   "Stores numeric and string constants to be accessed by READ.",  /* Description */
+   "DATA",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_DEC,  /* UniqueID */
+@@ -333,7 +333,7 @@
+   "Defines a single-line function.  Single-line functions require "
+   "an equal sign.",  /* Description */
+   "DEF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_DEF,  /* UniqueID */
+@@ -362,14 +362,14 @@
+   "DEFDBL letter[-letter] [, ...]",  /* Syntax */
+   "Declares variables with single-letter names as numeric variables.",  /* Description */
+   "DEFDBL",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DEFINT,  /* UniqueID */
+   "DEFINT  letter[-letter] [, ...]",  /* Syntax */
+   "Declares variables with single-letter names as numeric variables.",  /* Description */
+   "DEFINT",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DEFLNG,  /* UniqueID */
+@@ -383,14 +383,14 @@
+   "DEFSNG letter[-letter] [, ...]",  /* Syntax */
+   "Declares variables with single-letter names as numeric variables.",  /* Description */
+   "DEFSNG",  /* Name */
+-  B15 | B93 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DEFSTR,  /* UniqueID */
+   "DEFSTR letter[-letter] [, ...]",  /* Syntax */
+   "Declares variables with single-letter names as string variables.",  /* Description */
+   "DEFSTR",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DELETE,  /* UniqueID */
+@@ -407,7 +407,7 @@
+   " If line numbers are not provided, they are assigned beginning "
+   "with 1.  Deleting a non-existing line does not cause an error.",  /* Description */
+   "DELETE",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | H80 | M80 | D73 | D70 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_DELIMIT,  /* UniqueID */
+@@ -424,7 +424,7 @@
+   "the OPTION BASE value is used.  If filenum is provided, then "
+   "the variable is virtual.",  /* Description */
+   "DIM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_DISPLAY,  /* UniqueID */
+@@ -476,21 +476,21 @@
+   "EDIT",  /* Syntax */
+   "implementation defined.",  /* Description */
+   "EDIT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ELSE,  /* UniqueID */
+   "ELSE",  /* Syntax */
+   "Introduces a default condition in a multi-line IF statement.",  /* Description */
+   "ELSE",  /* Name */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ELSEIF,  /* UniqueID */
+   "ELSEIF",  /* Syntax */
+   "Introduces a secondary condition in a multi-line IF statement.",  /* Description */
+   "ELSEIF",  /* Name */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_END,  /* UniqueID */
+@@ -499,7 +499,7 @@
+   "from the operating system level, then control returns to the "
+   "operating system, oterwise control reuturns to the BASIC prompt.",  /* Description */
+   "END",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_END_FUNCTION,  /* UniqueID */
+@@ -513,7 +513,7 @@
+   "END IF",  /* Syntax */
+   "Specifies the last line of a multi-line IF definition.",  /* Description */
+   "END IF",  /* Name */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_END_SELECT,  /* UniqueID */
+@@ -534,7 +534,7 @@
+   "ERASE variable [, ...]",  /* Syntax */
+   "Eliminates arrayed variables from a program.",  /* Description */
+   "ERASE",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_EXCHANGE,  /* UniqueID */
+@@ -607,7 +607,7 @@
+   "the variable variable$.  GET will automatically update the variable, "
+   "and PUT will automatically use the variable.",  /* Description */
+   "FIELD",  /* Name */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_FILE,  /* UniqueID */
+@@ -661,7 +661,7 @@
+   "number of times, which is determined by the values of start, "
+   "finish, and increment.",  /* Description */
+   "FOR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_FUNCTION,  /* UniqueID */
+@@ -712,7 +712,7 @@
+   "GO",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "GO",  /* Name */
+-  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_GO_SUB,  /* UniqueID */
+@@ -720,7 +720,7 @@
+   "Initiates a subroutine call to the line specified.  The subroutine "
+   "must end with RETURN.  The line may be a number or a label.",  /* Description */
+   "GO SUB",  /* Name */
+-  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_GO_TO,  /* UniqueID */
+@@ -728,7 +728,7 @@
+   "Branches program execution to the specified line.  The line may "
+   "be a number or a label.",  /* Description */
+   "GO TO",  /* Name */
+-  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_GOODBYE,  /* UniqueID */
+@@ -743,7 +743,7 @@
+   "Initiates a subroutine call to the line specified.  The subroutine "
+   "must end with RETURN.  The line may be a number or a label.",  /* Description */
+   "GOSUB",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_GOTO,  /* UniqueID */
+@@ -751,7 +751,7 @@
+   "Branches program execution to the specified line.  The line may "
+   "be a number or a label.",  /* Description */
+   "GOTO",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_HELP,  /* UniqueID */
+@@ -769,7 +769,7 @@
+   "branch to line2.  Otherwise continue to the next line.  LABELS "
+   "are not allowed.",  /* Description */
+   "IF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_IF_END,  /* UniqueID */
+@@ -799,7 +799,7 @@
+   "are executed, otherwise the program branches to the next ELSE "
+   "or ELSE IF command.",  /* Description */
+   "IF*THEN",  /* Name */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_IMAGE,  /* UniqueID */
+@@ -820,35 +820,35 @@
+   "INPUT \"prompt string\" , variable [, ...]",  /* Syntax */
+   "Reads input from the terminal after displaying a prompt.",  /* Description */
+   "INPUT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_INPUT,  /* UniqueID */
+   "INPUT # filenum , variable [, ...]s",  /* Syntax */
+   "Reads input from the file specified by filenum.",  /* Description */
+   "INPUT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_INPUT,  /* UniqueID */
+   "INPUT variable [, ...]",  /* Syntax */
+   "Reads input from the terminal.",  /* Description */
+   "INPUT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_INPUT_LINE,  /* UniqueID */
+   "INPUT LINE variable$",  /* Syntax */
+   "Reads entire line from the terminal into variable$.",  /* Description */
+   "INPUT LINE",  /* Name */
+-  B15 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_INPUT_LINE,  /* UniqueID */
+   "INPUT LINE # filenum , variable$",  /* Syntax */
+   "Reads entire line from a file into variable$.",  /* Description */
+   "INPUT LINE",  /* Name */
+-  B15 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_INPUT_LINE,  /* UniqueID */
+@@ -856,28 +856,28 @@
+   "Reads entire line from the terminal into variable$ after displaying "
+   "a prompt",  /* Description */
+   "INPUT LINE",  /* Name */
+-  B15 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LET,  /* UniqueID */
+   "[LET] variable [, ...] = value",  /* Syntax */
+   "Assigns the value to the variable.  The LET keyword is optional.",  /* Description */
+   "LET",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LINE,  /* UniqueID */
+   "LINE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "LINE",  /* Name */
+-  B15 | B93 | H14 | HB2 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LINE_INPUT,  /* UniqueID */
+   "LINE INPUT [[#] filenum,][\"prompt string\";] variable$",  /* Syntax */
+   "Reads entire line from the keyboard or a file into variable$.",  /* Description */
+   "LINE INPUT",  /* Name */
+-  B15 | B93 | H14 | HB2 | H80 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LIST,  /* UniqueID */
+@@ -885,7 +885,7 @@
+   "Lists BASIC program lines from line1 to line2 to the console "
+   "on stdout.",  /* Description */
+   "LIST",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LISTNH,  /* UniqueID */
+@@ -901,14 +901,14 @@
+   "Lists BASIC program lines from line1 to line2 to the printer "
+   "on stderr.",  /* Description */
+   "LLIST",  /* Name */
+-  B15 | C77 | H14 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | C77 | H14 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_LOAD,  /* UniqueID */
+   "LOAD [filename$]",  /* Syntax */
+   "Loads an ASCII BASIC program into memory.",  /* Description */
+   "LOAD",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_LOCAL,  /* UniqueID */
+@@ -948,7 +948,7 @@
+   "LPRINT [USING format-string$;] value ...",  /* Syntax */
+   "Send output to the printer (stderr).",  /* Description */
+   "LPRINT",  /* Name */
+-  B15 | S70 | E78 | E86 | H14 | HB2 | M80 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
++  B15 | S70 | E78 | E86 | H14 | HB2 | M80 | M86 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_LPRINTER,  /* UniqueID */
+@@ -975,7 +975,7 @@
+   "the right.  This is only for use with variables assigned to a "
+   "random access buffer with FIELD command.",  /* Description */
+   "LSET",  /* Name */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER,  /* UniqueID */
+@@ -983,126 +983,126 @@
+   "This command is reserved for use by the Bywater BASIC maintainer. "
+   " It is not for the BASIC programmer.",  /* Description */
+   "MAINTAINER",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS,  /* UniqueID */
+   "MAINTAINER CMDS",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "MAINTAINER CMDS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS_HTML,  /* UniqueID */
+   "MAINTAINER CMDS HTML",  /* Syntax */
+   "Dump COMMAND vs VERSION as HTML table",  /* Description */
+   "MAINTAINER CMDS HTML",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS_ID,  /* UniqueID */
+   "MAINTAINER CMDS ID",  /* Syntax */
+   "Dump COMMAND #define.",  /* Description */
+   "MAINTAINER CMDS ID",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS_MANUAL,  /* UniqueID */
+   "MAINTAINER CMDS MANUAL",  /* Syntax */
+   "Dump COMMAND manual.",  /* Description */
+   "MAINTAINER CMDS MANUAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS_SWITCH,  /* UniqueID */
+   "MAINTAINER CMDS_SWITCH",  /* Syntax */
+   "Dump COMMAND switch.",  /* Description */
+   "MAINTAINER CMDS SWITCH",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_CMDS_TABLE,  /* UniqueID */
+   "MAINTAINER CMDS TABLE",  /* Syntax */
+   "Dump COMMAND table.",  /* Description */
+   "MAINTAINER CMDS TABLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_DEBUG,  /* UniqueID */
+   "MAINTAINER DEBUG",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "MAINTAINER DEBUG",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_DEBUG_OFF,  /* UniqueID */
+   "MAINTAINER DEBUG OFF",  /* Syntax */
+   "Disable degug tracing.",  /* Description */
+   "MAINTAINER DEBUG OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_DEBUG_ON,  /* UniqueID */
+   "MAINTAINER DEBUG ON",  /* Syntax */
+   "Enable degug tracing.",  /* Description */
+   "MAINTAINER DEBUG ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS,  /* UniqueID */
+   "MAINTAINER FNCS",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "MAINTAINER FNCS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS_HTML,  /* UniqueID */
+   "MAINTAINER FNCS HTML",  /* Syntax */
+   "Dump FUNCTION vs VERSION as HTML table.",  /* Description */
+   "MAINTAINER FNCS HTML",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS_ID,  /* UniqueID */
+   "MAINTAINER FNCS ID",  /* Syntax */
+   "Dump FUNCTION #define.",  /* Description */
+   "MAINTAINER FNCS ID",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS_MANUAL,  /* UniqueID */
+   "MAINTAINER FNCS MANUAL",  /* Syntax */
+   "Dump FUNCTION manual.",  /* Description */
+   "MAINTAINER FNCS MANUAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS_SWITCH,  /* UniqueID */
+   "MAINTAINER FNCS SWITCH",  /* Syntax */
+   "Dump FUNCTION switch.",  /* Description */
+   "MAINTAINER FNCS SWITCH",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_FNCS_TABLE,  /* UniqueID */
+   "MAINTAINER FNCS TABLE",  /* Syntax */
+   "Dump FUNCTION table.",  /* Description */
+   "MAINTAINER FNCS TABLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_MANUAL,  /* UniqueID */
+   "MAINTAINER MANUAL",  /* Syntax */
+   "Dump manual for the currently selected OPTION VERSION.",  /* Description */
+   "MAINTAINER MANUAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MAINTAINER_STACK,  /* UniqueID */
+   "MAINTAINER STACK",  /* Syntax */
+   "Dump the BASIC stack.",  /* Description */
+   "MAINTAINER STACK",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_MARGIN,  /* UniqueID */
+@@ -1169,14 +1169,14 @@
+   "program.  Lines in filename$ replace any matching lines in the "
+   "current program.",  /* Description */
+   "MERGE",  /* Name */
+-  B15 | B93 | C77 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | C77 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_MID4,  /* UniqueID */
+   "MID$( variable$, start [, count ] ) = value",  /* Syntax */
+   "Replaces a subtring of variable$ with value.",  /* Description */
+   "MID$",  /* Name */
+-  B15 | B93 | C77 | H14 | H80 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | C77 | H14 | H80 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_MON,  /* UniqueID */
+@@ -1190,28 +1190,28 @@
+   "NAME old$ AS new$",  /* Syntax */
+   "Changes the name of an existing file.",  /* Description */
+   "NAME",  /* Name */
+-  B15 | B93 | H14 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_NEW,  /* UniqueID */
+   "NEW",  /* Syntax */
+   "Deletes the program in memory and clears all variables.",  /* Description */
+   "NEW",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_NEXT,  /* UniqueID */
+   "NEXT [variable]",  /* Syntax */
+   "The bottom line of a FOR - NEXT structure.",  /* Description */
+   "NEXT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OF,  /* UniqueID */
+   "OF",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OF",  /* Name */
+-  B15 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OLD,  /* UniqueID */
+@@ -1225,21 +1225,21 @@
+   "ON value GOSUB line [, ...]",  /* Syntax */
+   "Calls based on the rounded value.",  /* Description */
+   "ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON,  /* UniqueID */
+   "ON value GOTO line [, ...]",  /* Syntax */
+   "Branches based on the rounded value.",  /* Description */
+   "ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON_ERROR,  /* UniqueID */
+   "ON ERROR",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "ON ERROR",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON_ERROR_GOSUB,  /* UniqueID */
+@@ -1259,14 +1259,14 @@
+   "is 0 (zerp), then use the default error handler.  Valid when "
+   "OPTION ERROR GOTO.",  /* Description */
+   "ON ERROR GOTO",  /* Name */
+-  B15 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON_ERROR_RESUME,  /* UniqueID */
+   "ON ERROR RESUME",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "ON ERROR RESUME",  /* Name */
+-  B15 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON_ERROR_RESUME_NEXT,  /* UniqueID */
+@@ -1274,7 +1274,7 @@
+   "When a trappable error occurs, execution continues with the next "
+   "line.  Valid when OPTION ERROR GOTO.",  /* Description */
+   "ON ERROR RESUME NEXT",  /* Name */
+-  B15 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_ON_ERROR_RETURN,  /* UniqueID */
+@@ -1315,7 +1315,7 @@
+   "fileenumber\n[LEN [=] record-length]",  /* Syntax */
+   "Opens a file for use.\nRANDOM requires LEN.",  /* Description */
+   "OPEN",  /* Name */
+-  B15 | B93 | H14 | HB2 | M80 | T80  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | M80 | M86 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_OPEN,  /* UniqueID */
+@@ -1353,14 +1353,14 @@
+   "OPTION",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ANGLE,  /* UniqueID */
+   "OPTION ANGLE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION ANGLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ANGLE_DEGREES,  /* UniqueID */
+@@ -1369,7 +1369,7 @@
+   "degrees:  ACOS, ACS, ANGLE, ARCSIN, ASIN, ASN, ARCTAN, ATN, ATAN, "
+   "COS, COT, CSC, SEC, SIN and TAN.",  /* Description */
+   "OPTION ANGLE DEGREES",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ANGLE_GRADIANS,  /* UniqueID */
+@@ -1378,7 +1378,7 @@
+   "gradians:  ACOS, ANGLE, ASIN, ASN, ATN, ATAN, COS, COT, CSC, "
+   "SEC, SIN and TAN.",  /* Description */
+   "OPTION ANGLE GRADIANS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ANGLE_RADIANS,  /* UniqueID */
+@@ -1387,105 +1387,105 @@
+   "radians:  ACOS, ANGLE, ASIN, ASN, ATN, ATAN, COS, COT, CSC, SEC, "
+   "SIN and TAN.",  /* Description */
+   "OPTION ANGLE RADIANS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ARITHMETIC,  /* UniqueID */
+   "OPTION ARITHMETIC",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION ARITHMETIC",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ARITHMETIC_DECIMAL,  /* UniqueID */
+   "OPTION ARITHMETIC DECIMAL",  /* Syntax */
+   "Currently has no effect.",  /* Description */
+   "OPTION ARITHMETIC DECIMAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ARITHMETIC_FIXED,  /* UniqueID */
+   "OPTION ARITHMETIC FIXED",  /* Syntax */
+   "Currently has no effect.",  /* Description */
+   "OPTION ARITHMETIC FIXED",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ARITHMETIC_NATIVE,  /* UniqueID */
+   "OPTION ARITHMETIC NATIVE",  /* Syntax */
+   "Currently has no effect.",  /* Description */
+   "OPTION ARITHMETIC NATIVE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_BASE,  /* UniqueID */
+   "OPTION BASE integer",  /* Syntax */
+   "Sets the default lowest array subscript.",  /* Description */
+   "OPTION BASE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_BUGS,  /* UniqueID */
+   "OPTION BUGS",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION BUGS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_BUGS_BOOLEAN,  /* UniqueID */
+   "OPTION BUGS BOOLEAN",  /* Syntax */
+   "Boolean results are 1 or 0 instead of bitwise.",  /* Description */
+   "OPTION BUGS BOOLEAN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_BUGS_OFF,  /* UniqueID */
+   "OPTION BUGS OFF",  /* Syntax */
+   "Disables bugs commonly found in many BASIC dialects.",  /* Description */
+   "OPTION BUGS OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_BUGS_ON,  /* UniqueID */
+   "OPTION BUGS ON",  /* Syntax */
+   "Enables bugs commonly found in many BASIC dialects.",  /* Description */
+   "OPTION BUGS ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COMPARE,  /* UniqueID */
+   "OPTION COMPARE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION COMPARE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COMPARE_BINARY,  /* UniqueID */
+   "OPTION COMPARE BINARY",  /* Syntax */
+   "Causes string comparisons to be case-sensitive.",  /* Description */
+   "OPTION COMPARE BINARY",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COMPARE_DATABASE,  /* UniqueID */
+   "OPTION COMPARE DATABASE",  /* Syntax */
+   "Causes string comparisons to be case-insensitive.",  /* Description */
+   "OPTION COMPARE DATABASE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COMPARE_TEXT,  /* UniqueID */
+   "OPTION COMPARE TEXT",  /* Syntax */
+   "Causes string comparisons to be case-insensitive.",  /* Description */
+   "OPTION COMPARE TEXT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COVERAGE,  /* UniqueID */
+   "OPTION COVERAGE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION COVERAGE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COVERAGE_OFF,  /* UniqueID */
+@@ -1493,7 +1493,7 @@
+   "Disables BASIC code coverage recording, displayed using the LIST "
+   "command.",  /* Description */
+   "OPTION COVERAGE OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_COVERAGE_ON,  /* UniqueID */
+@@ -1501,14 +1501,14 @@
+   "Enables BASIC code coverage recording, displayed using the LIST "
+   "command.",  /* Description */
+   "OPTION COVERAGE ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DATE,  /* UniqueID */
+   "OPTION DATE format$",  /* Syntax */
+   "Sets the date format string used by C strftime() for DATE$.",  /* Description */
+   "OPTION DATE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DIGITS,  /* UniqueID */
+@@ -1516,77 +1516,77 @@
+   "Sets the number of significant digits for PRINT.  Setting the "
+   "value to zero restores the default.",  /* Description */
+   "OPTION DIGITS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DISABLE,  /* UniqueID */
+   "OPTION DISABLE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION DISABLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DISABLE_COMMAND,  /* UniqueID */
+   "OPTION DISABLE COMMAND name$",  /* Syntax */
+   "Disables the specified BASIC command.",  /* Description */
+   "OPTION DISABLE COMMAND",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DISABLE_FUNCTION,  /* UniqueID */
+   "OPTION DISABLE FUNCTION name$",  /* Syntax */
+   "Disables the specified BASIC function.",  /* Description */
+   "OPTION DISABLE FUNCTION",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_DISABLE_OPERATOR,  /* UniqueID */
+   "OPTION DISABLE OPERATOR name$",  /* Syntax */
+   "Disables the specified BASIC operator.",  /* Description */
+   "OPTION DISABLE OPERATOR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_EDIT,  /* UniqueID */
+   "OPTION EDIT string$",  /* Syntax */
+   "Sets the program name used by the EDIT command.",  /* Description */
+   "OPTION EDIT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ENABLE,  /* UniqueID */
+   "OPTION ENABLE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION ENABLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ENABLE_COMMAND,  /* UniqueID */
+   "OPTION ENABLE COMMAND name$",  /* Syntax */
+   "Enables the specified BASIC command.",  /* Description */
+   "OPTION ENABLE COMMAND",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ENABLE_FUNCTION,  /* UniqueID */
+   "OPTION ENABLE FUNCTION name$",  /* Syntax */
+   "Enables the specified BASIC function.",  /* Description */
+   "OPTION ENABLE FUNCTION",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ENABLE_OPERATOR,  /* UniqueID */
+   "OPTION ENABLE OPERATOR name$",  /* Syntax */
+   "Enables the specified BASIC operator.",  /* Description */
+   "OPTION ENABLE OPERATOR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ERROR,  /* UniqueID */
+   "OPTION ERROR",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION ERROR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ERROR_GOSUB,  /* UniqueID */
+@@ -1594,7 +1594,7 @@
+   "When an error occurs, GOSUB to the error handler.  The error "
+   "handler exits with RETURN.",  /* Description */
+   "OPTION ERROR GOSUB",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ERROR_GOTO,  /* UniqueID */
+@@ -1602,28 +1602,28 @@
+   "When an error occurs, GOTO to the error handler.  The error handler "
+   "exits with RESUME.",  /* Description */
+   "OPTION ERROR GOTO",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_EXPLICIT,  /* UniqueID */
+   "OPTION EXPLICIT",  /* Syntax */
+   "All variables must be declared using DIM.",  /* Description */
+   "OPTION EXPLICIT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_EXTENSION,  /* UniqueID */
+   "OPTION EXTENSION string$",  /* Syntax */
+   "Sets the BASIC filename extension, commonly \".bas\".",  /* Description */
+   "OPTION EXTENSION",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_FILES,  /* UniqueID */
+   "OPTION FILES string$",  /* Syntax */
+   "Sets the program name used by the FILES command.",  /* Description */
+   "OPTION FILES",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_IMPLICIT,  /* UniqueID */
+@@ -1632,7 +1632,7 @@
+   "no more that 10 elements.  This is the opposite of OPTION EXPLICIT, "
+   "and is the default for all versions of BASIC.",  /* Description */
+   "OPTION IMPLICIT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_INDENT,  /* UniqueID */
+@@ -1640,49 +1640,49 @@
+   "Sets indention level for LIST.  Zero means no indention.  Default "
+   "is 2.",  /* Description */
+   "OPTION INDENT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_LABELS,  /* UniqueID */
+   "OPTION LABELS",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION LABELS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_LABELS_OFF,  /* UniqueID */
+   "OPTION LABELS OFF",  /* Syntax */
+   "Disables text labels.",  /* Description */
+   "OPTION LABELS OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_LABELS_ON,  /* UniqueID */
+   "OPTION LABELS ON",  /* Syntax */
+   "Enables text labels.",  /* Description */
+   "OPTION LABELS ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PROMPT,  /* UniqueID */
+   "OPTION PROMPT string$",  /* Syntax */
+   "Sets the BASIC prompt.",  /* Description */
+   "OPTION PROMPT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT,  /* UniqueID */
+   "OPTION PUNCT",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION PUNCT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_AT,  /* UniqueID */
+   "OPTION PUNCT AT char$",  /* Syntax */
+   "Sets the PRINT AT character, commonly \"@\".",  /* Description */
+   "OPTION PUNCT AT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_BYTE,  /* UniqueID */
+@@ -1690,14 +1690,14 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "BYTE, commonly \"~\".",  /* Description */
+   "OPTION PUNCT BYTE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_COMMENT,  /* UniqueID */
+   "OPTION PUNCT COMMENT char$",  /* Syntax */
+   "Sets the shortcut COMMENT character.",  /* Description */
+   "OPTION PUNCT COMMENT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_CURRENCY,  /* UniqueID */
+@@ -1705,7 +1705,7 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "CURRENCY, commonly \"@\".",  /* Description */
+   "OPTION PUNCT CURRENCY",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_DOUBLE,  /* UniqueID */
+@@ -1713,28 +1713,28 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "DOUBLE, commonly \"#\".",  /* Description */
+   "OPTION PUNCT DOUBLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_FILENUM,  /* UniqueID */
+   "OPTION PUNCT FILENUM char$",  /* Syntax */
+   "Sets the FILE NUMBER prefix character, commonly \"#\".",  /* Description */
+   "OPTION PUNCT FILENUM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_IMAGE,  /* UniqueID */
+   "OPTION PUNCT IMAGE char$",  /* Syntax */
+   "Sets the shortcut IMAGE character, commonly \":\".",  /* Description */
+   "OPTION PUNCT IMAGE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_INPUT,  /* UniqueID */
+   "OPTION PUNCT INPUT char$",  /* Syntax */
+   "Sets the shortcut INPUT character, commonly \"!\".",  /* Description */
+   "OPTION PUNCT INPUT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_INTEGER,  /* UniqueID */
+@@ -1742,7 +1742,7 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "INTEGER, commonly \"%\".",  /* Description */
+   "OPTION PUNCT INTEGER",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_LONG,  /* UniqueID */
+@@ -1750,35 +1750,35 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "LONG, commonly \"&\".",  /* Description */
+   "OPTION PUNCT LONG",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_LPAREN,  /* UniqueID */
+   "OPTION PUNCT LPAREN char$",  /* Syntax */
+   "Sets the LEFT PARENTHESIS character, commonly \"(\".",  /* Description */
+   "OPTION PUNCT LPAREN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_PRINT,  /* UniqueID */
+   "OPTION PUNCT_PRINT char$",  /* Syntax */
+   "Sets the shortcut PRINT character, commonly \"?\".",  /* Description */
+   "OPTION PUNCT PRINT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_QUOTE,  /* UniqueID */
+   "OPTION PUNCT QUOTE char$",  /* Syntax */
+   "Sets the QUOTE character, commonly \"\"\"",  /* Description */
+   "OPTION PUNCT QUOTE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_RPAREN,  /* UniqueID */
+   "OPTION PUNCT RPAREN char$",  /* Syntax */
+   "Sets the RIGHT PARENTHESIS character, commonly \")\".",  /* Description */
+   "OPTION PUNCT RPAREN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_SINGLE,  /* UniqueID */
+@@ -1786,14 +1786,14 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "SINGLE, commonly \"!\".",  /* Description */
+   "OPTION PUNCT SINGLE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_STATEMENT,  /* UniqueID */
+   "OPTION PUNCT STATEMENT char$",  /* Syntax */
+   "Sets the statement seperator character, commonly \":\".",  /* Description */
+   "OPTION PUNCT STATEMENT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_PUNCT_STRING,  /* UniqueID */
+@@ -1801,49 +1801,49 @@
+   "Sets the suffix character that indicates a variable is of type "
+   "STRING, commonly \"$\".",  /* Description */
+   "OPTION PUNCT STRING",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_RECLEN,  /* UniqueID */
+   "OPTION RECLEN integer",  /* Syntax */
+   "Sets the default RANDOM record length.",  /* Description */
+   "OPTION RECLEN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_RENUM,  /* UniqueID */
+   "OPTION RENUM string$",  /* Syntax */
+   "Sets the program name used by the RENUM command.",  /* Description */
+   "OPTION RENUM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ROUND,  /* UniqueID */
+   "OPTION ROUND",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION ROUND",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ROUND_BANK,  /* UniqueID */
+   "OPTION ROUND BANK",  /* Syntax */
+   "Round using the Banker rule.",  /* Description */
+   "OPTION ROUND BANK",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ROUND_MATH,  /* UniqueID */
+   "OPTION ROUND MATH",  /* Syntax */
+   "Round using mathematical rules.",  /* Description */
+   "OPTION ROUND MATH",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ROUND_TRUNCATE,  /* UniqueID */
+   "OPTION ROUND TRUNCATE",  /* Syntax */
+   "Round using truncation.",  /* Description */
+   "OPTION ROUND TRUNCATE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_SCALE,  /* UniqueID */
+@@ -1851,7 +1851,7 @@
+   "Sets the number of digits to round after the decimal point for "
+   "PRINT.  Setting the value to zero disables rounding.",  /* Description */
+   "OPTION SCALE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_SLEEP,  /* UniqueID */
+@@ -1859,35 +1859,35 @@
+   "Sets multiplier for SLEEP and WAIT.  Zero means no waiting.  "
+   "Default is 1.",  /* Description */
+   "OPTION SLEEP",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STDERR,  /* UniqueID */
+   "OPTION STDERR filename$",  /* Syntax */
+   "Sets the file used for STDERR, which is used by LPRINT commands.",  /* Description */
+   "OPTION STDERR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STDIN,  /* UniqueID */
+   "OPTION STDIN filename$",  /* Syntax */
+   "Sets the file used for STDIN, which is used by INPUT commands.",  /* Description */
+   "OPTION STDIN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STDOUT,  /* UniqueID */
+   "OPTION STDOUT filename$",  /* Syntax */
+   "Sets the file used for STDOUT, which is used by PRINT commands.",  /* Description */
+   "OPTION STDOUT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STRICT,  /* UniqueID */
+   "OPTION STRICT",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION STRICT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STRICT_OFF,  /* UniqueID */
+@@ -1895,7 +1895,7 @@
+   "Disables checking for implicit array creation without using the "
+   "DIM command.",  /* Description */
+   "OPTION STRICT OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_STRICT_ON,  /* UniqueID */
+@@ -1903,70 +1903,77 @@
+   "Enables checking for implicit array creation without using the "
+   "DIM command.",  /* Description */
+   "OPTION STRICT ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TERMINAL,  /* UniqueID */
+   "OPTION TERMINAL",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION TERMINAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TERMINAL_ADM,  /* UniqueID */
+   "OPTION TERMINAL ADM",  /* Syntax */
+   "Enables ADM-3A terminal control codes for CLS, COLOR, and LOCATE.",  /* Description */
+   "OPTION TERMINAL ADM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TERMINAL_ANSI,  /* UniqueID */
+   "OPTION TERMINAL ANSI",  /* Syntax */
+   "Enables ANSI terminal control codes for CLS, COLOR, and LOCATE.",  /* Description */
+   "OPTION TERMINAL ANSI",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++},
++{
++  C_OPTION_TERMINAL_PC,  /* UniqueID */
++  "OPTION TERMINAL PC",  /* Syntax */
++  "Enables IBM PC terminal control codes for CLS, COLOR, and LOCATE.",  /* Description */
++  "OPTION TERMINAL PC",  /* Name */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TERMINAL_NONE,  /* UniqueID */
+   "OPTION TERMINAL NONE",  /* Syntax */
+   "Disables terminal control codes for CLS, COLOR, and LOCATE.",  /* Description */
+   "OPTION TERMINAL NONE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TIME,  /* UniqueID */
+   "OPTION TIME format$",  /* Syntax */
+   "Sets the time format string used by C strftime() for TIME$.",  /* Description */
+   "OPTION TIME",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TRACE,  /* UniqueID */
+   "OPTION TRACE",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION TRACE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TRACE_OFF,  /* UniqueID */
+   "OPTION TRACE OFF",  /* Syntax */
+   "Disables displaying a stack trace when an ERROR occurs.",  /* Description */
+   "OPTION TRACE OFF",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_TRACE_ON,  /* UniqueID */
+   "OPTION TRACE ON",  /* Syntax */
+   "Enables displaying a stack trace when an ERROR occurs.",  /* Description */
+   "OPTION TRACE ON",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING,  /* UniqueID */
+   "OPTION USING",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "OPTION USING",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_ALL,  /* UniqueID */
+@@ -1974,7 +1981,7 @@
+   "Specifies the magic ALL character for the PRINT USING command. "
+   " A common value is \"&\".",  /* Description */
+   "OPTION USING ALL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_COMMA,  /* UniqueID */
+@@ -1982,7 +1989,7 @@
+   "Specifies the magic COMMA character for the PRINT USING command. "
+   " A common value is \",\".",  /* Description */
+   "OPTION USING COMMA",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_DIGIT,  /* UniqueID */
+@@ -1990,7 +1997,7 @@
+   "Specifies the magic DIGIT character for the PRINT USING command. "
+   " A common value is \"#\".",  /* Description */
+   "OPTION USING DIGIT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_DOLLAR,  /* UniqueID */
+@@ -1998,7 +2005,7 @@
+   "Specifies the magic DOLLAR character for the PRINT USING command. "
+   " A common value is \"$\".",  /* Description */
+   "OPTION USING DOLLAR",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_EXRAD,  /* UniqueID */
+@@ -2006,7 +2013,7 @@
+   "Specifies the magic EXRAD character for the PRINT USING command. "
+   " A common value is \"^\".",  /* Description */
+   "OPTION USING EXRAD",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_FILLER,  /* UniqueID */
+@@ -2014,7 +2021,7 @@
+   "Specifies the magic FILLER character for the PRINT USING command. "
+   " A common value is \"*\".",  /* Description */
+   "OPTION USING FILLER",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_FIRST,  /* UniqueID */
+@@ -2022,7 +2029,7 @@
+   "Specifies the magic FIRST character for the PRINT USING command. "
+   " A common value is \"!\".",  /* Description */
+   "OPTION USING FIRST",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_LENGTH,  /* UniqueID */
+@@ -2030,7 +2037,7 @@
+   "Specifies the magic LENGTH character for the PRINT USING command. "
+   " A common value is \"\\\".",  /* Description */
+   "OPTION USING LENGTH",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_LITERAL,  /* UniqueID */
+@@ -2038,7 +2045,7 @@
+   "Specifies the magic LITERAL character for the PRINT USING command. "
+   " A common value is \"_\".",  /* Description */
+   "OPTION USING LITERAL",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_MINUS,  /* UniqueID */
+@@ -2046,7 +2053,7 @@
+   "Specifies the magic MINUS character for the PRINT USING command. "
+   " A common value is \"-\".",  /* Description */
+   "OPTION USING MINUS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_PERIOD,  /* UniqueID */
+@@ -2054,7 +2061,7 @@
+   "Specifies the magic PERIOD character for the PRINT USING command. "
+   " A common value is \".\".",  /* Description */
+   "OPTION USING PERIOD",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_USING_PLUS,  /* UniqueID */
+@@ -2062,7 +2069,7 @@
+   "Specifies the magic PLUS character for the PRINT USING command. "
+   " A common value is \"+\".",  /* Description */
+   "OPTION USING PLUS",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_VERSION,  /* UniqueID */
+@@ -2072,7 +2079,7 @@
+   "functions and operators.  If no version is specified, displays "
+   "a list of the available versions.",  /* Description */
+   "OPTION VERSION",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 | M86 /* OptionVersionBitmask */
+ },
+ {
+   C_OPTION_ZONE,  /* UniqueID */
+@@ -2080,7 +2087,7 @@
+   "Sets the PRINT zone width.  Setting the value to zero restores "
+   "the default.",  /* Description */
+   "OPTION ZONE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_PAUSE,  /* UniqueID */
+@@ -2112,14 +2119,14 @@
+   "PRINT # filenum , [USING format$;] value ...",  /* Syntax */
+   "Sends output to a file.",  /* Description */
+   "PRINT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_PRINT,  /* UniqueID */
+   "PRINT [USING format$;] value ...",  /* Syntax */
+   "Sends output to the screen.",  /* Description */
+   "PRINT",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_PTP,  /* UniqueID */
+@@ -2177,7 +2184,7 @@
+   "READ variable [, ...]",  /* Syntax */
+   "Reads values from DATA statements.",  /* Description */
+   "READ",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RECALL,  /* UniqueID */
+@@ -2191,7 +2198,7 @@
+   "REM ...",  /* Syntax */
+   "Remark.",  /* Description */
+   "REM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RENAME,  /* UniqueID */
+@@ -2213,7 +2220,7 @@
+   "RENUM",  /* Syntax */
+   "Implementation defined.",  /* Description */
+   "RENUM",  /* Name */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RENUMBER,  /* UniqueID */
+@@ -2249,7 +2256,7 @@
+   "Resets the line used for the next READ statement.  line may be "
+   "either a number or a label.",  /* Description */
+   "RESTORE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RESUME,  /* UniqueID */
+@@ -2257,7 +2264,7 @@
+   "Used in an error handler to specify the next line to execute. "
+   " Branch to ERL.",  /* Description */
+   "RESUME",  /* Name */
+-  B15 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RESUME,  /* UniqueID */
+@@ -2265,7 +2272,7 @@
+   "Used in an error handler to specify the next line to execute. "
+   " Branch to the specified line.",  /* Description */
+   "RESUME",  /* Name */
+-  B15 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RESUME,  /* UniqueID */
+@@ -2273,7 +2280,7 @@
+   "Used in an error handler to specify the next line to execute. "
+   " Branch to the line after ERL.",  /* Description */
+   "RESUME",  /* Name */
+-  B15 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RESUME,  /* UniqueID */
+@@ -2281,14 +2288,14 @@
+   "Used in an error handler to specify the next line to execute. "
+   " Branch to ERL.",  /* Description */
+   "RESUME",  /* Name */
+-  B15 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RETURN,  /* UniqueID */
+   "RETURN",  /* Syntax */
+   "Concludes a subroutine called by GOSUB.",  /* Description */
+   "RETURN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RSET,  /* UniqueID */
+@@ -2299,7 +2306,7 @@
+   "on the right.  This is only for use with variables assigned to "
+   "a random access buffer with FIELD command.",  /* Description */
+   "RSET",  /* Name */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RUN,  /* UniqueID */
+@@ -2307,21 +2314,21 @@
+   "Loads a new BAASIC program and executes the program from the "
+   "start.",  /* Description */
+   "RUN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RUN,  /* UniqueID */
+   "RUN line",  /* Syntax */
+   "Executes the program in memory beginning at line.",  /* Description */
+   "RUN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RUN,  /* UniqueID */
+   "RUN",  /* Syntax */
+   "Executes the program in memory from the start.",  /* Description */
+   "RUN",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_RUNNH,  /* UniqueID */
+@@ -2350,7 +2357,7 @@
+   "SAVE [filename$]",  /* Syntax */
+   "Saves the current program into the file filename$ in ASCII format.",  /* Description */
+   "SAVE",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_SCRATCH,  /* UniqueID */
+@@ -2379,7 +2386,7 @@
+   "STEP",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "STEP",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_STOP,  /* UniqueID */
+@@ -2388,7 +2395,7 @@
+   "the STOP command.  For use when debugging BASIC programs.  Whether "
+   "STOP issues a SIGINT signal is implementation defined.",  /* Description */
+   "STOP",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_STORE,  /* UniqueID */
+@@ -2444,14 +2451,14 @@
+   "Swaps the values of two variables. Both variables must be of "
+   "the same type.",  /* Description */
+   "SWAP",  /* Name */
+-  B15 | B93 | H14 | HB2 | M80 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_SYSTEM,  /* UniqueID */
+   "SYSTEM",  /* Syntax */
+   "Exits to the operating system.",  /* Description */
+   "SYSTEM",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | D71 | I70 | I73 | T80 | V09  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | M86 | D71 | I70 | I73 | T80 | V09  /* OptionVersionBitmask */
+ },
+ {
+   C_TEXT,  /* UniqueID */
+@@ -2465,7 +2472,7 @@
+   "THEN",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "THEN",  /* Name */
+-  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_TIMER,  /* UniqueID */
+@@ -2510,7 +2517,7 @@
+   "TO",  /* Syntax */
+   "Syntax Error.",  /* Description */
+   "TO",  /* Name */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ {
+   C_TRACE,  /* UniqueID */
+@@ -2592,7 +2599,7 @@
+   "WEND",  /* Syntax */
+   "Bottom of a WHILE - WEND structure.",  /* Description */
+   "WEND",  /* Name */
+-  B15 | B93 | C77 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | C77 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_WHILE,  /* UniqueID */
+@@ -2600,7 +2607,7 @@
+   "Top of a WHILE - WEND structure.  If the value is non-zero, then "
+   "the loop is terminated.",  /* Description */
+   "WHILE",  /* Name */
+-  B15 | B93 | C77 | H14 | HB1 | HB2 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | C77 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_WRITE,  /* UniqueID */
+@@ -2608,7 +2615,7 @@
+   "Outputs value to a file.    Strings are quoted and each value "
+   "is seperated by a omma.",  /* Description */
+   "WRITE",  /* Name */
+-  B15 | B93 | G74 | H14 | G65 | G67 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | G74 | H14 | G65 | G67 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ {
+   C_WRITE,  /* UniqueID */
+@@ -2616,7 +2623,7 @@
+   "Outputs value to the screen.  Strings are quoted and each value "
+   "is seperated by a comma.",  /* Description */
+   "WRITE",  /* Name */
+-  B15 | B93 | G74 | H14 | G65 | G67 | M80 | D71 | T80  /* OptionVersionBitmask */
++  B15 | B93 | G74 | H14 | G65 | G67 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
+ };
+ 
+diff -urN basic\bwd_fun.c newbasic\bwd_fun.c
+--- basic\bwd_fun.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwd_fun.c	Mon Dec 18 21:27:15 2023
+@@ -54,7 +54,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ACOS_X_N, /* UniqueID */
+@@ -213,7 +213,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ASC_A_X_N, /* UniqueID */
+@@ -308,7 +308,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ATND_X_N, /* UniqueID */
+@@ -410,7 +410,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1DBL, /* ParameterTests */
+-  B15 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CEIL_X_N, /* UniqueID */
+@@ -455,7 +455,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CHR_X_S, /* UniqueID */
+@@ -490,7 +490,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_CIN_X_N, /* UniqueID */
+@@ -514,7 +514,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CLG_X_N, /* UniqueID */
+@@ -579,7 +579,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1LNG, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CLOG_X_N, /* UniqueID */
+@@ -601,7 +601,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | H80 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CLOSE_X_N, /* UniqueID */
+@@ -612,7 +612,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | C77 | H14 | HB2 | H80 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | H14 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_CLS_N, /* UniqueID */
+@@ -623,7 +623,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CNTRL_X_Y_N, /* UniqueID */
+@@ -659,7 +659,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1BYT | P2BYT, /* ParameterTests */
+-  B15 | H14 | M80 | T80 /* OptionVersionBitmask */
++  B15 | H14 | M80 | M86 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_COMMAND4_S, /* UniqueID */
+@@ -697,7 +697,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_COSD_X_N, /* UniqueID */
+@@ -785,7 +785,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1FLT, /* ParameterTests */
+-  B15 | B93 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_CUR_X_Y_S, /* UniqueID */
+@@ -819,7 +819,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1DBL, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_CVI_A_N, /* UniqueID */
+@@ -831,7 +831,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_CVL_A_N, /* UniqueID */
+@@ -842,7 +842,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1LNG, /* ParameterTests */
+-  B15 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_CVS_A_N, /* UniqueID */
+@@ -853,7 +853,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1FLT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_DAT4_S, /* UniqueID */
+@@ -892,7 +892,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_DATE4_X_S, /* UniqueID */
+@@ -1060,7 +1060,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_ENVIRON4_A_S, /* UniqueID */
+@@ -1071,7 +1071,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_EOF_X_N, /* UniqueID */
+@@ -1083,7 +1083,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | H80 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_EPS_X_N, /* UniqueID */
+@@ -1111,7 +1111,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ERR_N, /* UniqueID */
+@@ -1122,7 +1122,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ERR4_S, /* UniqueID */
+@@ -1133,7 +1133,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_ERRL_N, /* UniqueID */
+@@ -1166,7 +1166,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_ERROR_X_A_N, /* UniqueID */
+@@ -1188,7 +1188,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_EXAM_X_N, /* UniqueID */
+@@ -1236,7 +1236,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_FALSE_N, /* UniqueID */
+@@ -1270,7 +1270,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2INT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_FILES_N, /* UniqueID */
+@@ -1281,7 +1281,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_FILES_A_N, /* UniqueID */
+@@ -1292,7 +1292,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_FILL_X_Y_N, /* UniqueID */
+@@ -1316,7 +1316,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | S70 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
++  B15 | S70 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | M86 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_FLOAT_X_N, /* UniqueID */
+@@ -1373,7 +1373,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | C77 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | C77 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_FRE_A_N, /* UniqueID */
+@@ -1386,7 +1386,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_FRE_X_N, /* UniqueID */
+@@ -1399,7 +1399,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | HB1 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_FREE_N, /* UniqueID */
+@@ -1460,7 +1460,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_GET_X_N, /* UniqueID */
+@@ -1484,7 +1484,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_GRAD_N, /* UniqueID */
+@@ -1542,7 +1542,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_HEX4_X_Y_S, /* UniqueID */
+@@ -1639,7 +1639,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_INP_X_N, /* UniqueID */
+@@ -1650,7 +1650,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | C77 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | C77 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_INPUT4_X_S, /* UniqueID */
+@@ -1661,7 +1661,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1LEN, /* ParameterTests */
+-  B15 | H14 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | H14 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_INPUT4_X_Y_S, /* UniqueID */
+@@ -1672,7 +1672,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1LEN | P2INT, /* ParameterTests */
+-  B15 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_INSTR_A_B_N, /* UniqueID */
+@@ -1684,7 +1684,7 @@
+   2, /* ParameterCount */
+   P1STR | P2STR, /* ParameterTypes */
+   P1ANY | P2ANY, /* ParameterTests */
+-  B15 | B93 | H14 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_INSTR_A_B_X_N, /* UniqueID */
+@@ -1708,7 +1708,7 @@
+   3, /* ParameterCount */
+   P1NUM | P2STR | P3STR, /* ParameterTypes */
+   P1POS | P2ANY | P3ANY, /* ParameterTests */
+-  B15 | B93 | H14 | HB2 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB2 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_INT_X_N, /* UniqueID */
+@@ -1720,7 +1720,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_INT5_X_N, /* UniqueID */
+@@ -1781,7 +1781,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_LBOUND_N, /* UniqueID */
+@@ -1806,7 +1806,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | C77 | E86 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | C77 | E86 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LEFT_A_X_S, /* UniqueID */
+@@ -1828,7 +1828,7 @@
+   2, /* ParameterCount */
+   P1STR | P2NUM, /* ParameterTypes */
+   P1ANY | P2LEN, /* ParameterTests */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | D71 | T80 | V09 /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D71 | T80 | V09 /* OptionVersionBitmask */
+ },
+ {
+   F_LEN_A_N, /* UniqueID */
+@@ -1839,7 +1839,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_LGT_X_N, /* UniqueID */
+@@ -1895,7 +1895,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | E86 | G74 | H14 | G65 | G67 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | E86 | G74 | H14 | G65 | G67 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LOCATE_X_Y_N, /* UniqueID */
+@@ -1906,7 +1906,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1BYT | P2BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LOCK_X_N, /* UniqueID */
+@@ -1928,7 +1928,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | E86 | G74 | H14 | G65 | G67 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | E86 | G74 | H14 | G65 | G67 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LOG_X_N, /* UniqueID */
+@@ -1939,7 +1939,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1GTZ, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_LOG10_X_N, /* UniqueID */
+@@ -1996,7 +1996,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LTRIM4_A_S, /* UniqueID */
+@@ -2008,7 +2008,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | E86 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | E86 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_LTW_X_N, /* UniqueID */
+@@ -2031,7 +2031,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_MATCH_A_B_X_N, /* UniqueID */
+@@ -2242,7 +2242,7 @@
+   2, /* ParameterCount */
+   P1STR | P2NUM, /* ParameterTypes */
+   P1ANY | P2POS, /* ParameterTests */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MID4_A_X_Y_S, /* UniqueID */
+@@ -2253,7 +2253,7 @@
+   3, /* ParameterCount */
+   P1STR | P2NUM | P3NUM, /* ParameterTypes */
+   P1ANY | P2POS | P3LEN, /* ParameterTests */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MIN_X_Y_N, /* UniqueID */
+@@ -2393,7 +2393,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1DBL, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MKDIR_A_N, /* UniqueID */
+@@ -2404,7 +2404,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_MKI4_X_S, /* UniqueID */
+@@ -2416,7 +2416,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MKL4_X_S, /* UniqueID */
+@@ -2428,7 +2428,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1LNG, /* ParameterTests */
+-  B15 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MKS4_X_S, /* UniqueID */
+@@ -2439,7 +2439,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1FLT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_MOD_X_Y_N, /* UniqueID */
+@@ -2461,7 +2461,7 @@
+   2, /* ParameterCount */
+   P1STR | P2STR, /* ParameterTypes */
+   P1BYT | P2BYT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_NAME_N, /* UniqueID */
+@@ -2506,7 +2506,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_NUM_N, /* UniqueID */
+@@ -2547,7 +2547,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | S70 | D64 | E78 | E86 | G74 | HB1 | HB2 | G65 | G67 | M80 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
++  B15 | S70 | D64 | E78 | E86 | G74 | HB1 | HB2 | G65 | G67 | M80 | M86 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_OCT4_X_S, /* UniqueID */
+@@ -2558,7 +2558,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_OCT4_X_Y_S, /* UniqueID */
+@@ -2582,7 +2582,7 @@
+   3, /* ParameterCount */
+   P1STR | P2NUM | P3STR, /* ParameterTypes */
+   P1BYT | P2INT | P3BYT, /* ParameterTests */
+-  B15 | B93 | H14 | H80 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_OPEN_A_X_B_Y_N, /* UniqueID */
+@@ -2594,7 +2594,7 @@
+   4, /* ParameterCount */
+   P1STR | P2NUM | P3STR | P4NUM, /* ParameterTypes */
+   P1BYT | P2INT | P3BYT | P4INT, /* ParameterTests */
+-  B15 | B93 | H14 | H80 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_ORD_A_N, /* UniqueID */
+@@ -2620,7 +2620,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2BYT, /* ParameterTests */
+-  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_PAD_X_N, /* UniqueID */
+@@ -2666,7 +2666,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1LNG, /* ParameterTests */
+-  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_PI_N, /* UniqueID */
+@@ -2712,7 +2712,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1LNG | P2BYT, /* ParameterTests */
+-  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | C77 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_POS_N, /* UniqueID */
+@@ -2723,7 +2723,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | C77 | H14 | H80 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | H14 | H80 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_POS_X_N, /* UniqueID */
+@@ -2734,7 +2734,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | H14 | HB2 | H80 | M80 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | H14 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_POS_A_B_N, /* UniqueID */
+@@ -2808,7 +2808,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_PUT_X_Y_N, /* UniqueID */
+@@ -2820,7 +2820,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2INT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_RAD_N, /* UniqueID */
+@@ -2910,7 +2910,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | D71 | I70 | I73 | T80 | V09 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | D71 | I70 | I73 | T80 | V09 /* OptionVersionBitmask */
+ },
+ {
+   F_RANDOMIZE_X_N, /* UniqueID */
+@@ -2921,7 +2921,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D71 | I70 | I73 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_REMAINDER_X_Y_N, /* UniqueID */
+@@ -2956,7 +2956,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2STR, /* ParameterTypes */
+   P1LEN | P2BYT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_REPEAT4_X_Y_S, /* UniqueID */
+@@ -2967,7 +2967,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1LEN | P2BYT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_RESET_N, /* UniqueID */
+@@ -2978,7 +2978,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_RESIDUE_N, /* UniqueID */
+@@ -3013,7 +3013,7 @@
+   2, /* ParameterCount */
+   P1STR | P2NUM, /* ParameterTypes */
+   P1ANY | P2LEN, /* ParameterTests */
+-  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | R86 | D71 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_RMDIR_A_N, /* UniqueID */
+@@ -3024,7 +3024,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_RND_N, /* UniqueID */
+@@ -3037,7 +3037,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_RND_X_N, /* UniqueID */
+@@ -3049,7 +3049,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_ROUND_X_Y_N, /* UniqueID */
+@@ -3074,7 +3074,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | E86 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | E86 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_SCALE_X_N, /* UniqueID */
+@@ -3109,7 +3109,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1INT, /* ParameterTests */
+-  B15 | E86 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | E86 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_SEEK_X_Y_N, /* UniqueID */
+@@ -3121,7 +3121,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2INT, /* ParameterTests */
+-  B15 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_SEG_X_N, /* UniqueID */
+@@ -3165,7 +3165,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_SHELL_A_N, /* UniqueID */
+@@ -3177,7 +3177,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_SIN_X_N, /* UniqueID */
+@@ -3188,7 +3188,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_SIND_X_N, /* UniqueID */
+@@ -3300,7 +3300,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1LEN, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_SPC_X_S, /* UniqueID */
+@@ -3311,7 +3311,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_SQR_X_N, /* UniqueID */
+@@ -3322,7 +3322,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1GEZ, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_SQRT_X_N, /* UniqueID */
+@@ -3356,7 +3356,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_STRING_X_Y_S, /* UniqueID */
+@@ -3379,7 +3379,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2STR, /* ParameterTypes */
+   P1LEN | P2BYT, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_STRING4_X_Y_S, /* UniqueID */
+@@ -3390,7 +3390,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1LEN | P2BYT, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_STRIP4_A_S, /* UniqueID */
+@@ -3424,7 +3424,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_TAN_X_N, /* UniqueID */
+@@ -3435,7 +3435,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_TAND_X_N, /* UniqueID */
+@@ -3567,7 +3567,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_TIME4_X_S, /* UniqueID */
+@@ -3593,7 +3593,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_TOP_N, /* UniqueID */
+@@ -3641,7 +3641,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | E86 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | E86 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_TROFF_N, /* UniqueID */
+@@ -3652,7 +3652,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_TRON_N, /* UniqueID */
+@@ -3663,7 +3663,7 @@
+   0, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | D71 | T80 | T79 /* OptionVersionBitmask */
++  B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_TRUE_N, /* UniqueID */
+@@ -3712,7 +3712,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1ANY, /* ParameterTests */
+-  B15 | C77 | E86 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | C77 | E86 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_UNLOCK_X_N, /* UniqueID */
+@@ -3758,7 +3758,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR0_N, /* UniqueID */
+@@ -3769,7 +3769,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR1_N, /* UniqueID */
+@@ -3780,7 +3780,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR2_N, /* UniqueID */
+@@ -3791,7 +3791,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR3_N, /* UniqueID */
+@@ -3802,7 +3802,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR4_N, /* UniqueID */
+@@ -3813,7 +3813,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR5_N, /* UniqueID */
+@@ -3824,7 +3824,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR6_N, /* UniqueID */
+@@ -3835,7 +3835,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR7_N, /* UniqueID */
+@@ -3846,7 +3846,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR8_N, /* UniqueID */
+@@ -3857,7 +3857,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_USR9_N, /* UniqueID */
+@@ -3868,7 +3868,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 | R86 | T80 | T79 /* OptionVersionBitmask */
++  M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_UUF_N, /* UniqueID */
+@@ -3896,7 +3896,7 @@
+   1, /* ParameterCount */
+   P1STR, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
++  B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
+ {
+   F_VARPTR_N, /* UniqueID */
+@@ -3907,7 +3907,7 @@
+   255, /* ParameterCount */
+   PNONE, /* ParameterTypes */
+   PNONE, /* ParameterTests */
+-  M80 /* OptionVersionBitmask */
++  M80 | M86 /* OptionVersionBitmask */
+ },
+ {
+   F_VTAB_X_N, /* UniqueID */
+@@ -3943,7 +3943,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2BYT, /* ParameterTests */
+-  B15 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_WAIT_X_Y_Z_N, /* UniqueID */
+@@ -3955,7 +3955,7 @@
+   3, /* ParameterCount */
+   P1NUM | P2NUM | P3NUM, /* ParameterTypes */
+   P1INT | P2BYT | P3BYT, /* ParameterTests */
+-  B15 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_WIDTH_X_N, /* UniqueID */
+@@ -3967,7 +3967,7 @@
+   1, /* ParameterCount */
+   P1NUM, /* ParameterTypes */
+   P1BYT, /* ParameterTests */
+-  B15 | B93 | H14 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_WIDTH_X_Y_N, /* UniqueID */
+@@ -3981,7 +3981,7 @@
+   2, /* ParameterCount */
+   P1NUM | P2NUM, /* ParameterTypes */
+   P1INT | P2BYT, /* ParameterTests */
+-  B15 | B93 | H14 | HB1 | HB2 | M80 | D71 | T80 /* OptionVersionBitmask */
++  B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
+ {
+   F_ZONE_X_N, /* UniqueID */
+diff -urN basic\bwd_six.h newbasic\bwd_six.h
+--- basic\bwd_six.h	Fri Mar 15 21:00:20 2024
++++ newbasic\bwd_six.h	Mon Dec 18 21:13:23 2023
+@@ -560,5 +560,7 @@
+ #define var_new                          X00202
+ #define var_set                          X00203
+ 
++#define bwb_OPTION_TERMINAL_PC           X00204
++
+ 
+ /* EOF */
+diff -urN basic\bwx_tty.c newbasic\bwx_tty.c
+--- basic\bwx_tty.c	Fri Mar 15 21:00:20 2024
++++ newbasic\bwx_tty.c	Mon Dec 18 21:13:51 2023
+@@ -69,6 +69,9 @@
+   case C_OPTION_TERMINAL_ANSI:
+     fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
+     break;
++  case C_OPTION_TERMINAL_PC:
++    fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
++    break;
+   default:
+     WARN_ADVANCED_FEATURE;
+     break;
+@@ -95,6 +98,9 @@
+   case C_OPTION_TERMINAL_ANSI:
+     fprintf (My->SYSOUT->cfp, "%c[2J", 27);
+     break;
++  case C_OPTION_TERMINAL_PC:
++    fprintf (My->SYSOUT->cfp, "%c[2J", 27);
++    break;
+   default:
+     WARN_ADVANCED_FEATURE;
+     break;
+@@ -123,6 +129,9 @@
+   case C_OPTION_TERMINAL_ADM:
+     break;
+   case C_OPTION_TERMINAL_ANSI:
++    fprintf (My->SYSOUT->cfp, "%c[%d;%dm", 27, 30 + Fore, 40 + Back);
++    break;
++  case C_OPTION_TERMINAL_PC:
+     fprintf (My->SYSOUT->cfp, "%c[%d;%dm", 27, 30 + Fore, 40 + Back);
+     break;
+   default:
