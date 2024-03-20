@@ -1,0 +1,2 @@
+; This is MSG_QMARK_APPEND in OS/2 DDK utilmd42.inc
+MSG_QMARK_APPEND EQU 3091

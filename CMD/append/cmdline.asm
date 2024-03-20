@@ -45,8 +45,10 @@ extern append_path   :byte
 extern append_prefix :byte
 extern NoAppend      :byte
 extern TooMany       :byte
-extern Help          :byte
 extern Invalid       :byte
+
+extern TXT_MSG_QMARK_APPEND: near
+extern printmsg: near
 
 MAXARGS		equ	20
 setenv		db	0		; Set Environment indicator
@@ -88,7 +90,7 @@ copy_cmdline:	push	di
 		push	es
 		pop	ds
 
-		les	di, cs:[cmdline]
+		les	di, dword ptr cs:[cmdline]
 
 ce_copyloop:	lodsb
 		stosb
@@ -189,7 +191,7 @@ parse_cmds:
 
 		push	cs
 		pop	ds
-		les	si, cs:[cmdline]
+		les	si, dword ptr cs:[cmdline]
 
 
 		mov	byte ptr cs:[setenv], 0
@@ -706,9 +708,8 @@ spoff_flag:	or	byte ptr cs:[p_flags], P_FOUND or S_FOUND
 prt_help:	push	ds
 		push	cs
 		pop	ds
-		mov	dx, offset Help
-		mov	ah, 9h
-		int	21h
+                lea     si, TXT_MSG_QMARK_APPEND
+		call	printmsg
 		pop	ds
 		stc
 		ret

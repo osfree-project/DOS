@@ -1,0 +1,8 @@
++ ported to macrolib
++ modified to use with mkmsgf
+
+todo
+
+msgextrt.exe tool needed to extract messages from OSO001.msg
+psgprof.exe tool needed to produce extract script for msgextrt.exe tool
+

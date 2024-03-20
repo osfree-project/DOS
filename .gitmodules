@@ -24,3 +24,6 @@
 [submodule "expserver"]
 	path = expserver
 	url = https://github.com/osfree-project/Bochs
+[submodule "CMD/append/macrolib"]
+	path = CMD/append/macrolib
+	url = https://github.com/osfree-project/MacroLib
