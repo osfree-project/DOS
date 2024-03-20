@@ -8,11 +8,8 @@
 	public	printmsg
 printmsg	proc    near
 	lodsw
-	mov     cx,ax
-	mov     ah,40h
-	mov     bx,2		; stderr
 	mov     dx,si
-	int     21h
+	@Write	, ax, 2		; stderr
 	ret
 printmsg	endp
 

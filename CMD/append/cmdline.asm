@@ -252,16 +252,10 @@ print:		push	si
 prt_loop:	lodsb
 		or	al, al
 		jz	prt_end
-		mov	dl, al
-		mov	ah, 02
-		int	21h
+		@DispCh al
 		jmp	prt_loop
-prt_end:	mov	dl, 13
-		mov	ah, 02
-		int	21h
-		mov	dl, 10
-		mov	ah, 02
-		int	21h
+prt_end:	@DispCh 13
+		@DispCh 10
 		pop	dx
 		pop	ax
 		pop	si

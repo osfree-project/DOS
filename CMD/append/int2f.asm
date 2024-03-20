@@ -45,6 +45,7 @@ extern cmd_id        :byte
 include useful.inc
 include append.inc
 include cmdline.inc
+include dos.inc
 
 old_int2f	dd	0	; Original INT 2F handler
 
@@ -206,8 +207,7 @@ i2fb711:	cmp	al, 11h
 		push	ax
 		push	bx
 		push	es
-		mov	ah, 51h		; Get caller's PSP pointer
-		int	21h
+		@DosCall 51h		; Get caller's PSP pointer
 		mov	es, bx
 		mov	byte ptr es:[03Dh], 01h	; Set state in caller's PSP
 		pop	es
