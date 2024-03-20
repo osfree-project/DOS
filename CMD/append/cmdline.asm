@@ -43,11 +43,10 @@ extern copy_environ  :near
 extern setenv_append :near
 extern append_path   :byte
 extern append_prefix :byte
-extern NoAppend      :byte
-extern TooMany       :byte
-extern Invalid       :byte
 
 extern TXT_MSG_QMARK_APPEND: near
+extern TXT_MSG_APPEND_NOAPPEND: near
+extern TXT_MSG_APPEND_BADARG: near
 extern printmsg: near
 
 MAXARGS		equ	20
@@ -73,6 +72,7 @@ p_flags		db	00000000b
 include useful.inc
 include cmdline.inc
 include append.inc
+include dos.inc
 
 
 ; ---------------------------------------------------------------------------
@@ -125,9 +125,8 @@ print_own:	cmp	byte ptr cs:[append_path], 0	; Empty?
 
 noappend2:	push	cs
 		pop	ds
-		mov	dx, offset NoAppend
-		mov	ah, 9h
-		int	21h
+		lea	si, TXT_MSG_APPEND_NOAPPEND
+		call	printmsg
 		jmp	pra_done
 
 prt_append:	push	si
@@ -344,9 +343,8 @@ gp_setapp:	call	set_append
 gp_toomany:	push	ds
 		push	cs
 		pop	ds
-		mov	dx, offset TooMany
-		mov	ah, 9h
-		int	21h
+		lea	si, TXT_MSG_APPEND_BADARG
+		call	printmsg
 		pop	ds
 		call	print_arg
 		stc
@@ -729,9 +727,8 @@ invalid_switch:
 		push	ds
 		push	cs
 		pop	ds
-		mov	dx, offset Invalid
-		mov	ah, 9h
-		int	21h
+		lea	si, TXT_MSG_APPEND_BADARG
+		call	printmsg
 		pop	ds
 		call	find_separator
 		mov	byte ptr ds:[si], 0

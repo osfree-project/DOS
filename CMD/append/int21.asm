@@ -177,7 +177,7 @@ i2123_check:	call	check_extended	; checks extended error
 i2123_noenv:	call	save_drive		; Save drive letter from
 						; FCB in [cs:defdrive]
 		mov	si, offset append_path
-		lds	di, cs:[new_filepath]
+		lds	di, dword ptr cs:[new_filepath]
 		call	find_first	; Get first path from APPEND
 
 i2123_srch:	cmp	byte ptr cs:[di], 0 ; No more paths
@@ -205,7 +205,7 @@ i2123_srch:	cmp	byte ptr cs:[di], 0 ; No more paths
 		jc	i2123_done	; Error other than file or
 					; path not found
 
-i2123_again:	lds	di, cs:[new_filepath]
+i2123_again:	lds	di, dword ptr cs:[new_filepath]
 		call	find_next
 		jmp	i2123_srch
 
@@ -302,7 +302,7 @@ i213d_srch2:	mov	cs:[basename_off], si	; Store offset to basename
 		mov	ds, ax
 
 		mov	si, offset append_path
-		lds	di, cs:[new_filepath]
+		lds	di, dword ptr cs:[new_filepath]
 		call	find_first		; Get first path from APPEND
 
 i213d_srchloop: cmp	byte ptr cs:[di], 0		; No more paths
@@ -318,11 +318,11 @@ i213d_srchloop: cmp	byte ptr cs:[di], 0		; No more paths
 		mov	ax, cs:[r_ax]
 		mov	bx, cs:[r_bx]
 		mov	cx, cs:[r_cx]
-		lds	dx, cs:[new_filepath]; F 3D uses ds:dx for filename
+		lds	dx, dword ptr cs:[new_filepath]; F 3D uses ds:dx for filename
 		cmp	ah, 6Ch
 		jne	i213d_callint
 					; Function 6C:
-		lds	si, cs:[new_filepath]; 6C uses ds:si for filename
+		lds	si, dword ptr cs:[new_filepath]; 6C uses ds:si for filename
 		mov	dx, cs:[r_dx]	; Action if file does/doesn't exist
 
 i213d_callint:	call	call_int21
@@ -333,7 +333,7 @@ i213d_callint:	call	call_int21
 		call	check_error
 		jc	i213d_found		; File found, other error
 
-i213d_again:	lds	di, cs:[new_filepath]
+i213d_again:	lds	di, dword ptr cs:[new_filepath]
 		call	find_next
 		jmp	i213d_srchloop
 
@@ -399,7 +399,7 @@ i214b00_noenv:	mov	ds, cs:[filename_seg]
 		call	call_int21
 
 		mov	si, offset append_path
-		lds	di, cs:[new_filepath]
+		lds	di, dword ptr cs:[new_filepath]
 		call	find_first		; Get first path from APPEND
 
 i214b00_schlp:	cmp	byte ptr cs:[di], 0		; No more paths
@@ -414,18 +414,18 @@ i214b00_schlp:	cmp	byte ptr cs:[di], 0		; No more paths
 
 		mov	ax, 4E00h		; FindFirst
 		mov	cx, 0037h		; Do not find volume labels
-		lds	dx, cs:[new_filepath]
+		lds	dx, dword ptr cs:[new_filepath]
 		call	call_int21
 
 		jnc	i214b00_found		; Success
 		call	check_error
 		jc	i214b00_found		; File found, other error
 
-		lds	di, cs:[new_filepath]
+		lds	di, dword ptr cs:[new_filepath]
 		call	find_next
 		jmp	i214b00_schlp
 
-i214b00_found:	lds	dx, cs:[new_filepath]	; Exec with found path
+i214b00_found:	lds	dx, dword ptr cs:[new_filepath]	; Exec with found path
 		jmp	i214b00_exec
 
 i214b00_nfound: mov	dx, cs:[filename_off]	; Exec with orig path
@@ -502,7 +502,7 @@ set_rfn:	push	ax
 		call	call_int21	; (returned in ES:BX)
 		add	bx, 1Eh		; Offset of uppercased found filename
 
-		lds	si, cs:[new_filepath]
+		lds	si, dword ptr cs:[new_filepath]
 		call	basename	; DS:SI points to basename
 		mov	di, si
 		mov	si, bx
@@ -513,7 +513,7 @@ set_rfn:	push	ax
 		call	strcpy		; new_filepath updated with
 					; uppercased found filename
 
-sr_copy:	lds	si, cs:[new_filepath]
+sr_copy:	lds	si, dword ptr cs:[new_filepath]
 		mov	es, cs:[filename_seg]
 		mov	di, cs:[filename_off]
 		call	strcpy			; Copy last file path
@@ -707,7 +707,7 @@ set_newpath:	clc
 
 		lds	si, cs:[dirname]
 
-		les	di, cs:[new_filepath]
+		les	di, dword ptr cs:[new_filepath]
 		cmp	byte ptr es:[di+1], ':'		; Check if there is a
 							; drive letter
 		je	sn_getdrive
@@ -735,7 +735,7 @@ sn_setdrive:	call	set_drive	; Set new drive in FCB
 		call	call_int21		; Get current path for drive
 		jc	sn_return
 
-		lds	dx, cs:[new_filepath]
+		lds	dx, dword ptr cs:[new_filepath]
 		mov	ah, 3Bh		; Set default directory
 		call	call_int21
 

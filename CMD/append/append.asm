@@ -38,9 +38,6 @@ public append_state
 public append_path
 public append_prefix
 public cmd_id
-public NoAppend
-public TooMany
-public Invalid
 
 extern p_flags :byte
 extern cmdline :word
@@ -88,10 +85,6 @@ append_state	dw	0011000000000001b
 ;APPEND_ENVIRON	equ	0100000000000000b
 ;APPEND_EXTENDD	equ	1000000000000000b
 
-NoAppend	db	13, "No Append", 13, 10, '$'			; SYS2046I ?
-Invalid		db	13, "Invalid switch  - ", '$'			; SYS2050I ?
-TooMany		db	13, "Too many parameters -  ", '$'
-NotAllw		db	13, "Parameter value not allowed -  ", '$'	; SYS2050I ?
 
 
 end_resident:
