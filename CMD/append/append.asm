@@ -51,6 +51,7 @@ extern int21       :near
 
 extern TXT_MSG_APPEND_INSTALLED: near
 extern TXT_MSG_APPEND_INCORRECT: near
+extern TXT_MSG_INCORRECT_DOSVERSION: near
 extern printmsg: near
 
 _TEXT segment
@@ -91,7 +92,15 @@ end_resident:
 ; ================== END OF RESIDENT CODE ================================
 
 start:		
-		mov	ax, 0B710h	; Check if we're already installed
+		@GetVer
+		cmp     al,2
+		jge     vers_ok		; Version must be 2.x or higher
+
+		lea	si, TXT_MSG_INCORRECT_DOSVERSION
+		call	printmsg
+		jmp	quit
+
+vers_ok:	mov	ax, 0B710h	; Check if we're already installed
 		mov	dx, 00000h
 		int	2Fh
 
@@ -107,6 +116,7 @@ wrong:		lea	si, TXT_MSG_APPEND_INCORRECT
 		call	printmsg
 		jmp	quit
 
+		
 installed:	lea	si, TXT_MSG_APPEND_INSTALLED
 		call	printmsg
 
