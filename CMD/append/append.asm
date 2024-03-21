@@ -90,7 +90,8 @@ append_state	dw	0011000000000001b
 end_resident:
 ; ================== END OF RESIDENT CODE ================================
 
-start:		mov	ax, 0B710h	; Check if we're already installed
+start:		
+		mov	ax, 0B710h	; Check if we're already installed
 		mov	dx, 00000h
 		int	2Fh
 
@@ -168,7 +169,7 @@ install:	mov	bx, cs
 		mov	cl, 4
 		shr	dx, cl		; Convert to paragraphs
 
-		@Exit	0	; Errorlevel 0
+		@TSR	DX, 0	; Errorlevel 0
 
 
 _TEXT ends
