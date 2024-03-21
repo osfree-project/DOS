@@ -213,7 +213,13 @@ pa_nextarg:	call	skipblanks
 
 		lodsb
 
-		cmp	al, '/'			; Is it a switch?
+		push	ax
+		mov	ax, 3700h
+		@DosCall ax
+		pop	ax
+
+		;cmp	al, '/'			; Is it a switch?
+		cmp	al, dl			; Is it a switch?
 		jz	do_switch
 
 		dec	si			; It's a path, then.
@@ -270,7 +276,14 @@ prt_end:	@DispCh 13
 ;
 is_separator:	cmp	al, ' '
 		je	iss_done
-		cmp	al, '/'
+		push	dx
+		push	ax
+		mov	ax, 3700h
+		@DosCall ax
+		pop	ax
+		cmp	al, dl
+		pop	dx
+		;cmp	al, '/'
 		je	iss_done
 		cmp	al, 0Dh		; CR (End of string)
 		je	iss_done
