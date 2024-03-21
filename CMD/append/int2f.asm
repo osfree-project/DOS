@@ -141,10 +141,9 @@ i2fb700:	cmp	al, 00h		; MS-DOS APPEND seems to use
 
 ; ----- 2FB701 : APPEND - GET APPEND PATH (Microtek) ------------------------
 ;
-;i2fb701:	cmp	al, 0x01
-;		jne	i2fb702
-;		jmp	i2fb704			; Same as 2FB704??????
-i2fb701:					; Not documented, unimplemented
+i2fb701:	cmp	al, 01h
+		jne	i2fb702
+		jmp	i2fb704			; Same as 2FB704
 
 ; ----- 2FB702 : APPEND - GET VERSION ---------------------------------------
 ;
@@ -215,7 +214,6 @@ i2fb711:	cmp	al, 11h
 		pop	ax
 		iret
 
-;end_i2fb7:	jmp	far [cs:old_int2f]
 end_i2fb7:	jmp	dword ptr cs:[old_int2f]
 
 
@@ -291,7 +289,6 @@ isfnc:				; Check if char is valid for filename
 loop1:		lodsb
 		cmp	ah, al
 		stc
-		;je	.ret
 		je	ret2
 		loop	loop1
 		clc
