@@ -8,7 +8,7 @@ run under osFree MVM (OS/2 VDM/MVDM).
 ## DOSKRNL
 
 DOSKRNL is a modified FreeDOS kernel to be used in osFree MVM
-and uses SVC API to call host services.
+and uses SVC API to call host services. It is not required to have  special version of kernel to run in MVM, but to provide access to filesystem it is required to have redirector (like vbox guest additions or MVDM fsaccess driver). Also, special kernel provide more free memory for programs because doesn't contains many parts of code like config.sys parser and filesystem support. also, most of drivers work out of DOS space.
 
 ## API
 
@@ -34,22 +34,22 @@ for more info
 
 ## Command line tools
 
-- append
-- assign
-- attrib
+- append DOS only
+- assign DOS only
+- attrib Dual mode
 - basic
 - comp
-- debug
+- debug DOS only
 - diskcomp
 - diskcopy
 - doskey
 - edlin
-- exit_vdm
+- exit_vdm DOS only
 - find
-- fsaccess
+- fsaccess DOS only
 - help
 - helpmsg
-- join
+- join DOS only
 - label
 - mem
 - more
@@ -57,6 +57,6 @@ for more info
 - qbasic
 - sort
 - stub
-- subst
+- subst DOS only
 - vmdisk
 - xcopy
