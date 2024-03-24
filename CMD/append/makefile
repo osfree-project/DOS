@@ -17,11 +17,24 @@ ADD_ASMOPT = -I=$(PATH);$(MYDIR)$(SEP)macrolib
 
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
-$(PATH)msg.inc: append.txt
-  mkmsgf /A /I$(MYDIR);$(%WATCOM)$(SEP)h$(SEP)os2 append.txt $(PATH)msg.inc
+$(PATH)msg.inc: $(PATH)append.txt
+  mkmsgf /A /I$(MYDIR);$(%WATCOM)$(SEP)h$(SEP)os2 $[@ $(PATH)msg.inc
 
-#$(PATH)append.txt: append.ext
-#  msgextrt append.ext > append.txt
+$(PATH)append.txt: $(PATH)append.ext
+  msgextrt $< $^@
 
 #$(PATH)append.ext: append.asm
 #  msgprof append.asm > append.ext
+
+$(PATH)append.ext: .symbolic
+ @%create $^@
+ @%append $^@ >append.asm
+ @%append $^@ <$(%ROOT)build$(SEP)bin$(SEP)os2$(SEP)system$(SEP)oso001.msg
+ @%append $^@ DOS1210
+ @%append $^@ DOS2046
+ @%append $^@ DOS2047
+ @%append $^@ DOS2049
+ @%append $^@ DOS2050
+ @%append $^@ DOS2052
+ @%append $^@ DOS3091
+

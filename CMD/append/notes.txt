@@ -1,9 +1,9 @@
 + ported to macrolib
 + modified to use with mkmsgf
 
-todo
+todo:
 
-msgextrt.exe tool needed to extract messages from OSO001.msg
-psgprof.exe tool needed to produce extract script for msgextrt.exe tool
+msgprof.exe tool needed to produce extract script for msgextrt.exe tool
+uni2inc tool needed to produce basemid.inc
 
-Under DosBox internal COMMAND.COM doesn't work.
+Under DosBox internal COMMAND.COM doesn't work because doesn't support command extension.
