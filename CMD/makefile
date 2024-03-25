@@ -23,7 +23,6 @@ DIRS =   shared    &
          mem       &
          more      &
          move      &
-         neloader  &
          qbasic    &
          sort      &
          subst     &
