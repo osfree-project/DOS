@@ -11,17 +11,17 @@ srcfiles   = $(p)segs$(e) $(p)environ$(e) $(p)cmdline$(e) $(p)int2f$(e) $(p)int2
 NOLIBS     = 1
 COM        = 1
 JWASM      = 1
-ADD_ASMOPT = -I=$(PATH);$(MYDIR)$(SEP)macrolib
+ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
 
 !include $(%ROOT)tools/mk/appsdos.mk
 
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
 $(PATH)msg.inc: $(PATH)append.txt
-  mkmsgf /A /I$(MYDIR);$(%OS2TK)$(SEP)inc $[@ $(PATH)msg.inc
+  mkmsgf.exe $[@ $(PATH)msg.inc /A /I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc
 
 $(PATH)append.txt: $(PATH)append.ext
-  msgextrt $< $^@
+  msgextrt.exe $< $^@
 
 #$(PATH)append.ext: append.asm
 #  msgprof append.asm > append.ext

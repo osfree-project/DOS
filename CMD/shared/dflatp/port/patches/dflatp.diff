@@ -1,6 +1,6 @@
-diff -urN dflatp\source\dflatp\dfpcomp.h newdflatp\source\dflatp\dfpcomp.h
---- dflatp\source\dflatp\dfpcomp.h	Sat Mar 22 03:00:48 2008
-+++ newdflatp\source\dflatp\dfpcomp.h	Wed Aug 16 22:22:07 2023
+diff -urwN dflatp-prev/source/dflatp/dfpcomp.h dflatp/source/dflatp/dfpcomp.h
+--- dflatp-prev/source/dflatp/dfpcomp.h	2008-03-22 03:00:48.000000000 +0000
++++ dflatp/source/dflatp/dfpcomp.h	2024-03-25 14:00:42.333141251 +0000
 @@ -43,8 +43,8 @@
  #include <bios.h>
  #include <ctype.h>
@@ -21,9 +21,9 @@ diff -urN dflatp\source\dflatp\dfpcomp.h newdflatp\source\dflatp\dfpcomp.h
  #define MAXPOINTER     24      /* maximize token            */
  #define MINPOINTER     25      /* minimize token            */
  #define RESTOREPOINTER 18      /* restore token             */
-diff -urN dflatp\source\dflatp\logger.c newdflatp\source\dflatp\logger.c
---- dflatp\source\dflatp\logger.c	Sat Mar 22 10:15:42 2008
-+++ newdflatp\source\dflatp\logger.c	Wed Aug 16 21:13:56 2023
+diff -urwN dflatp-prev/source/dflatp/logger.c dflatp/source/dflatp/logger.c
+--- dflatp-prev/source/dflatp/logger.c	2008-03-22 10:15:42.000000000 +0000
++++ dflatp/source/dflatp/logger.c	2024-03-25 14:00:42.349141053 +0000
 @@ -4,7 +4,7 @@
  //#ifdef DFLATP_LOG
  
@@ -33,9 +33,17 @@ diff -urN dflatp\source\dflatp\logger.c newdflatp\source\dflatp\logger.c
  #include <stdlib.h>
  #include <stdio.h>
  #include <string.h>
-diff -urN dflatp\source\dflatp\portab.h newdflatp\source\dflatp\portab.h
---- dflatp\source\dflatp\portab.h	Sat Mar 22 03:51:04 2008
-+++ newdflatp\source\dflatp\portab.h	Wed Aug 16 21:13:56 2023
+diff -urwN dflatp-prev/source/dflatp/menu.h dflatp/source/dflatp/menu.h
+--- dflatp-prev/source/dflatp/menu.h	2007-12-26 23:20:18.000000000 +0000
++++ dflatp/source/dflatp/menu.h	2024-03-25 14:01:22.000646415 +0000
+@@ -51,4 +51,3 @@
+ 
+ #endif
+ 
+-
+diff -urwN dflatp-prev/source/dflatp/portab.h dflatp/source/dflatp/portab.h
+--- dflatp-prev/source/dflatp/portab.h	2008-03-22 03:51:04.000000000 +0000
++++ dflatp/source/dflatp/portab.h	2024-03-25 14:00:42.349141053 +0000
 @@ -7,6 +7,9 @@
  #include <dos.h>
  
