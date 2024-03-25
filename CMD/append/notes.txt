@@ -4,6 +4,5 @@
 todo:
 
 msgprof.exe tool needed to produce extract script for msgextrt.exe tool
-uni2inc tool needed to produce basemid.inc
 
 Under DosBox internal COMMAND.COM doesn't work because doesn't support command extension.

@@ -18,7 +18,7 @@ ADD_ASMOPT = -I=$(PATH);$(MYDIR)$(SEP)macrolib
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
 $(PATH)msg.inc: $(PATH)append.txt
-  mkmsgf /A /I$(MYDIR);$(%WATCOM)$(SEP)h$(SEP)os2 $[@ $(PATH)msg.inc
+  mkmsgf /A /I$(MYDIR);$(%OS2TK)$(SEP)inc $[@ $(PATH)msg.inc
 
 $(PATH)append.txt: $(PATH)append.ext
   msgextrt $< $^@
