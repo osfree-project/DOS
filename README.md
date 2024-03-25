@@ -51,7 +51,7 @@ for more info
 - helpmsg
 - join DOS only
 - label
-- mem
+- mem DOS only
 - more
 - move
 - qbasic
