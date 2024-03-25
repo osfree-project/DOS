@@ -14,6 +14,6 @@ NOLIBS = 1
 !include $(%ROOT)tools/mk/appsdos.mk
 !include $(MYDIR)..$(SEP)port$(SEP)assign.mk
 
-.asm: $(PORT_BASE)SOURCE$(SEP)ASSIGN
+.asm: $(PORT_BASE)source$(SEP)assign
 
 

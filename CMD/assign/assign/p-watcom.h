@@ -2,7 +2,10 @@
 
 #ifdef __WATCOMC__
 
+#ifndef  __LINUX__
 #include <direct.h>
+#endif
+
 #include <stdlib.h>
 
 

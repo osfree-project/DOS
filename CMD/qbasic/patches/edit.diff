@@ -1,6 +1,17 @@
-diff -urN edit\source\edit\config.c newedit\source\edit\config.c
---- edit\source\edit\config.c	Wed Aug 16 22:29:32 2023
-+++ newedit\source\edit\config.c	Wed Aug 16 00:09:13 2023
+diff -urwN edit/source/edit/calendar.c edit-new/source/edit/calendar.c
+--- edit/source/edit/calendar.c	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/calendar.c	2024-03-25 18:29:33.691200754 +0000
+@@ -1,6 +1,6 @@
+ /* ------------- calendar.c ------------- */
+ #include <string.h>
+-#include <sys\types.h>
++#include <sys/types.h>
+ #include <time.h>
+ 
+ 
+diff -urwN edit/source/edit/config.c edit-new/source/edit/config.c
+--- edit/source/edit/config.c	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/config.c	2024-03-25 18:25:07.958532616 +0000
 @@ -7,7 +7,7 @@
  
  /* ------ default configuration values ------- */
@@ -20,9 +31,9 @@ diff -urN edit\source\edit\config.c newedit\source\edit\config.c
  };
  
  extern BOOL ConfigLoaded;
-diff -urN edit\source\edit\config.h newedit\source\edit\config.h
---- edit\source\edit\config.h	Wed Aug 16 22:29:32 2023
-+++ newedit\source\edit\config.h	Wed Aug 16 00:09:13 2023
+diff -urwN edit/source/edit/config.h edit-new/source/edit/config.h
+--- edit/source/edit/config.h	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/config.h	2024-03-25 18:25:07.974532415 +0000
 @@ -35,6 +35,7 @@
  	int TopMargin;
  	int BottomMargin;
@@ -31,9 +42,20 @@ diff -urN edit\source\edit\config.h newedit\source\edit\config.h
  	ColorScheme clr;
  //    unsigned char clr[CLASSCOUNT] [4] [2]; /* Colors         */
  } CONFIG;
-diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
---- edit\source\edit\edit.c	Wed Aug 16 22:29:32 2023
-+++ newedit\source\edit\edit.c	Wed Aug 16 21:54:04 2023
+diff -urwN edit/source/edit/edit.c edit-new/source/edit/edit.c
+--- edit/source/edit/edit.c	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/edit.c	2024-03-25 18:26:13.453711373 +0000
+@@ -20,8 +20,8 @@
+ #include <bios.h>
+ #include <ctype.h>
+ #include <io.h>
+-#include <sys\types.h>
+-#include <sys\stat.h>
++#include <sys/types.h>
++#include <sys/stat.h>
+ #include <time.h>
+ #include <setjmp.h>
+ 
 @@ -30,6 +30,8 @@
  #include "config.h"
  #include "edit.h"
@@ -91,7 +113,7 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
          else if (optargs[index][0] == 'B' || optargs[index][0] == 'b')
  							SelectColorScheme (bw);
          else if (optargs[index][0] == 'i' || optargs[index][0] == 'I')
-@@ -149,17 +171,37 @@
+@@ -149,8 +171,17 @@
  
          }
  
@@ -105,25 +127,14 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +
      if (help_flag)
          {
--        printf("FreeDOS Editor    Version %s.\n\n"
--               "Syntax: EDIT [/B] [/H] [/?] [file(s)]\n"
--               "  /B     Force monochrome mode\n"
--               "  /I     Use inverse color scheme\n"
--               "  /H     Use 43/50 lines on EGA/VGA\n"
--               "  /R     Open all files read-only\n"
--               "  /?     Display this help message\n"
--               "  [file] Specify file(s) to load.\n"
--               "         Wildcards can be used here.\n", DFlatpVersion);
 +        if (cfg.EditorMode)
-+          printf("FreeDOS Editor    Version %s.\n\n"
-+                 "Syntax: EDIT [/B] [/H] [/?] [file(s)]\n"
-+                 "  /B     Force monochrome mode\n"
-+                 "  /I     Use inverse color scheme\n"
-+                 "  /H     Use 43/50 lines on EGA/VGA\n"
-+                 "  /R     Open all files read-only\n"
-+                 "  /?     Display this help message\n"
-+                 "  [file] Specify file(s) to load.\n"
-+                 "         Wildcards can be used here.\n", DFlatpVersion);
+         printf("FreeDOS Editor    Version %s.\n\n"
+                "Syntax: EDIT [/B] [/H] [/?] [file(s)]\n"
+                "  /B     Force monochrome mode\n"
+@@ -160,6 +191,17 @@
+                "  /?     Display this help message\n"
+                "  [file] Specify file(s) to load.\n"
+                "         Wildcards can be used here.\n", DFlatpVersion);
 +        else
 +          printf("osFree QBasic    Version %s.\n\n"
 +                 "Syntax: QBASIC [/B] [/H] [/?] [file(s)]\n"
@@ -138,21 +149,17 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
          exit(1);
          }
  
-@@ -176,9 +218,12 @@
+@@ -176,7 +218,10 @@
      if (cfg.ReadOnlyMode)
      		sprintf (WindowTitle, "EDIT (viewer mode) %i.%i%c", ProgramModule.Ver_maj, ProgramModule.Ver_min, ProgramModule.Ver_rel+'a'-1);
      else
 +    if (cfg.EditorMode)
      		sprintf (WindowTitle, "FreeDOS Edit %i.%i%c", ProgramModule.Ver_maj, ProgramModule.Ver_min, ProgramModule.Ver_rel+'a'-1);
--    		
--    
 +    else
 +    		sprintf (WindowTitle, "osFree QBasic %i.%i%c", ProgramModule.Ver_maj, ProgramModule.Ver_min, ProgramModule.Ver_rel+'a'-1);
-+
-+
+     		
+     
      EditApplication = CreateWindow(APPLICATION, WindowTitle, 0, 0, -1, -1,
-             &MainMenu, NULL, MemoPadProc, MOVEABLE | SIZEABLE | HASBORDER | MINMAXBOX | HASSTATUSBAR);
- 
 @@ -246,6 +291,11 @@
  
  }
@@ -346,13 +353,10 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
  /* ---------- save a file to disk ------------ */
  static void SaveFile(WINDOW wnd, int Saveas)
  {
-@@ -1095,6 +1305,27 @@
- 	        ActivateCommand(&MainMenu, ID_REPLACE);
- 	    }
- 	    ActivateCommand(&MainMenu, ID_SEARCHNEXT);
-+	}
-+    }
-+}
+@@ -1098,6 +1308,27 @@
+ 	}
+     }
+ }
 +
 +void PrepRunMenu(void *w, struct Menu *mnu)
 +{
@@ -371,12 +375,15 @@ diff -urN edit\source\edit\edit.c newedit\source\edit\edit.c
 +//	        ActivateCommand(&MainMenu, ID_REPLACE);
 +	    }
 +//	    ActivateCommand(&MainMenu, ID_SEARCHNEXT);
- 	}
-     }
- }
-diff -urN edit\source\edit\edit.h newedit\source\edit\edit.h
---- edit\source\edit\edit.h	Wed Aug 16 22:29:32 2023
-+++ newedit\source\edit\edit.h	Wed Aug 16 00:09:13 2023
++	}
++    }
++}
+ 
+ void PrepEditMenu(void *w, struct Menu *mnu)
+ {
+diff -urwN edit/source/edit/edit.h edit-new/source/edit/edit.h
+--- edit/source/edit/edit.h	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/edit.h	2024-03-25 18:25:07.974532415 +0000
 @@ -28,6 +28,7 @@
  void PrepEditMenu(void *, struct Menu *);
  void PrepSearchMenu(void *, struct Menu *);
@@ -402,9 +409,9 @@ diff -urN edit\source\edit\edit.h newedit\source\edit\edit.h
      ID_ABOUTDFP,
      /* -------------- TabStops menu ------------- */
      ID_TAB0, /* tab-as-char mode -ea */
-diff -urN edit\source\edit\menus.c newedit\source\edit\menus.c
---- edit\source\edit\menus.c	Wed Aug 16 22:29:32 2023
-+++ newedit\source\edit\menus.c	Wed Aug 16 00:09:13 2023
+diff -urwN edit/source/edit/menus.c edit-new/source/edit/menus.c
+--- edit/source/edit/menus.c	2024-03-25 18:30:01.694849657 +0000
++++ edit-new/source/edit/menus.c	2024-03-25 18:25:07.978532364 +0000
 @@ -6,6 +6,14 @@
  
  
@@ -521,9 +528,9 @@ diff -urN edit\source\edit\menus.c newedit\source\edit\menus.c
      /* --------------- the File popdown menu ----------------*/
      POPDOWN( "~File",  PrepFileMenu, "Commands for manipulating files" )
          SELECTION( "~New",        ID_NEW,     CTRL_N, 0) /* 0.7a */
-diff -urN edit\source\edit\qbasic.c newedit\source\edit\qbasic.c
---- edit\source\edit\qbasic.c	Thu Jan 01 07:00:00 1970
-+++ newedit\source\edit\qbasic.c	Wed Aug 16 21:54:42 2023
+diff -urwN edit/source/edit/qbasic.c edit-new/source/edit/qbasic.c
+--- edit/source/edit/qbasic.c	1970-01-01 00:00:00.000000000 +0000
++++ edit-new/source/edit/qbasic.c	2024-03-25 18:25:07.978532364 +0000
 @@ -0,0 +1,3566 @@
 +/***************************************************************
 +  

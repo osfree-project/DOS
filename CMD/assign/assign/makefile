@@ -10,7 +10,7 @@ ADD_COPT = -ml -D__WATCOM__
 !include $(MYDIR)..$(SEP)port$(SEP)assign.mk
 
 
-.c: $(PORT_BASE)SOURCE$(SEP)ASSIGN
+.c: $(PORT_BASE)source$(SEP)assign
 
-.h: $(PORT_BASE)SOURCE$(SEP)ASSIGN
+.h: $(PORT_BASE)source$(SEP)assign
 

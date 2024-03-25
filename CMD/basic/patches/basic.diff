@@ -1,6 +1,6 @@
-diff -urN basic\bwbasic.h newbasic\bwbasic.h
---- basic\bwbasic.h	Sat Aug 19 12:32:08 2023
-+++ newbasic\bwbasic.h	Thu Aug 17 10:18:31 2023
+diff -urN basic/bwbasic.h newbasic/bwbasic.h
+--- basic/bwbasic.h	Sat Aug 19 12:32:08 2023
++++ newbasic/bwbasic.h	Thu Aug 17 10:18:31 2023
 @@ -1346,6 +1346,7 @@
    struct LineStructure *OtherLine; /* pointer to other line in loops */
    char *buffer;                    /* buffer to hold the line */
@@ -9,9 +9,9 @@ diff -urN basic\bwbasic.h newbasic\bwbasic.h
    int position;                    /* current position in line */
    int cmdnum;                      /* C_... */
    int Startpos;                    /* start of rest of line read from buffer */
-diff -urN basic\bwb_inp.c newbasic\bwb_inp.c
---- basic\bwb_inp.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwb_inp.c	Mon Dec 18 20:57:13 2023
+diff -urN basic/bwb_inp.c newbasic/bwb_inp.c
+--- basic/bwb_inp.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwb_inp.c	Mon Dec 18 20:57:13 2023
 @@ -185,6 +185,10 @@
    assert(My->SYSIN != NULL);
    assert(My->SYSIN->cfp != NULL);
@@ -23,9 +23,9 @@ diff -urN basic\bwb_inp.c newbasic\bwb_inp.c
    if (prompt != NULL)
    {
      while (*prompt)
-diff -urN basic\bwb_tbl.c newbasic\bwb_tbl.c
---- basic\bwb_tbl.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwb_tbl.c	Sun Dec 17 21:55:14 2023
+diff -urN basic/bwb_tbl.c newbasic/bwb_tbl.c
+--- basic/bwb_tbl.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwb_tbl.c	Sun Dec 17 21:55:14 2023
 @@ -1147,6 +1147,51 @@
     '\\',                        /* OptionUsingLength */
     }
@@ -78,9 +78,9 @@ diff -urN basic\bwb_tbl.c newbasic\bwb_tbl.c
  };
  
  
-diff -urN basic\bwb_var.c newbasic\bwb_var.c
---- basic\bwb_var.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwb_var.c	Mon Dec 18 21:11:22 2023
+diff -urN basic/bwb_var.c newbasic/bwb_var.c
+--- basic/bwb_var.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwb_var.c	Mon Dec 18 21:11:22 2023
 @@ -3167,6 +3167,17 @@
  }
  
@@ -99,9 +99,9 @@ diff -urN basic\bwb_var.c newbasic\bwb_var.c
  bwb_OPTION_TIME (LineType * l)
  {
    /* OPTION TIME format$ */
-diff -urN basic\bwbasic.c newbasic\bwbasic.c
---- basic\bwbasic.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwbasic.c	Mon Dec 18 21:26:23 2023
+diff -urN basic/bwbasic.c newbasic/bwbasic.c
+--- basic/bwbasic.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwbasic.c	Mon Dec 18 21:26:23 2023
 @@ -65,27 +65,11 @@
  GlobalType *My = NULL;
  
@@ -169,9 +169,9 @@ diff -urN basic\bwbasic.c newbasic\bwbasic.c
        break;
     case C_OPTION_TERMINAL_NONE:
        r = bwb_OPTION_TERMINAL_NONE( l );
-diff -urN basic\bwbasic.h newbasic\bwbasic.h
---- basic\bwbasic.h	Fri Mar 15 21:00:38 2024
-+++ newbasic\bwbasic.h	Mon Dec 18 21:10:57 2023
+diff -urN basic/bwbasic.h newbasic/bwbasic.h
+--- basic/bwbasic.h	Fri Mar 15 21:00:38 2024
++++ newbasic/bwbasic.h	Mon Dec 18 21:10:57 2023
 @@ -317,7 +317,7 @@
  **
  */
@@ -263,9 +263,9 @@ diff -urN basic\bwbasic.h newbasic\bwbasic.h
  
  
  /*-------------------------------------------------------------
-diff -urN basic\bwd_cmd.c newbasic\bwd_cmd.c
---- basic\bwd_cmd.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwd_cmd.c	Mon Dec 18 21:12:09 2023
+diff -urN basic/bwd_cmd.c newbasic/bwd_cmd.c
+--- basic/bwd_cmd.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwd_cmd.c	Mon Dec 18 21:12:09 2023
 @@ -67,7 +67,7 @@
    "AS",  /* Syntax */
    "Syntax Error.",  /* Description */
@@ -1992,9 +1992,9 @@ diff -urN basic\bwd_cmd.c newbasic\bwd_cmd.c
  },
  };
  
-diff -urN basic\bwd_fun.c newbasic\bwd_fun.c
---- basic\bwd_fun.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwd_fun.c	Mon Dec 18 21:27:15 2023
+diff -urN basic/bwd_fun.c newbasic/bwd_fun.c
+--- basic/bwd_fun.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwd_fun.c	Mon Dec 18 21:27:15 2023
 @@ -54,7 +54,7 @@
    1, /* ParameterCount */
    P1NUM, /* ParameterTypes */
@@ -3093,9 +3093,9 @@ diff -urN basic\bwd_fun.c newbasic\bwd_fun.c
  },
  {
    F_ZONE_X_N, /* UniqueID */
-diff -urN basic\bwd_six.h newbasic\bwd_six.h
---- basic\bwd_six.h	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwd_six.h	Mon Dec 18 21:13:23 2023
+diff -urN basic/bwd_six.h newbasic/bwd_six.h
+--- basic/bwd_six.h	Fri Mar 15 21:00:20 2024
++++ newbasic/bwd_six.h	Mon Dec 18 21:13:23 2023
 @@ -560,5 +560,7 @@
  #define var_new                          X00202
  #define var_set                          X00203
@@ -3104,9 +3104,9 @@ diff -urN basic\bwd_six.h newbasic\bwd_six.h
 +
  
  /* EOF */
-diff -urN basic\bwx_tty.c newbasic\bwx_tty.c
---- basic\bwx_tty.c	Fri Mar 15 21:00:20 2024
-+++ newbasic\bwx_tty.c	Mon Dec 18 21:13:51 2023
+diff -urN basic/bwx_tty.c newbasic/bwx_tty.c
+--- basic/bwx_tty.c	Fri Mar 15 21:00:20 2024
++++ newbasic/bwx_tty.c	Mon Dec 18 21:13:51 2023
 @@ -69,6 +69,9 @@
    case C_OPTION_TERMINAL_ANSI:
      fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
