@@ -3,7 +3,7 @@
 PORT_NAME = dos$(SEP)debug
 PORT_TYPE = git
 PORT_URL  = https://github.com/Baron-von-Riedesel/DOS-debug
-PORT_REV  = v2.0
+PORT_REV  = v2.02
 PORT_PATCHES  = 
 
 !include $(%ROOT)tools/mk/port.mk
