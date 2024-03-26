@@ -6,7 +6,7 @@
 
 DIRS =   shared    &
          stub      &
-#         append    &
+         append    &
          assign    &
          attrib    &
          basic     &
