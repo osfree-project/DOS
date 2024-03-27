@@ -1,1 +1,0 @@
-!include $(MYDIR)assign.mk
