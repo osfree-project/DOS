@@ -82,6 +82,12 @@ extern char TXT_MSG_INCORRECT_DOSVERSION[];
 extern char TXT_MSG_ASSIGN_ASSIGNMENT[];
 extern char TXT_MSG_QMARK_ASSIGN[];
 extern char TXT_MSG_ASSIGN_NOTINSTALLED[];
+extern char TXT_MSG_ASSIGN_NOREDIRECT[];
+extern char TXT_MSG_ASSIGN_BADSEPARATOR[];
+extern char TXT_MSG_ASSIGN_BADDRIVE[];
+extern char TXT_MSG_ASSIGN_NODRIVE[];
+extern char TXT_MSG_ASSIGN_BADSWITCH[];
+extern char TXT_MSG_ASSIGN_NOMEM[];
 
 #define E_recursion "Cannot unload the module, because it is a recursion loop"
 #define E_releaseBlock "The chunk of memory could not be relased"
@@ -92,9 +98,6 @@ extern char TXT_MSG_ASSIGN_NOTINSTALLED[];
 #define E_assignData "Cannot locate ASSIGN data segment"
 #define M_installByte "The installation check byte is 0%02x"
 #define M_inRecurs "The recursion rejection flag is 0%02x"
-#define E_noMem "Memory full"
-
-
 
 #define message(f, ...) {fprintf(f, __VA_ARGS__); }
 #define warning(...) printf(__VA_ARGS__);
@@ -199,12 +202,12 @@ unsigned Xalloc_seg(unsigned size)
 	if(allocation != 2) {
 		_AX = 0x5801;
 		_BX = allocation;
-		geninterrupt(0x21);
+		intr(0x21, &reg);
 	}
 	if(UMBLink == 0) {
 		_AX = 0x5803;
 		_BX = 0;
-		geninterrupt(0x21);
+		intr(0x21, &reg);
 	}
 
 	return segment;
@@ -255,6 +258,7 @@ int installed(void)
 void displayStatus(void)
 {	unsigned segment, offset;
 	byte dr;
+	int n=0;
 
 	if(!(dr = installed()))
 		informative(TXT_MSG_ASSIGN_NOTINSTALLED);
@@ -268,7 +272,11 @@ void displayStatus(void)
 		}
 		for(offset = 1; offset < 27; ++offset)
 			if((dr = peekb(segment, offset + 0x102)) != offset)
+			{
+				n++;
 				message(stdout, TXT_MSG_ASSIGN_ASSIGNMENT, offset + 'A' - 1, 'A' - 1 + dr); //@todo change %c to %1 and %2
+			}
+		if (!n) message(stdout, TXT_MSG_ASSIGN_NOREDIRECT);
 	}
 }
 
@@ -288,13 +296,13 @@ void addAssignment(unsigned const segment, const char * const asgm)
 	p = asgm;
 	assert(p && segment);
 	if(islower(*p)) dr1 = toupper(*p);
-	else if(!isupper(dr1 = *p)) hlpScreen();
+	else if(!isupper(dr1 = *p)) message(stdout, TXT_MSG_ASSIGN_BADDRIVE, *p); // @todo parse %1
 
 	if(*++p == ':') ++p;
-	if(!*p == '=') hlpScreen();
+	if(!*p == '=') message(stdout, TXT_MSG_ASSIGN_BADSEPARATOR, *p); // @todo parse %1
 
 	if(islower(*++p)) dr2 = toupper(*p);
-	else if(!isupper(dr2 = *p)) hlpScreen();
+	else if(!isupper(dr2 = *p)) message(stdout, TXT_MSG_ASSIGN_NODRIVE);
 
 	if(*++p == ':') ++p;
 	if(*p) hlpScreen();
@@ -342,7 +350,7 @@ void loadModule(byte *mod, unsigned len, const char *const padd)
 
 /* allocate that amount of paragraphs */
 	if(!(segment = Xalloc_seg(segLen + segPad)))
-		fatal(E_noMem);
+		fatal(TXT_MSG_ASSIGN_NOMEM);
 
 #ifndef NDEBUG
 	printf("Loading module at 0x%04x\n", segment);
@@ -438,17 +446,18 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 #else
 	_ES = peekw(segment, 0x100 - 2);
 	_AX = 0x4900;
-	geninterrupt(0x21);
+	intr(0x21, &reg);
 #endif
        if(_CFLAG)      /* Carry set ==> Error */
 		fatal(E_releaseBlock);
 }
 
 void flush(void)
-{	__asm {
-		mov ah, 0dh
-		int 21h
-	}
+{
+	USEREGS
+		
+	_AH=0xd;
+	intr(0x21, &reg);
 }
 
 void patchModule(byte *mod, word len)
@@ -495,18 +504,18 @@ int main(int argc, char **argv)
 			case 'M': usehi = !NUL; break;
 			case 's':
 			case 'S':
-                        #if 0
-				if(len = strlen(p = &argv[optind][optchar])) {
+                        #if 1
+				if(len = strlen(p = &argv[optind])) {
 					/* differ "/STATUS" and "/SHADOW" */
 
 					++optind;		/* skip this option */
-					optchar = 0;
+					//optchar = 0;
 
-					if(memicmp(p, "HADOW", len) == 0) {
+					if(memicmp(p, "SHADOW", len) == 0) {
 						shadow = 1;
 						continue;
 					}
-					if(memicmp(p, "TATUS", len))
+					if(memicmp(p, "STATUS", len))
 						hlpScreen();
 				}
 
@@ -516,8 +525,12 @@ int main(int argc, char **argv)
 				status = CMD_STATUS;
 				continue;
 			
-			default:
+			case 'h':
+			case 'H':
+			case '?':
 				hlpScreen();
+			default:
+				message(stdout, TXT_MSG_ASSIGN_BADSWITCH, c); //@todo parse %1
 		}
 
 	switch(status) {

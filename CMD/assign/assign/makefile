@@ -30,6 +30,8 @@ $(PATH)assign.ext: .symbolic
  @%append $^@ >assign.asm
  @%append $^@ <$(%ROOT)build$(SEP)bin$(SEP)os2$(SEP)system$(SEP)oso001.msg
  @%append $^@ DOS1210
+ @%append $^@ DOS1826
+ @%append $^@ DOS3010
  @%append $^@ DOS3026
  @%append $^@ DOS3027
  @%append $^@ DOS3028
