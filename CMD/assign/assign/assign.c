@@ -505,7 +505,7 @@ int main(int argc, char **argv)
 			case 's':
 			case 'S':
                         #if 1
-				if(len = strlen(p = &argv[optind])) {
+				if(len = strlen(p = argv[optind])) {
 					/* differ "/STATUS" and "/SHADOW" */
 
 					++optind;		/* skip this option */
