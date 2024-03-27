@@ -30,7 +30,7 @@ for more info
 
 ## Command processor
 
-- command.com
+- command.com DOS only
 
 ## Command line tools
 
