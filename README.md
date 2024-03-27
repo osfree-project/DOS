@@ -30,7 +30,7 @@ for more info
 
 ## Command processor
 
-- command.com
+- command.com DOS only
 
 ## Command line tools
 
@@ -47,7 +47,8 @@ for more info
 - exit_vdm DOS only
 - find
 - fsaccess DOS only
-- help
+- graftabl DOS only
+- help DOS only
 - helpmsg
 - join DOS only
 - label
@@ -58,5 +59,4 @@ for more info
 - sort
 - stub
 - subst DOS only
-- vmdisk
 - xcopy
