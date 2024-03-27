@@ -27,3 +27,6 @@
 [submodule "CMD/append/macrolib"]
 	path = CMD/append/macrolib
 	url = https://github.com/osfree-project/MacroLib
+[submodule "CMD/graftabl/macrolib"]
+	path = CMD/graftabl/macrolib
+	url = https://github.com/osfree-project/MacroLib

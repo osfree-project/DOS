@@ -17,6 +17,7 @@ DIRS =   shared    &
          edlin     &
          exit_vdm  &
          find      &
+		 graftabl  &
          help      &
          join      &
          label     &
