@@ -16,7 +16,6 @@
 
 #include <regproto.h>
 #define NUL '\0'
-#define MK_OSVERS(major,minor) ((major << 8) | (minor))
 
 #ifdef FARDATA
 #undef FARDATA
@@ -25,12 +24,6 @@
 #undef FARCODE
 #endif
 
-#ifdef _MICROC_
-
-#include <p-mc.h>
-
-#else	/* no _MICROC_ */
-
 #if defined(__HUGE__) || defined(__LARGE__) || defined(__COMPACT__)
 #define FARDATA
 #endif
@@ -38,27 +31,6 @@
 #define FARCODE
 #endif
 
-/*
- *	Currently supported:
- *		Borland C/C++ v2+
- *		Pacific C v7.51
- *		Watcom v10.6
- */
-
-#define iM(q)			/* if Micro-C */
-#define nM(q)	q		/* not Mirco-C */
-#define inM(q,w)	w	/* if-not Micro-C */
-#define aF(fct) (fct)		/* address of function */
-#define aS(structure) &(structure)	/* address of structure */
-#define cS(strucType) (strucType)	/* casting of a structure */
-
-
-/* Handling of pointers to structures */
-#define sInc(poi) ++(poi)
-#define sDec(poi) --(poi)
-#define sIdx(array,index) ((array) + (index))
-#define sAdd(poi,displacement) ((poi) += (displacement))
-#define sSub(poi,displacement) ((poi) -= (displacement))
 
 /* far pointer variable handling */
 #define TO_FP(var) ((void far*) (var))	/* cast variable to far pointer */
@@ -83,42 +55,11 @@
 #define NULL ((void*)0)
 #endif
 
-/* LONGMATH */
-#define longcpy(a,b) ((a) = (b))
-#define longset(a,b) ((a) = (b))
-#define longmul(a,b) ((a) *= (b))
-#define longdiv(a,b) ((a) /= (b))
-#define longadd(a,b) ((a) += (b))
-#define longsub(a,b) ((a) -= (b))
-#define longtst(a) (!!(a))
-#define longcmp1(a,b) ((signed long)(a) - (signed long)(b))
-
-#define longseti(a,b) ((a) = (int)(b))
-#define longmuli(a,b) ((a) *= (int)(b))
-#define longdivi(a,b) ((a) /= (int)(b))
-#define longaddi(a,b) ((a) += (int)(b))
-#define longsubi(a,b) ((a) -= (int)(b))
-
-#define longsetu(a,b) ((a) = (unsigned)(b))
-#define longmulu(a,b) ((a) *= (unsigned)(b))
-#define longdivu(a,b) ((a) /= (unsigned)(b))
-#define longaddu(a,b) ((a) += (unsigned)(b))
-#define longsubu(a,b) ((a) -= (unsigned)(b))
-
-
 /* Source In compiler specific settings */
-#ifdef __TURBOC__
-#include "p-bc.h"
-#endif
-
-#ifdef HI_TECH_C
-#include "p-pac.h"
-#endif
 
 #ifdef __WATCOMC__
 #include "p-watcom.h"
 #endif
 
-#endif	/* _MICROC_ */
 
 #endif

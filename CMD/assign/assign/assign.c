@@ -60,9 +60,8 @@
 #include <direct.h>                                                                                     
 #include <stdlib.h>
 #include <portable.h>
-#include <getopt.h>
-
-#define nargs() _AX
+#include <unistd.h>
+ 
 typedef void __interrupt
 #ifdef __cplusplus
 	(*fintr)(...);
@@ -115,24 +114,6 @@ extern char TXT_MSG_ASSIGN_NOMEM[];
 
 //msgExitCode
 
-/*
- * The application's name
- */
-#ifdef MAXFILE
-       static char XappName[MAXFILE] = "";
-#define maxName MAXFILE
-#else /*#      !(defined(MAXFILE)) */
-       static char XappName[9] = "";
-#define maxName 9
-#endif /*#     defined(MAXFILE) */
-
-
-/*
- *     Return the application's name   
- */
-char *appName(void)
-{      return XappName;        }
-
 
 void hlpScreen()
 {
@@ -140,12 +121,6 @@ void hlpScreen()
        exit(msgErrorNumber(E_hlpScreen));
 }
 
-
-
-#ifndef lint
-static char const rcsid[] = 
-	"$Id: ASSIGN.C 1.4 1997/01/27 08:09:37 ska Rel ska $";
-#endif
 
 char shadowStr[] = "SKAUS18A3";
 FLAG8 status = CMD_NONE;
@@ -157,7 +132,7 @@ unsigned Xalloc_seg(unsigned size)
 /* reserves a chunk of memory through DOS-48 & last fit */
 {	unsigned segment;
 	FLAG8 UMBLink, allocation;
-        USEREGS
+        union REGPACK reg;
 
 	_AX = 0x5800;
 	intr(0x21, &reg);
@@ -170,7 +145,7 @@ unsigned Xalloc_seg(unsigned size)
 			rcl al, 1		/* incorporate Carry */
 			xor ah, ah
 		}
-		UMBLink = nargs();
+		UMBLink = _AX;
 		if(UMBLink == 0) {	/* UMBs not chained, but available */
 			__asm {
 				mov ax, 5803h	/* Chain UMBs */
@@ -179,7 +154,7 @@ unsigned Xalloc_seg(unsigned size)
 				rcl al, 1
 				xor ah, ah
 			}
-			if(nargs() & 1)
+			if(_AX & 1)
 				fatal(E_mcbChain);
 		}
 	}
@@ -197,7 +172,7 @@ unsigned Xalloc_seg(unsigned size)
 		xor ax, ax
         allocOK:
 	}
-	segment = nargs();
+	segment = _AX;
 
 	if(allocation != 2) {
 		_AX = 0x5801;
@@ -230,12 +205,12 @@ extern  unsigned short          GetDS( void );
 unsigned getSeg(void)
 /* returns the data segment of ASSIGN */
 {	int segment;
-        USEREGS
+        union REGPACK reg;
 
 	_ES=0;
 	_AX=0x0601;
 	intr(0x2f,&reg);
-	if(!(segment = _ES/*nargs()*/) || segment == GetDS())
+	if(!(segment = _ES) || segment == GetDS())
 		fatal(E_assignData);
 
 	return segment;
@@ -244,7 +219,7 @@ unsigned getSeg(void)
 int installed(void)
 /* check, if ASSIGN is installed */
 {	int cond;
-    USEREGS
+    union REGPACK reg;
 
 	_AX=0x600;
 	intr(0x2f, &reg);
@@ -310,7 +285,7 @@ void addAssignment(unsigned const segment, const char * const asgm)
 	pokeb(segment, 0x103 + (int)dr1 - 'A', dr2 - 'A' + 1);
 }
 
-#include <algnbyte.h>
+#pragma pack(__push,1);
 
 struct PATCHITEM {
 	byte intNr;
@@ -324,7 +299,8 @@ struct COMinfo {
 	word addOff;
 	byte type;
 };
-#include <algndflt.h>
+
+#pragma pack(__pop);
 
 void loadModule(byte *mod, unsigned len, const char *const padd)
 /* install module mod with length len */
@@ -334,7 +310,7 @@ void loadModule(byte *mod, unsigned len, const char *const padd)
 	const char *pad;
 	word vseg, voff;
 	struct PATCHITEM const *h;
-        USEREGS
+        union REGPACK reg;
 
 	nfo = (struct COMinfo*)(mod + len - sizeof(struct COMinfo));
 
@@ -393,7 +369,7 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 	const char *pad;
 	word vseg, voff;
 	struct PATCHITEM const *h;
-        USEREGS
+        union REGPACK reg;
 
 #ifndef NDEBUG
 	printf("Unloading module from 0x%04x\n", segment);
@@ -407,7 +383,7 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 
 	if(pad && cmp_seg(segment, 0x100 - strlen(pad) - 2
 					, FP_SEG(pad), FP_OFF(pad), strlen(pad)))
-		fatal(E_loadedModule, appName());
+		fatal(E_loadedModule);
 
 /* check, if all interrupts point into this MCB */
 
@@ -432,29 +408,17 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 #endif
 
 /* now release the memory block */
-#ifdef _MICROC_
-/* no way to stuff ES into int86() function */
 
-	set_es(peekw(segment, 0x100 - 2));
-	__asm {
-		mov ah, 49h
-		int 21h
-		pushf
-		pop ax
-		mov __FLAGS, ax
-	}
-#else
 	_ES = peekw(segment, 0x100 - 2);
 	_AX = 0x4900;
 	intr(0x21, &reg);
-#endif
-       if(_CFLAG)      /* Carry set ==> Error */
+    if(_CFLAG)      /* Carry set ==> Error */
 		fatal(E_releaseBlock);
 }
 
 void flush(void)
 {
-	USEREGS
+	union REGPACK reg;
 		
 	_AH=0xd;
 	intr(0x21, &reg);
@@ -465,7 +429,7 @@ void patchModule(byte *mod, word len)
 	byte *iotbl;
 	word *p, version;
 	FLAG8 a;
-        USEREGS
+        union REGPACK reg;
 
 	nfo = (struct COMinfo*)(mod + len - sizeof(struct COMinfo));
 	p = (word*)(module - 0x100 + nfo->addOff);
@@ -477,7 +441,7 @@ void patchModule(byte *mod, word len)
 
 /* Patch module */
 
-	if(((version = nargs()) & 0xff) < 5) {
+	if(((version = _AX) & 0xff) < 5) {
 		if((version & 0xff) < 3)
 			fatal(TXT_MSG_INCORRECT_DOSVERSION);
 		a = 0x10;	/* sub fct >= 0x10 new since DOS5 */
@@ -496,7 +460,7 @@ int main(int argc, char **argv)
 {	int c, len;
 	char *p;
 
-	while((c = getopt(argc, argv, "sShHmMuU?", "")) != EOF)
+	while((c = getopt(argc, argv, "sShHmMuU?")) != EOF)
 		switch(c) {
 			case 'u': 
 			case 'U': status = CMD_UNINSTALL; break;
@@ -504,7 +468,6 @@ int main(int argc, char **argv)
 			case 'M': usehi = !NUL; break;
 			case 's':
 			case 'S':
-                        #if 1
 				if(len = strlen(p = argv[optind])) {
 					/* differ "/STATUS" and "/SHADOW" */
 
@@ -519,8 +482,6 @@ int main(int argc, char **argv)
 						hlpScreen();
 				}
 
-
-                        #endif
 				/* Status */
 				status = CMD_STATUS;
 				continue;
