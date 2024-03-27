@@ -139,22 +139,13 @@ unsigned Xalloc_seg(unsigned size)
 	allocation = _AL;
 
 	if(usehi) {
-		__asm {
-			mov ax, 5802h	/* Get UMB Link Status */
-			int 21h
-			rcl al, 1		/* incorporate Carry */
-			xor ah, ah
-		}
-		UMBLink = _AX;
+		_AX = 0x5802;
+		intr(0x21, &reg);
+		UMBLink = _CFLAG;
 		if(UMBLink == 0) {	/* UMBs not chained, but available */
-			__asm {
-				mov ax, 5803h	/* Chain UMBs */
-				mov bx, 1
-				int 21h
-				rcl al, 1
-				xor ah, ah
-			}
-			if(_AX & 1)
+			_AX = 0x5803;
+			intr(0x21, &reg);
+			if(_CFLAG)
 				fatal(E_mcbChain);
 		}
 	}
