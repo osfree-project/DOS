@@ -10,6 +10,7 @@ DIRS =   shared    &
          assign    &
          attrib    &
          basic     &
+         choice    &
          command   &
          comp      &
          debug     &

@@ -1,0 +1,50 @@
+SYS0133I: A JOIN or SUBST command cannot be used for a drive that
+contains previously joined drives.
+;
+;
+SYS0134I: An attempt was made to use a JOIN or SUBST command on a
+drive that has already been joined.
+;
+;
+SYS0135I: An attempt was made to use a JOIN or SUBST command on a
+drive that has already been substituted.
+;
+;
+SYS0136I: The system tried to delete the JOIN of a drive that is not
+joined.
+;
+;
+SYS0137I: The system tried to delete the substitution of a drive that
+is not substituted.
+;
+;
+SYS0138I: The system tried to join a drive to a directory on a joined
+drive.
+;
+;
+SYS0139I: The system tried to substitute a drive to a directory on a
+substituted drive.
+;
+;
+SYS0140I: The system tried to join a drive to a directory on a
+substituted drive.
+;
+;
+SYS0141I: The system tried to substitute a drive to a directory on
+a joined drive.
+;
+;
+SYS0142E: The system cannot perform a JOIN or SUBST at this time.
+;
+;
+SYS0143I: The system cannot join or substitute a drive to or for a
+directory on the same drive.
+;
+;
+SYS0144E: The directory is not a subdirectory of the root directory.
+;
+;
+SYS0145E: The directory is not empty.
+;
+;
+SYS0146E: The path specified is being used in a substitute.
