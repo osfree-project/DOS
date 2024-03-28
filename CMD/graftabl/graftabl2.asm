@@ -216,8 +216,8 @@ okdos7:       mov       ah, [si]            ; Next char from each string.
           inc       si                  ; Move up and keep checking.
           inc       di
           jmp short okdos7
-okdos8:       mov       dx, eswitch         ; "Invalid switch"
-          call      wrstr
+okdos8:		lea	si, TXT_MSG_BAD_PARM1	;//       mov       dx, eswitch         ; "Invalid switch"
+          call      printmsg
           mov       si, bx
 okdos9:       mov       ah, [si]            ; Next char of switch
           call      smash
@@ -248,27 +248,44 @@ okdos11:      mov       ax, 0B000h          ; Check for a running instance.
           int       02Fh
           cmp       al, 0FFh            ; Found it?
           je        okdos12                 ; Yes, jump forward.
-          mov       dx, eis             ; Write "GRAFTABL is NOT installed"
-          call      wrstr
-          mov       dx, enot
-          call      wrstr
+          ;mov       dx, eis             ; Write "GRAFTABL is NOT installed"
+          ;call      wrstr
+          ;mov       dx, enot
+          ;call      wrstr
           jmp short okdos13                 ; Die
 okdos12:      mov       bx, whence          ; Get location of GRAFTABL data,
           mov       ax, 0B001h          ;   usually same as the 1F vector
           int       02Fh
-          mov       dx, eactive
-          call      wrstr
           mov       di, [whence]
           mov       ds, word ptr [whence+2]
           mov       bx, 00400h
           mov       ax, ds:[bx+di]
           push      cs                  ; Restore DS
           pop       ds
-          call      wrnum               ; Write the codepage in decimal form.
-          mov       dx, ecrlf
-          call      wrstr
-okdos13:      mov       ax, 04C02h
-          int       021h                ; EXIT CODE 2
+
+	  lea	si, TXT_MSG_GRAFTABL_US_LOADED_ALREADY
+	  cmp	ax, 437
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_CANADIAN_LOADED_ALREADY
+	  cmp	ax, 863
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_PORTUGUESE_LOADED_ALREADY
+	  cmp	ax, 860
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_NORDIC_LOADED_ALREADY
+	  cmp	ax, 865
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_MULTI_LOADED_ALREADY
+	  cmp	ax, 850
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_HEBROW_LOADED_ALREADY
+	  cmp	ax, 862
+	  jz	okdos13
+	  lea	si, TXT_MSG_GRAFTABL_UNKNOWN_LOADED_ALREADY
+
+okdos13:	call	printmsg
+		mov       ax, 04C02h
+		int       021h                ; EXIT CODE 2
 
 ; Codepage mover/resident installer.
 ; (This serves both purposes, depending on which is needed.)
@@ -296,8 +313,10 @@ okdos18:      add       si, 2               ; Get address of font
           je        okdos21
           or        al, al              ; AL=00?
           jz        okdos19                 ; Yes, so safe to install.
-          mov       dx, enope           ; Not safe to install, die screaming
-          call      wrstr
+          lea	si, TXT_MSG_GRAFTABL_NO_CP_LOADED
+	  call	printmsg
+	  ;mov       dx, enope           ; Not safe to install, die screaming
+          ;call      wrstr
           mov       ax, 04C02h
           int       021h                ; EXIT CODE 2
 okdos19:      mov       word ptr [whence], entry
@@ -313,16 +332,44 @@ okdos19:      mov       word ptr [whence], entry
           mov       ax, 0251Fh          ; Hook INT1F
           mov       dx, entry           ; Remember, this doubles as the
           int       021h                ;   address of the font!
-          mov       dx, eis             ; "GRAFTABL installed"
-          call      wrstr
-          mov       dx, einstall
-          call      wrstr
+          ;mov       dx, eis             ; "GRAFTABL installed"
+          ;call      wrstr
+          ;mov       dx, einstall
+          ;call      wrstr
+	  
+	  lea	si, TXT_MSG_GRAFTABL_US_LOADED
+	  cmp	word ptr [codepage], 437
+	  jz	prcp
+	  lea	si, TXT_MSG_GRAFTABL_CANADIAN_LOADED
+	  cmp	word ptr [codepage], 863
+	  jz	prcp
+	  lea	si, TXT_MSG_GRAFTABL_PORTUGUESE_LOADED
+	  cmp	word ptr [codepage], 860
+	  jz	prcp
+	  lea	si, TXT_MSG_GRAFTABL_NORDIC_LOADED
+	  cmp	word ptr [codepage], 865
+	  jz	prcp
+	  lea	si, TXT_MSG_GRAFTABL_MULTI_LOADED
+	  cmp	word ptr [codepage], 850
+	  jz	prcp
+	  lea	si, TXT_MSG_GRAFTABL_HEBROW_LOADED
+	  cmp	word ptr [codepage], 862
+	  jz	prcp
+
+; These pages has now messages in standard, so print codepage number (@todo: need to add messages to oso001.msg)
+;   * 852 - Central Europe/Latin 2
+;   * 866 - Cyrilic
+
           mov       dx, eactive         ; Display new codepage.
           call      wrstr
           mov       ax, [codepage]
           call      wrnum
           mov       dx, ecrlf
           call      wrstr
+	  jmp	prcp2
+	  
+prcp:	call	printmsg	  
+prcp2:
           mov       ax, word ptr [002Ch]        ; Free up the environment for a little
 	  mov       es, ax
           mov       ah, 049h            ;   memory boost
@@ -351,12 +398,35 @@ okdos21:      mov       ax, 0B001h          ; So where is it?
           ;call      wrnum
           ;mov       dx, ecrlf
           ;call      wrstr
+	  lea	si, TXT_MSG_GRAFTABL_US_LOADED
+	  cmp	word ptr [codepage], 437
+	  jz	okdos211
+	  lea	si, TXT_MSG_GRAFTABL_CANADIAN_LOADED
+	  cmp	word ptr [codepage], 863
+	  jz	okdos211
+	  lea	si, TXT_MSG_GRAFTABL_PORTUGUESE_LOADED
+	  cmp	word ptr [codepage], 860
+	  jz	okdos211
+	  lea	si, TXT_MSG_GRAFTABL_NORDIC_LOADED
+	  cmp	word ptr [codepage], 865
+	  jz	okdos211
+	  lea	si, TXT_MSG_GRAFTABL_MULTI_LOADED
+	  cmp	word ptr [codepage], 850
+	  jz	okdos211
+	  lea	si, TXT_MSG_GRAFTABL_HEBROW_LOADED
+	  cmp	word ptr [codepage], 862
+	  jz	okdos211
+
           mov       dx, eactive         ; Display new codepage.
           call      wrstr
           mov       ax, [codepage]
           call      wrnum
           mov       dx, ecrlf
           call      wrstr
+	  jmp	okdos2111
+	  
+okdos211:	call printmsg
+okdos2111:
           mov       ax, 04C01h
           int       021h                ; EXIT CODE 1
 
@@ -451,8 +521,10 @@ wrstrc2:       pop       di
 ;
 ; Input: DX=string, terminated by $
 
-wrstr:    mov       ah, 009h            ; PUTSTR
+wrstr:  push ax  
+	mov       ah, 009h            ; PUTSTR
           int       021h
+	pop ax
           ret
 
 ; ============================================================================
@@ -479,29 +551,12 @@ numbuf:
 ; MESSAGES/TEXT
 ; ============================================================================
 
-; Errors.
-;
-; Note that "Invalid switch" does NOT contain a newline.
-; Any arbitrary newline plus terminator is adequate as a place to put "ecrlf".
-
-eswitch:  
-          db        "Invalid switch - /$"
 ecrlf:    
           db        13, 10, "$"
 
 ; Informational messages and message fragments.
 ;
-; Note that "eold" is not accessed directly, but only via fallthrough from
-; "eupdated".
 
-enope:
-          db        "Not installing GRAFTABL.", 13, 10, "$"
-eis:
-          db        "GRAFTABL is $"
-enot:
-          db        "NOT "                        ; FALL INTO
-einstall:
-          db        "installed.", 13, 10, "$"
 eactive:
           db        "Active code page is: $"
 
