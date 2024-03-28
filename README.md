@@ -38,6 +38,7 @@ for more info
 - assign DOS only
 - attrib Dual mode
 - basic
+- choice
 - comp
 - debug DOS only
 - diskcomp
