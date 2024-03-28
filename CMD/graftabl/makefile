@@ -31,4 +31,20 @@ $(PATH)graftabl.ext: .symbolic
  @%append $^@ >graftabl.asm
  @%append $^@ <$(%ROOT)build$(SEP)bin$(SEP)os2$(SEP)system$(SEP)oso001.msg
  @%append $^@ DOS1001
+ @%append $^@ DOS1210
+ @%append $^@ DOS2010
+ @%append $^@ DOS2011
+ @%append $^@ DOS2012
+ @%append $^@ DOS2013
+ @%append $^@ DOS2014
+ @%append $^@ DOS2015
+ @%append $^@ DOS2016
+ @%append $^@ DOS2017
+ @%append $^@ DOS2018
+ @%append $^@ DOS2019
+ @%append $^@ DOS2020
+ @%append $^@ DOS2021
+ @%append $^@ DOS2022
+ @%append $^@ DOS2023
+ @%append $^@ DOS2024
 

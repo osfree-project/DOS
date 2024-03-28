@@ -77,8 +77,30 @@
 
           .8086
 
+	include dos.inc
+	
 _TEXT segment word public 'CODE' use16
           org       100h
+
+extern TXT_MSG_BAD_PARM1: near
+extern TXT_MSG_INCORRECT_DOSVERSION: near
+extern TXT_MSG_GRAFTABL_US_LOADED: near
+extern TXT_MSG_GRAFTABL_CANADIAN_LOADED: near
+extern TXT_MSG_GRAFTABL_PORTUGUESE_LOADED: near
+extern TXT_MSG_GRAFTABL_NORDIC_LOADED: near
+extern TXT_MSG_GRAFTABL_US_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_CANADIAN_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_PORTUGUESE_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_NORDIC_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_NO_CP_LOADED: near
+extern TXT_MSG_GRAFTABL_UNKNOWN_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_HEBROW_LOADED: near
+extern TXT_MSG_QMARK_GRAFTABL: near
+extern TXT_MSG_GRAFTABL_MULTI_LOADED_ALREADY: near
+extern TXT_MSG_GRAFTABL_MULTI_LOADED: near
+extern TXT_MSG_GRAFTABL_HEBROW_LOADED_ALREADY: near
+
+extern printmsg: near
 
 ; ============================================================================
 ; RESIDENT PORTION OF GRAFTABL (entry is replaced)
@@ -138,8 +160,8 @@ trans:    mov       ah, 030h
           xchg      ah, al
           cmp       ax, 00200h
           jae       okdos
-          mov       dx, edos1
-          call      wrstr
+          lea	si, TXT_MSG_INCORRECT_DOSVERSION
+          call	printmsg
           int       020h                ; DOS 1 EXIT
 
 ; Command-line parser.
@@ -168,17 +190,20 @@ okdos2:       mov       ah, [si]            ; Read digits.
           mov       word ptr [codepage], ax
           inc       si                  ; Next char
           jmp short okdos2
-okdos3:       mov       dx, esyn            ; Syntax error, die screaming
-okdos4:       call      wrstr
-          mov       ax, 04C03h
+
+okdos3:		lea	si, TXT_MSG_BAD_PARM1	;mov       dx, esyn            ; Syntax error, die screaming
+		call	printmsg
+		jmp	okdos41
+okdos4:   call      wrstr
+okdos41:  mov       ax, 04C03h
           int       021h                ; EXIT CODE 3
 okdos5:       inc       si                  ; Start reading switch.
-	ifdef    HELP
           cmp       byte ptr [si], '?'      ; /? - show command-line help
           jne       okdos6
-          mov       dx, ehelp
-          jmp       okdos4                  ; Treat it as an error condition
-	endif
+          ;mov       dx, ehelp
+	  lea       si, TXT_MSG_QMARK_GRAFTABL
+	  call	printmsg
+          jmp       okdos41                  ; Treat it as an error condition
 okdos6:       mov       di, mstatus         ; The switch we need to match.
           mov       bx, si              ; Hold onto the current pointer.
 okdos7:       mov       ah, [si]            ; Next char from each string.
@@ -259,8 +284,9 @@ okdos16:      cmp       word ptr [si], 0        ; End of table?
           je        okdos18                 ; Yes, so use it.
           add       si, 4               ; Next entry
           jmp short okdos16
-okdos17:      mov       dx, ecp             ; "Invalid codepage"
-          jmp       okdos4
+okdos17:	lea	si, TXT_MSG_GRAFTABL_NO_CP_LOADED	;//      mov       dx, ecp             ; "Invalid codepage"
+		call	printmsg
+          jmp       okdos41
 okdos18:      add       si, 2               ; Get address of font
           mov       ax, [si]
           mov       word ptr [cpptr], ax         ; Save it.
@@ -319,12 +345,12 @@ okdos21:      mov       ax, 0B001h          ; So where is it?
           mov       bx, whence          ; ES:BX gets this.
           int       02Fh
           call      movcp
-          mov       dx, eupdated        ; Display old codepage.
-          call      wrstr
-          mov       ax, [oldcp]
-          call      wrnum
-          mov       dx, ecrlf
-          call      wrstr
+          ;mov       dx, eupdated        ; Display old codepage.
+          ;call      wrstr
+          ;mov       ax, [oldcp]
+          ;call      wrnum
+          ;mov       dx, ecrlf
+          ;call      wrstr
           mov       dx, eactive         ; Display new codepage.
           call      wrstr
           mov       ax, [codepage]
@@ -458,14 +484,8 @@ numbuf:
 ; Note that "Invalid switch" does NOT contain a newline.
 ; Any arbitrary newline plus terminator is adequate as a place to put "ecrlf".
 
-edos1:    
-          db        "Incorrect DOS version", 13, 10, "$"
-esyn:     
-          db        "Invalid parameter", 13, 10, "$"
 eswitch:  
           db        "Invalid switch - /$"
-ecp:      
-          db        "Invalid code page" ; FALL INTO
 ecrlf:    
           db        13, 10, "$"
 
@@ -474,14 +494,6 @@ ecrlf:
 ; Note that "eold" is not accessed directly, but only via fallthrough from
 ; "eupdated".
 
-          ifdef    HELP
-ehelp:
-          db        "Enables DOS to display an extended character set in CGA graphics mode.", 13, 10, 13, 10
-          db        "GRAFTABL [xxx]", 13, 10
-          db        "GRAFTABL /STATUS", 13, 10, 13, 10
-          db        "  xxx      Specifies a code page number.", 13, 10
-          db        "  /STATUS  Displays the current code page selected for use with GRAFTABL.", 13, 10, "$"
-          endif
 enope:
           db        "Not installing GRAFTABL.", 13, 10, "$"
 eis:
@@ -490,10 +502,6 @@ enot:
           db        "NOT "                        ; FALL INTO
 einstall:
           db        "installed.", 13, 10, "$"
-eupdated:
-          db        "Code page updated.", 13, 10  ; FALL INTO
-eold:
-          db        "Previous code page was: $"
 eactive:
           db        "Active code page is: $"
 
