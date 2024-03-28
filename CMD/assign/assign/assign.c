@@ -87,16 +87,8 @@ extern char TXT_MSG_ASSIGN_BADDRIVE[];
 extern char TXT_MSG_ASSIGN_NODRIVE[];
 extern char TXT_MSG_ASSIGN_BADSWITCH[];
 extern char TXT_MSG_ASSIGN_NOMEM[];
+extern char TXT_MSG_ASSIGN_INTERNAL[];
 
-#define E_recursion "Cannot unload the module, because it is a recursion loop"
-#define E_releaseBlock "The chunk of memory could not be relased"
-#define E_internalFailure "Internal failure #%u"
-#define E_loadedModule "The module %s is not loaded with this module version"
-#define E_notOnTop "Some interrupt vectors are hooked by other programs."
-#define E_mcbChain "MCB Chain corrupt"
-#define E_assignData "Cannot locate ASSIGN data segment"
-#define M_installByte "The installation check byte is 0%02x"
-#define M_inRecurs "The recursion rejection flag is 0%02x"
 
 #define message(f, ...) {fprintf(f, __VA_ARGS__); }
 #define warning(...) printf(__VA_ARGS__);
@@ -108,7 +100,7 @@ extern char TXT_MSG_ASSIGN_NOMEM[];
  *     Issue an internal failure error message
  *     They have only a number to differ among themselves
  */
-#define iFailure(nr) fatal(E_internalFailure, nr)
+#define iFailure(nr) fatal(TXT_MSG_ASSIGN_INTERNAL, nr)
 
 #define msgErrorNumber(nr) 0
 
@@ -146,7 +138,7 @@ unsigned Xalloc_seg(unsigned size)
 			_AX = 0x5803;
 			intr(0x21, &reg);
 			if(_CFLAG)
-				fatal(E_mcbChain);
+				fatal(TXT_MSG_ASSIGN_INTERNAL); //E_mcbChain
 		}
 	}
 	else UMBLink = 0;
@@ -156,7 +148,7 @@ unsigned Xalloc_seg(unsigned size)
 	intr(0x21, &reg);
 
 	__asm {
-		mov bx, asmName(size, 4)
+		mov bx, size
 		mov ah, 48h
 		int 21h
 		jnc allocOK
@@ -202,7 +194,7 @@ unsigned getSeg(void)
 	_AX=0x0601;
 	intr(0x2f,&reg);
 	if(!(segment = _ES) || segment == GetDS())
-		fatal(E_assignData);
+		fatal(TXT_MSG_ASSIGN_INTERNAL); //E_assignData
 
 	return segment;
 }
@@ -231,11 +223,10 @@ void displayStatus(void)
 	else {
 		segment = getSeg();
 		assert(segment);
-		if(shadow) {
-			if(dr != 0xff) informative(M_installByte, dr);
-			if(dr = peekb(segment, 0x102))
-				informative(M_inRecurs, dr);
-		}
+//		if(shadow) {
+//			if(dr != 0xff) ;//informative(M_installByte, dr);
+//			if(dr = peekb(segment, 0x102)) ; //informative(M_inRecurs, dr);
+//		}
 		for(offset = 1; offset < 27; ++offset)
 			if((dr = peekb(segment, offset + 0x102)) != offset)
 			{
@@ -374,7 +365,7 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 
 	if(pad && cmp_seg(segment, 0x100 - strlen(pad) - 2
 					, FP_SEG(pad), FP_OFF(pad), strlen(pad)))
-		fatal(E_loadedModule);
+		fatal(TXT_MSG_ASSIGN_INTERNAL); //E_loadedModule
 
 /* check, if all interrupts point into this MCB */
 
@@ -386,7 +377,7 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 		vseg=_ES;
 		voff=_BX;
 		if(h->newIntOfs != voff || segment != vseg)
-		 	error(E_notOnTop);
+		 	error(TXT_MSG_ASSIGN_INTERNAL); //E_notOnTop
 	}
 	for(h = (struct PATCHITEM*)nfo, items = nfo->intr; items--;) {
 		--h;
@@ -404,7 +395,7 @@ void unloadModule(byte *mod, unsigned len, const char *const padd, unsigned cons
 	_AX = 0x4900;
 	intr(0x21, &reg);
     if(_CFLAG)      /* Carry set ==> Error */
-		fatal(E_releaseBlock);
+		fatal(TXT_MSG_ASSIGN_INTERNAL); //E_releaseBlock
 }
 
 void flush(void)
@@ -456,7 +447,7 @@ int main(int argc, char **argv)
 			case 'u': 
 			case 'U': status = CMD_UNINSTALL; break;
 			case 'm':
-			case 'M': usehi = !NUL; break;
+			case 'M': usehi = !'\0'; break;
 			case 's':
 			case 'S':
 				if(len = strlen(p = argv[optind])) {
@@ -497,7 +488,7 @@ int main(int argc, char **argv)
 				break;
 			}
 			if(peekb(getSeg(), 0x102))
-				error(E_recursion);
+				error(TXT_MSG_ASSIGN_INTERNAL); //E_recursion
 			flush();
 			unloadModule(module, sizeof(module), shadowStr, getSeg());
 			break;
@@ -507,7 +498,7 @@ int main(int argc, char **argv)
 				patchModule(module, sizeof(module));
 				if(shadow)
 					*module = 1;	/* shadow ASSIGN */
-				module[1] = getdisk();	/* patch in the current working drive */
+				module[1] = _getdrive()-1;	/* patch in the current working drive */
 				loadModule(module, sizeof(module), shadowStr);
 			}
 

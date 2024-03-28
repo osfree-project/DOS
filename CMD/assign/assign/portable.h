@@ -14,51 +14,39 @@
 #ifndef __PORTABLE_H
 #define __PORTABLE_H
 
-#include <regproto.h>
-#define NUL '\0'
+#include <dos.h>
+#include <direct.h>
+#include <stdlib.h>
 
-#ifdef FARDATA
-#undef FARDATA
-#endif
-#ifdef FARCODE
-#undef FARCODE
-#endif
+#define _AH reg.h.ah
+#define _AL reg.h.al
+#define _BH reg.h.bh
+#define _BL reg.h.bl
+#define _CH reg.h.ch
+#define _CL reg.h.cl
+#define _DH reg.h.dh
+#define _DL reg.h.dl
+#define _AX reg.x.ax
+#define _BX reg.x.bx
+#define _CX reg.x.cx
+#define _DX reg.x.dx
+#define _SI reg.x.si
+#define _DI reg.x.di
+#define _DS reg.x.ds
+#define _ES reg.x.es
+#define _CFLAG (reg.x.flags & 1)
 
-#if defined(__HUGE__) || defined(__LARGE__) || defined(__COMPACT__)
-#define FARDATA
-#endif
-#if defined(__HUGE__) || defined(__LARGE__) || defined(__MEDIUM__)
-#define FARCODE
-#endif
+/* byte/word/dword type */
+typedef unsigned char byte;
+typedef unsigned word;
+typedef unsigned FLAG;
+typedef unsigned FLAG8;
 
-
-/* far pointer variable handling */
-#define TO_FP(var) ((void far*) (var))	/* cast variable to far pointer */
-#define FARARG(var,type) type far* var
-#define COPYFARARG(var) var
-
-/* DWORD variables handling */
-#define setDW(var,seg,ofs) ((var) = (dword)MK_FP(seg,ofs))
-#define setDWP(varP,seg,ofs) (*(varP) = (dword)MK_FP(seg,ofs))
-#define DW_LO(var) ((word)(var))
-#define DW_HI(var) ((word)((var) >> 16))
-#define DWP_LO(var) ((word)(var))
-#define DWP_HI(var) ((word)((var) >> 16))
-#define DWARG dword
-
-/* Simulate long constants and long arguments */
-#define TO_LONG(num) (unsigned long)(num)
-#define MK_LONG(hi,lo) (((unsigned long)(hi) << 16) | (unsigned)(lo))
-
-
-#ifndef NULL
-#define NULL ((void*)0)
-#endif
-
-/* Source In compiler specific settings */
-
-#ifdef __WATCOMC__
-#include "p-watcom.h"
+#ifndef _CLIB_
+#define peekb(segm,ofs) (*(byte __far*)MK_FP((segm),(ofs)))
+#define peekw(segm,ofs) (*(word __far*)MK_FP((segm),(ofs)))
+#define pokeb(segm,ofs,value) (peekb((segm),(ofs)) = (byte)(value))
+#define pokew(segm,ofs,value) (peekw((segm),(ofs)) = (word)(value))
 #endif
 
 
