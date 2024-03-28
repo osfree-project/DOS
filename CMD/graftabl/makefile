@@ -7,7 +7,7 @@
 PROJ       = graftabl
 TRGT       = $(PROJ).com
 DESC       = Append directory to search path
-srcfiles   = $(p)graftabl$(e) $(p)msg$(e)
+srcfiles   = $(p)graftabl2$(e) $(p)msg$(e)
 NOLIBS     = 1
 COM        = 1
 JWASM      = 1
