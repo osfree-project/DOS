@@ -41,6 +41,27 @@
 
 #define FAILSAFE
 
+unsigned coreleft(void)
+{
+
+    struct _heapinfo entry;
+    unsigned left;
+
+    left=0;
+    entry._pentry=NULL;
+
+    while (1)
+    {
+      if (_heapwalk(&entry) != _HEAPOK)
+        break;
+
+      if (entry._useflag==_FREEENTRY)
+        left += entry._size;
+    }
+
+    return (left);
+}
+
 static int FastCopy (FILE* sfptr, FILE* tfptr, unsigned bufsize, void* buf)
 {
   int i;

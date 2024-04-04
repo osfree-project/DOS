@@ -68,7 +68,10 @@ int OnCBreak (void);
 void ReadSectors (int drive, int nsects, int lsect, void *buffer,
 		  int bytespersector);
 
-#pragma aux absread =  \
+int absread(int DosDrive, int nsects, int foo, void *diskReadPacket);
+
+int myabsread(int DosDrive, int nsects, int foo, void *diskReadPacket);
+#pragma aux myabsread =  \
       "push bp"           \
       "int 0x25"          \
       "sbb ax, ax"        \

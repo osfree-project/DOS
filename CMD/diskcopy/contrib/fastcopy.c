@@ -37,6 +37,7 @@
 
 #include "drive.h"
 #include "boot.h"
+#include "diskcopy.h"
 #include "fastcopy.h"
 
 static int PerformFastCopy = FALSE;
@@ -133,7 +134,7 @@ IsSectorUsed (unsigned long sector)
 }
 
 static int
-FileReader (int handle, int nsects, long lsect, void *buffer)
+FileReader (int handle, int nsects, int lsect, void *buffer)
 {
   int size = nsects * BYTESPERSECTOR;
 
@@ -180,7 +181,7 @@ FileReadBootInfo (char *file, struct dfree *free)
 
 static int
 ReadFatInfo (int driveorfile,
-	     int (*readfunc) (int drive, int nsects, long lsect,
+	     int (*readfunc) (int drive, int nsects, int lsect,
 			      void *buffer))
 {
   int i;

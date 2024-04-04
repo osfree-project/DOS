@@ -1049,3 +1049,8 @@ OnCBreak (void)
   OnExit ();
   return ABORT;
 }
+
+int absread(int DosDrive, int nsects, int foo, void *diskReadPacket)
+{
+	return myabsread(DosDrive, nsects, foo, diskReadPacket);
+};

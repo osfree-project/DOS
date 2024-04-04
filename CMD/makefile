@@ -15,6 +15,7 @@ DIRS =   shared    &
          comp      &
          debug     &
          diskcomp  &
+		 diskcopy  &
          edlin     &
          exit_vdm  &
          find      &
