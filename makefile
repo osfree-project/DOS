@@ -6,7 +6,7 @@
 
 # First directory must be SHARED which provides shared libs
 
-DIRS = shared doskrnl fapi CMD WIN16
+DIRS = shared doskrnl CMD WIN16
 
 !include $(%ROOT)tools/mk/all.mk
 
