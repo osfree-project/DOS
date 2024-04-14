@@ -22,7 +22,7 @@ JWASM = 1
 
 .h: $(PORT_BASE)source$(SEP)mem
 
-$(PATH)msg.obj: msg.asm $(PATH)msg.inc
+$(PATH)msg.obj: msg.asm $(PATH)msg.inc $(MYDIR)utilmd04.inc
 
 $(PATH)msg.inc: $(PATH)$(PROJ).txt
   mkmsgf.exe $[@ $^@ -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc
