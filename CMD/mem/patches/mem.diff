@@ -1,0 +1,132 @@
+diff -urN mem/source/mem/mem2.c newmem/source/mem/mem2.c
+--- mem/source/mem/mem2.c	Sun Apr 14 13:45:48 2024
++++ newmem/source/mem/mem2.c	Sun Apr 14 13:26:32 2024
+@@ -1,3 +1,9 @@
++/* MKMSGF format messages */
++
++extern char TXT_MSG_MEM_QMARK1[];
++extern char TXT_MSG_MEM_QMARK2[];
++extern char TXT_MSG_MEM_QMARK3[];
++extern char TXT_MSG_MEM_LARGEST_EXECUTABLE[];
+ 
+ typedef int (*mlist_filter_match)(MINFO *entry, void *data);
+ 
+@@ -311,7 +317,8 @@
+ 
+     largest_executable = mcb_largest();
+ 
+-    printf("%-38s%3uK", _(2,9,"Largest executable program size"), round_seg_kb(largest_executable));
++	// FIXME: Here we need parse %1 parameter
++    printf("%-38s%3uK", TXT_MSG_MEM_LARGEST_EXECUTABLE, round_seg_kb(largest_executable));
+     convert(_(1,3," (%7s bytes)\n"), (ulong)largest_executable
+ 	    * CONV_BYTES_PER_PAGE);
+ /*
+@@ -1458,53 +1465,6 @@
+     return (flags);
+ }
+ 
+-/*
+- * Return the help string for the given command-line flag/option.  If
+- * there is no help string for the option, NULL is returned.
+- */
+-char *help_for_flag(opt_flag_t opt)
+-{
+-    switch (opt) {
+-    case F_HELP:       return (_(7, 10,
+-"/?           Displays this help message"));
+-    case F_DEVICE:     return (_(7, 6,
+-"/DEV[ICE]    List of device drivers currently in memory"));
+-    case F_EMS:	       return (_(7, 3,
+-"/E[MS]       Reports all information about Expanded Memory"));
+-    case F_FULL:       return (_(7, 4,
+-"/FU[LL]      Full list of memory blocks"));
+-    case F_UPPER:      return (_(7, 7,
+-"/U           List of programs in conventional and upper memory"));
+-    case F_XMS:	       return (_(7, 8,
+-"/X[MS]       Reports all information about Extended Memory"));
+-    case F_PAGE:       return (_(7, 9,
+-"/P[AGE]      Pauses after each screenful of information"));
+-    case F_CLASSIFY:   return (_(7, 5,
+-"/C[LASSIFY]  Classify modules using memory below 1 MB"));
+-    case F_DEBUG:      return (_(7, 11,
+-"/DEB[UG]     Show programs and devices in conventional and upper memory"));
+-    case F_MODULE:     return (_(7, 12,
+-"/M <name> | /MODULE <name>\n"
+-"             Show memory used by the given program or driver"));
+-    case F_FREE:       return (_(7, 13,
+-"/FR[EE]      Show free conventional and upper memory blocks"));
+-    case F_ALL:	       return (_(7, 14,
+-"/A[LL]       Show all details of high memory area (HMA)"));
+-    case F_NOSUMMARY:  return (_(7, 15,
+-"/N[OSUMMARY] Do not show the summary normally displayed when no other\n"
+-"             options are specified"));
+-    case F_SUMMARY:    return (_(7, 16,
+-"/S[UMMARY]   Negates the /NOSUMMARY option"));
+-    case F_OLD:	       return (_(7, 18,
+-"/O[LD]       Compatability with FreeDOS MEM 1.7 beta"));
+-    case F_D:	       return (_(7, 19,
+-"/D           Same as /DEBUG by default, same as /DEVICE if /OLD used"));
+-    case F_F:	       return (_(7, 20,
+-"/F           Same as /FREE by default, same as /FULL if /OLD used"));
+-    default:	       return (NULL);
+-    }
+-}
+-
+ void show_help(opt_t *opts, int opt_count)
+ {
+     int opt_index;
+@@ -1512,50 +1472,10 @@
+     opt_flag_t flag;
+     char *help_str;
+ 
+-    printf(_(7, 0, "FreeDOS MEM version %s"), MEM_VERSION);
+-#ifdef DEBUG
+-    printf(" DEBUG");
+-#endif
+-    printf(" [%s %s", __DATE__, __TIME__);
+-#ifdef __WATCOMC__
+-    printf(" Watcom C %u.%u", __WATCOMC__ / 100, __WATCOMC__ % 100);
+-#endif
+-#ifdef __TURBOC__
+-    printf(" Turbo C 0x%04X", __TURBOC__);
+-#endif
+-    printf("]\n");
+-
+-    printf("%s\n\n%s\n",
+-	   _(7, 1, "Displays the amount of used and free memory in your system."),
+-	   _(7, 2, "Syntax: MEM [zero or more of the options shown below]"));
+-
+-    for (opt_index = 0; opt_index < opt_count; opt_index++) {
+-	flag = opts[opt_index].flag;
+-	if (displayed_flags & flag) {
+-	    /*
+-	     * We've already displayed the provided help string for
+-	     * this flag so don't re-display it.
+-	     */
+-	    continue;
+-	}
+-	help_str = help_for_flag(flag);
+-	if (help_str != NULL) {
+-	    printf("%s\n", help_str);
+-	    /*
+-	     * Make sure we don't display this string again - the
+-	     * string returned by help_for_flag() should have covered
+-	     * both options.
+-	     */
+-	    displayed_flags |= flag;
+-	} else {
+-	    printf(_(7, 17, "/%-10s No help is available for this option\n"),
+-		   opts[opt_index].s);
+-	    /*
+-	     * If there is another option with the same flag, we'll
+-	     * need to display that one too.
+-	     */
+-	}
+-    }
++    printf(TXT_MSG_MEM_QMARK1);
++    printf(TXT_MSG_MEM_QMARK2);
++    printf(TXT_MSG_MEM_QMARK3);
++                            
+ 
+     exit(1);
+ }
