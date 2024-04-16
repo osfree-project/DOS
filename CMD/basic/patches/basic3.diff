@@ -1,0 +1,317 @@
+diff -urwN basic/bwb_cmd.c newbasic/bwb_cmd.c
+--- basic/bwb_cmd.c	Tue Apr 16 14:58:16 2024
++++ newbasic/bwb_cmd.c	Tue Apr 16 09:14:41 2024
+@@ -52,7 +52,9 @@
+ static LineType *bwb_system (LineType * l);
+ static LineType *bwb_xlist (LineType * l, FILE * file);
+ static LineType *bwx_run (LineType * Line, char *ProgramName);
++#ifndef NO_MAINTAINER
+ static void CommandOptionVersion (int n, char *OutputLine);
++#endif
+ static void CommandUniqueID (int i, char *UniqueID);
+ static void CommandVector (int i, char *Vector);
+ static VariableType *find_variable_by_type (char *name, int dimensions,
+@@ -6351,6 +6353,8 @@
+   FixUp (UniqueID);
+ }
+ 
++#ifndef NO_MAINTAINER
++
+ static void
+ CommandVector (int i, char *Vector)
+ {
+@@ -6362,6 +6366,7 @@
+   FixUp (Vector);
+ }
+ 
++
+ static void
+ CommandOptionVersion (int n, char *OutputLine)
+ {
+@@ -6386,6 +6391,7 @@
+     }
+   }
+ }
++#endif
+ 
+ 
+ void
+@@ -6637,6 +6643,8 @@
+ }
+ #endif
+ 
++#ifndef NO_MAINTAINER
++
+ void
+ DumpAllCommandTableDefinitions (FILE * file)
+ {
+@@ -7041,6 +7049,10 @@
+   fflush (file);
+ }
+ 
++#endif
++
++#ifndef NO_HELP	  
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                HELP
+@@ -7159,6 +7171,7 @@
+   return (l);
+ 
+ }
++#endif
+ 
+ int
+ NumberValueCheck (ParamTestType ParameterTests, DoubleType X)
+@@ -7509,6 +7522,8 @@
+   }
+ }
+ 
++#ifndef NO_MAINTAINER
++
+ void
+ IntrinsicFunctionUniqueID (IntrinsicFunctionType * f, char *UniqueID)
+ {
+@@ -7691,6 +7706,7 @@
+   fflush (file);
+ }
+ 
++
+ void
+ DumpAllFunctionSwitch (FILE * file)
+ {
+@@ -7717,6 +7733,10 @@
+   fflush (file);
+ }
+ 
++#endif
++
++#ifndef NO_MAINTAINER
++
+ static const char *ParameterRangeID[16] = {
+   "P%dERR",
+   "P%dANY",
+@@ -7774,6 +7794,10 @@
+   /* P1NEZ */ "  PARAMETER: %c$ is a string, RESERVED",
+ };
+ 
++#endif
++
++#ifndef NO_MAINTAINER
++
+ void
+ DumpAllFuctionTableDefinitions (FILE * file)
+ {
+@@ -8163,6 +8187,8 @@
+   fflush (file);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                FNCS
+@@ -8208,6 +8234,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_MAINTAINER
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                MAINTAINER
+@@ -8763,6 +8791,8 @@
+   ResetConsoleColumn ();
+   return (l);
+ }
++
++#endif
+ 
+ 
+ /***************************************************************
+diff -urwN basic/bwb_exp.c newbasic/bwb_exp.c
+--- basic/bwb_exp.c	Tue Apr 16 14:58:04 2024
++++ newbasic/bwb_exp.c	Tue Apr 16 09:09:41 2024
+@@ -3431,6 +3431,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_MAINTAINER
++
+ void
+ DumpOneOperatorSyntax (FILE * file, int IsXref, int n)
+ {
+@@ -3515,5 +3517,6 @@
+   fprintf (file, "\n");
+   fflush (file);
+ }
++#endif
+ 
+ /* EOF */
+diff -urwN basic/bwbasic.c newbasic/bwbasic.c
+--- basic/bwbasic.c	Tue Apr 16 14:58:16 2024
++++ newbasic/bwbasic.c	Tue Apr 16 09:06:54 2024
+@@ -2943,9 +2943,11 @@
+    case C_GOTO:
+       r = bwb_GOTO( l );
+       break;
++#ifndef NO_HELP	  
+    case C_HELP:
+       r = bwb_HELP( l );
+       break;
++#endif   
+    case C_IF:
+       r = bwb_IF( l );
+       break;
+@@ -3009,6 +3011,7 @@
+    case C_LSET:
+       r = bwb_LSET( l );
+       break;
++#ifndef NO_MAINTAINER
+    case C_MAINTAINER:
+       r = bwb_MAINTAINER( l );
+       break;
+@@ -3063,6 +3066,7 @@
+    case C_MAINTAINER_STACK:
+       r = bwb_MAINTAINER_STACK( l );
+       break;
++#endif
+    case C_MARGIN:
+       r = bwb_MARGIN( l );
+       break;
+diff -urwN basic/bwbasic.h newbasic/bwbasic.h
+--- basic/bwbasic.h	Tue Apr 16 14:58:16 2024
++++ newbasic/bwbasic.h	Tue Apr 16 09:07:39 2024
+@@ -1146,6 +1146,7 @@
+ #define   THE_PRICE_IS_RIGHT      TRUE
+ #endif /* THE_PRICE_IS_RIGHT */
+ 
++#ifndef NO_MAINTAINER
+ #ifndef   MAINTAINER_BUFFER_LENGTH
+ /*
+ **
+@@ -1154,6 +1155,7 @@
+ **/
+ #define   MAINTAINER_BUFFER_LENGTH       1023
+ #endif /* MAINTAINER_BUFFER_LENGTH */
++#endif
+ 
+ /*-------------------------------------------------------------
+                         FUNCTION PARAMETER TYPES
+@@ -1845,7 +1847,9 @@
+ extern LineType *bwb_GOTO (LineType * l);
+ extern LineType *bwb_GO_SUB (LineType * l);
+ extern LineType *bwb_GO_TO (LineType * l);
++#ifndef NO_HELP	  
+ extern LineType *bwb_HELP (LineType * l);
++#endif
+ extern LineType *bwb_IF (LineType * l);
+ extern LineType *bwb_IF8THEN (LineType * l);
+ extern LineType *bwb_IF_END (LineType * l);
+@@ -1867,6 +1871,7 @@
+ extern LineType *bwb_LPRINTER (LineType * l);
+ extern LineType *bwb_LPT (LineType * l);
+ extern LineType *bwb_LSET (LineType * l);
++#ifndef NO_MAINTAINER
+ extern LineType *bwb_MAINTAINER (LineType * l);
+ extern LineType *bwb_MAINTAINER_CMDS (LineType * l);
+ extern LineType *bwb_MAINTAINER_CMDS_HTML (LineType * l);
+@@ -1885,6 +1890,7 @@
+ extern LineType *bwb_MAINTAINER_FNCS_TABLE (LineType * l);
+ extern LineType *bwb_MAINTAINER_MANUAL (LineType * l);
+ extern LineType *bwb_MAINTAINER_STACK (LineType * l);
++#endif
+ extern LineType *bwb_MARGIN (LineType * l);
+ extern LineType *bwb_MAT (LineType * l);
+ extern LineType *bwb_MAT_GET (LineType * Line);
+@@ -2430,7 +2436,9 @@
+ #define C_GOODBYE                       75 /* GOODBYE                        */
+ #define C_GOSUB                         76 /* GOSUB                          */
+ #define C_GOTO                          77 /* GOTO                           */
++#ifndef NO_HELP	  
+ #define C_HELP                          78 /* HELP                           */
++#endif
+ #define C_IF                            79 /* IF                             */
+ #define C_IF_END                        80 /* IF END                         */
+ #define C_IF_MORE                       81 /* IF MORE                        */
+@@ -2452,6 +2460,7 @@
+ #define C_LPRINTER                      97 /* LPRINTER                       */
+ #define C_LPT                           98 /* LPT                            */
+ #define C_LSET                          99 /* LSET                           */
++#ifndef NO_MAINTAINER
+ #define C_MAINTAINER                   100 /* MAINTAINER                     */
+ #define C_MAINTAINER_CMDS              101 /* MAINTAINER CMDS                */
+ #define C_MAINTAINER_CMDS_HTML         102 /* MAINTAINER CMDS HTML           */
+@@ -2470,6 +2479,7 @@
+ #define C_MAINTAINER_FNCS_TABLE        115 /* MAINTAINER FNCS TABLE          */
+ #define C_MAINTAINER_MANUAL            116 /* MAINTAINER MANUAL              */
+ #define C_MAINTAINER_STACK             117 /* MAINTAINER STACK               */
++#endif
+ #define C_MARGIN                       118 /* MARGIN                         */
+ #define C_MAT                          119 /* MAT                            */
+ #define C_MAT_GET                      120 /* MAT GET                        */
+diff -urwN basic/bwd_cmd.c newbasic/bwd_cmd.c
+--- basic/bwd_cmd.c	Tue Apr 16 14:58:16 2024
++++ newbasic/bwd_cmd.c	Tue Apr 16 09:10:13 2024
+@@ -937,6 +937,7 @@
+   "GOTO",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_HELP	  
+ {
+   C_HELP,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -947,6 +948,7 @@
+   "HELP",  /* Name */
+   B15  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_IF,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1217,6 +1219,7 @@
+   "LSET",  /* Name */
+   B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_MAINTAINER
+ {
+   C_MAINTAINER,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1380,6 +1383,7 @@
+   "MAINTAINER STACK",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_MARGIN,  /* UniqueID */
+ #ifndef NO_HELP
+diff -urwN basic/bwd_six.h newbasic/bwd_six.h
+--- basic/bwd_six.h	Tue Apr 16 14:58:16 2024
++++ newbasic/bwd_six.h	Tue Apr 16 09:10:22 2024
+@@ -215,7 +215,9 @@
+ #define bwb_GOTO                         X000A9
+ #define bwb_GO_SUB                       X000AA
+ #define bwb_GO_TO                        X000AB
++#ifndef NO_HELP	  
+ #define bwb_HELP                         X000AC
++#endif
+ #define bwb_IF                           X000AD
+ #define bwb_IF8THEN                      X000AE
+ #define bwb_IF_END                       X000AF
+@@ -237,6 +239,7 @@
+ #define bwb_LPRINTER                     X000BF
+ #define bwb_LPT                          X000C0
+ #define bwb_LSET                         X000C1
++#ifndef NO_MAINTAINER
+ #define bwb_MAINTAINER                   X000C2
+ #define bwb_MAINTAINER_CMDS              X000C3
+ #define bwb_MAINTAINER_CMDS_HTML         X000C4
+@@ -255,6 +258,7 @@
+ #define bwb_MAINTAINER_FNCS_TABLE        X000D1
+ #define bwb_MAINTAINER_MANUAL            X000D2
+ #define bwb_MAINTAINER_STACK             X000D3
++#endif
+ #define bwb_MARGIN                       X000D4
+ #define bwb_MAT                          X000D5
+ #define bwb_MAT_GET                      X000D6

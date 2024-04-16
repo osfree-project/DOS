@@ -27,7 +27,8 @@ $(p)bwd_fun$(e) &
 $(p)bwx_tty$(e)
 
 # defines additional options for C compiler
-ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__ -3 -DNO_HELP
+ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__ -3 -DNO_HELP -DNO_MAINTAINER
+
 
 # additions to install target
 INSTALL_ADD = 1
