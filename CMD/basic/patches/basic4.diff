@@ -1,0 +1,525 @@
+diff -urN basic/bwb_exp.c newbasic/bwb_exp.c
+--- basic/bwb_exp.c	Sat Apr 20 10:48:46 2024
++++ newbasic/bwb_exp.c	Sat Apr 20 10:41:33 2024
+@@ -104,8 +104,10 @@
+   const char IsAlpha;                /* IS_ALPHA or NO_ALPHA, determines how operator is matched */
+   const char *Name;
+   OperatorFunctionType *Eval;
++#ifndef NO_HELP
+   const char *Syntax;
+   const char *Description;
++#endif
+   OptionVersionType OptionVersionBitmask;        /* OPTION VERSION bitmask */
+ };
+ typedef struct OperatorStruct OperatorType;
+@@ -163,7 +165,9 @@
+ static ResultType OP_POS (VariantType * X, VariantType * Y);
+ static ResultType OP_SUB (VariantType * X, VariantType * Y);
+ static ResultType OP_XOR (VariantType * X, VariantType * Y);
++#ifndef NO_HELP
+ static void SortAllOperatorsForManual (void);
++#endif
+ static ResultType test_eq (VariantType * X, VariantType * Y, int TrueValue,
+                            int FalseValue);
+ static ResultType test_gt (VariantType * X, VariantType * Y, int TrueValue,
+@@ -182,116 +186,233 @@
+ static OperatorType OperatorTable[ /* NUM_OPERATORS */ ] =
+ {
+   /* LOGICAL */
+-  {0x01, 0x02, BINARY, IS_ALPHA, "IMP", OP_IMP, "X IMP Y", "Bitwise IMP",
++  {0x01, 0x02, BINARY, IS_ALPHA, "IMP", OP_IMP, 
++#ifndef NO_HELP
++   "X IMP Y", "Bitwise IMP",
++#endif
+    B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | T80
+    | H14},
+-  {0x02, 0x03, BINARY, IS_ALPHA, "EQV", OP_EQV, "X EQV Y", "Bitwise EQV",
++  {0x02, 0x03, BINARY, IS_ALPHA, "EQV", OP_EQV,
++#ifndef NO_HELP
++ "X EQV Y", "Bitwise EQV",
++#endif
+    B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | T80
+    | H14},
+-  {0x03, 0x04, BINARY, IS_ALPHA, "XOR", OP_XOR, "X XOR Y",
++  {0x03, 0x04, BINARY, IS_ALPHA, "XOR", OP_XOR,
++#ifndef NO_HELP
++   "X XOR Y",
+    "Bitwise Exclusive OR",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | M80 | T79 | R86 | T80 | H14},
+-  {0x03, 0x04, BINARY, IS_ALPHA, "XRA", OP_XOR, "X XRA Y",
++  {0x03, 0x04, BINARY, IS_ALPHA, "XRA", OP_XOR,
++#ifndef NO_HELP
++   "X XRA Y",
+    "Bitwise Exclusive OR",
++#endif
+    HB2},
+-  {0x04, 0x05, BINARY, IS_ALPHA, "OR", OP_OR, "X OR Y", "Bitwise OR",
++  {0x04, 0x05, BINARY, IS_ALPHA, "OR", OP_OR,
++#ifndef NO_HELP
++  "X OR Y", "Bitwise OR",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x05, 0x06, BINARY, IS_ALPHA, "AND", OP_AND, "X AND Y", "Bitwise AND",
++  {0x05, 0x06, BINARY, IS_ALPHA, "AND", OP_AND,
++#ifndef NO_HELP
++   "X AND Y", "Bitwise AND",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x06, 0x06, UNARY, IS_ALPHA, "NOT", OP_NOT, "NOT X", "Bitwise NOT",
++  {0x06, 0x06, UNARY, IS_ALPHA, "NOT", OP_NOT,
++#ifndef NO_HELP
++  "NOT X", "Bitwise NOT",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+ /* RELATIONAL */
+-  {0x07, 0x08, BINARY, IS_ALPHA, "NE", OP_NE, "X NE Y", "Not Equal",
++  {0x07, 0x08, BINARY, IS_ALPHA, "NE", OP_NE,
++#ifndef NO_HELP
++   "X NE Y", "Not Equal",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "#", OP_NE, "X # Y", "Not Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "#", OP_NE,
++#ifndef NO_HELP
++  "X # Y", "Not Equal",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "<>", OP_NE, "X <> Y", "Not Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "<>", OP_NE,
++#ifndef NO_HELP
++  "X <> Y", "Not Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "><", OP_NE, "X >< Y", "Not Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "><", OP_NE,
++#ifndef NO_HELP
++  "X >< Y", "Not Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "GE", OP_GE, "X GE Y",
++  {0x07, 0x08, BINARY, IS_ALPHA, "GE", OP_GE,
++#ifndef NO_HELP
++   "X GE Y",
+    "Greater than or Equal",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, ">=", OP_GE, "X >= Y",
++  {0x07, 0x08, BINARY, NO_ALPHA, ">=", OP_GE,
++#ifndef NO_HELP
++   "X >= Y",
+    "Greater than or Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "=>", OP_GE, "X => Y",
++  {0x07, 0x08, BINARY, NO_ALPHA, "=>", OP_GE,
++#ifndef NO_HELP
++   "X => Y",
+    "Greater than or Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "LE", OP_LE, "X LE Y", "Less than or Equal",
++  {0x07, 0x08, BINARY, IS_ALPHA, "LE", OP_LE,
++#ifndef NO_HELP
++   "X LE Y", "Less than or Equal",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "<=", OP_LE, "X <= Y", "Less than or Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "<=", OP_LE,
++#ifndef NO_HELP
++   "X <= Y", "Less than or Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "=<", OP_LE, "X =< Y", "Less than or Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "=<", OP_LE,
++#ifndef NO_HELP
++   "X =< Y", "Less than or Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "EQ", OP_EQ, "X EQ Y", "Equal",
++  {0x07, 0x08, BINARY, IS_ALPHA, "EQ", OP_EQ,
++#ifndef NO_HELP
++   "X EQ Y", "Equal",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "=", OP_EQ, "X = Y", "Equal",
++  {0x07, 0x08, BINARY, NO_ALPHA, "=", OP_EQ,
++#ifndef NO_HELP
++   "X = Y", "Equal",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "LT", OP_LT, "X LT Y", "Less than",
++  {0x07, 0x08, BINARY, IS_ALPHA, "LT", OP_LT,
++#ifndef NO_HELP
++   "X LT Y", "Less than",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, "<", OP_LT, "X < Y", "Less than",
++  {0x07, 0x08, BINARY, NO_ALPHA, "<", OP_LT,
++#ifndef NO_HELP
++   "X < Y", "Less than",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "GT", OP_GT, "X GT Y", "Greater than",
++  {0x07, 0x08, BINARY, IS_ALPHA, "GT", OP_GT,
++#ifndef NO_HELP
++   "X GT Y", "Greater than",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, NO_ALPHA, ">", OP_GT, "X > Y", "Greater than",
++  {0x07, 0x08, BINARY, NO_ALPHA, ">", OP_GT,
++#ifndef NO_HELP
++   "X > Y", "Greater than",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "LIKE", OP_LIKE, "A$ LIKE B$",
++  {0x07, 0x08, BINARY, IS_ALPHA, "LIKE", OP_LIKE,
++#ifndef NO_HELP
++   "A$ LIKE B$",
+    "Compare A$ to the pattern in B$",
++#endif
+    B15},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "MAX", OP_MAX, "X MAX Y", "Maximum",
++  {0x07, 0x08, BINARY, IS_ALPHA, "MAX", OP_MAX,
++#ifndef NO_HELP
++   "X MAX Y", "Maximum",
++#endif
+    0},
+-  {0x07, 0x08, BINARY, IS_ALPHA, "MIN", OP_MIN, "X MIN Y", "Minimum",
++  {0x07, 0x08, BINARY, IS_ALPHA, "MIN", OP_MIN,
++#ifndef NO_HELP
++   "X MIN Y", "Minimum",
++#endif
+    0},
+ /* CONCATENATION */
+-  {0x08, 0x09, BINARY, NO_ALPHA, "&", OP_AMP, "X & Y", "Concatenation",
++  {0x08, 0x09, BINARY, NO_ALPHA, "&", OP_AMP,
++#ifndef NO_HELP
++   "X & Y", "Concatenation",
++#endif
+    B15 | B93 | HB2},
+ /* ARITHMETIC */
+-  {0x09, 0x0A, BINARY, NO_ALPHA, "+", OP_ADD, "X + Y", "Addition",
++  {0x09, 0x0A, BINARY, NO_ALPHA, "+", OP_ADD,
++#ifndef NO_HELP
++   "X + Y", "Addition",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x09, 0x0A, BINARY, NO_ALPHA, "-", OP_SUB, "X - Y", "Subtraction",
++  {0x09, 0x0A, BINARY, NO_ALPHA, "-", OP_SUB,
++#ifndef NO_HELP
++   "X - Y", "Subtraction",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x0A, 0x0B, BINARY, IS_ALPHA, "MOD", OP_MOD, "X MOD Y", "Integer Modulus",
++  {0x0A, 0x0B, BINARY, IS_ALPHA, "MOD", OP_MOD,
++#ifndef NO_HELP
++   "X MOD Y", "Integer Modulus",
++#endif
+    B15 | B93 | HB1 | HB2 | D71 | M80 | R86 | T80 | H14},
+-  {0x0B, 0x0C, BINARY, NO_ALPHA, "\\", OP_IDIV, "X \\ Y", "Integer Division",
++  {0x0B, 0x0C, BINARY, NO_ALPHA, "\\", OP_IDIV,
++#ifndef NO_HELP
++   "X \\ Y", "Integer Division",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | E78 | E86 | M80 | T80 | H14},
+-  {0x0C, 0x0D, BINARY, NO_ALPHA, "*", OP_MUL, "X * Y", "Multiplication",
++  {0x0C, 0x0D, BINARY, NO_ALPHA, "*", OP_MUL,
++#ifndef NO_HELP
++   "X * Y", "Multiplication",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x0C, 0x0D, BINARY, NO_ALPHA, "/", OP_DIV, "X / Y", "Division",
++  {0x0C, 0x0D, BINARY, NO_ALPHA, "/", OP_DIV,
++#ifndef NO_HELP
++   "X / Y", "Division",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x0D, 0x0D, UNARY, NO_ALPHA, "#", OP_POS, "# X", "Posation",
++  {0x0D, 0x0D, UNARY, NO_ALPHA, "#", OP_POS,
++#ifndef NO_HELP
++   "# X", "Posation",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | C77 | D71 | E86 | M80 | T79
+    | R86 | T80 | H80 | H14},
+-  {0x0D, 0x0D, UNARY, NO_ALPHA, "+", OP_POS, "+ X", "Posation",
++  {0x0D, 0x0D, UNARY, NO_ALPHA, "+", OP_POS,
++#ifndef NO_HELP
++   "+ X", "Posation",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x0D, 0x0D, UNARY, NO_ALPHA, "-", OP_NEG, "- X", "Negation",
++  {0x0D, 0x0D, UNARY, NO_ALPHA, "-", OP_NEG,
++#ifndef NO_HELP
++   "- X", "Negation",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
+-  {0x0E, 0x0F, BINARY, NO_ALPHA, "^", OP_EXP, "X ^ Y", "Exponential",
++  {0x0E, 0x0F, BINARY, NO_ALPHA, "^", OP_EXP,
++#ifndef NO_HELP
++   "X ^ Y", "Exponential",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78 | E86 | M80 | T79 | R86 | H80 | V09 | H14},
+-  {0x0E, 0x0F, BINARY, NO_ALPHA, "[", OP_EXP, "X [ Y", "Exponential",
++  {0x0E, 0x0F, BINARY, NO_ALPHA, "[", OP_EXP,
++#ifndef NO_HELP
++   "X [ Y", "Exponential",
++#endif
+    B15 | HB1 | HB2 | T80},
+-  {0x0E, 0x0F, BINARY, NO_ALPHA, "**", OP_EXP, "X ** Y", "Exponential",
++  {0x0E, 0x0F, BINARY, NO_ALPHA, "**", OP_EXP,
++#ifndef NO_HELP
++   "X ** Y", "Exponential",
++#endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78},
+ };
+@@ -350,6 +471,8 @@
+   }
+ }
+ 
++#ifndef NO_HELP
++
+ static void
+ SortAllOperatorsForManual (void)        /* SortAllOperators() should be called aftwards */
+ {
+@@ -401,6 +524,9 @@
+     }
+   }
+ }
++
++#endif
++
+ static char
+ min_value_type (VariantType * X)
+ {
+@@ -3320,6 +3446,8 @@
+ }
+ #endif
+ 
++#ifndef NO_OPTION
++
+ LineType *
+ bwb_OPTION_DISABLE_OPERATOR (LineType * l)
+ {
+@@ -3430,6 +3558,8 @@
+   }
+   return (l);
+ }
++
++#endif
+ 
+ #ifndef NO_MAINTAINER
+ 
+diff -urN basic/bwb_var.c newbasic/bwb_var.c
+--- basic/bwb_var.c	Sat Apr 20 10:48:45 2024
++++ newbasic/bwb_var.c	Sat Apr 20 10:29:16 2024
+@@ -1798,6 +1798,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_OPTION
++
+ LineType *
+ bwb_OPTION_ANGLE (LineType * l)
+ {
+@@ -1878,6 +1880,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_OPTION_BASE (LineType * l)
+ {
+@@ -1891,6 +1895,8 @@
+                                    MININT, MAXINT);
+ }
+ 
++#ifndef NO_OPTION
++
+ LineType *
+ bwb_OPTION_BUGS (LineType * l)
+ {
+@@ -1936,6 +1942,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_option_punct_char (LineType * l, char *c)
+ {
+@@ -2004,6 +2012,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_OPTION
++
+ LineType *
+ bwb_OPTION_PUNCT_COMMENT (LineType * l)
+ {
+@@ -3470,6 +3480,7 @@
+   return (l);
+ }
+ 
++#endif
+ 
+ 
+ int
+diff -urN basic/bwbasic.c newbasic/bwbasic.c
+--- basic/bwbasic.c	Sat Apr 20 10:48:46 2024
++++ newbasic/bwbasic.c	Sat Apr 20 10:10:21 2024
+@@ -3148,6 +3148,7 @@
+    case C_OPTION:
+       r = bwb_OPTION( l );
+       break;
++#ifndef NO_OPTION
+    case C_OPTION_ANGLE:
+       r = bwb_OPTION_ANGLE( l );
+       break;
+@@ -3172,9 +3173,11 @@
+    case C_OPTION_ARITHMETIC_NATIVE:
+       r = bwb_OPTION_ARITHMETIC_NATIVE( l );
+       break;
++#endif
+    case C_OPTION_BASE:
+       r = bwb_OPTION_BASE( l );
+       break;
++#ifndef NO_OPTION
+    case C_OPTION_BUGS:
+       r = bwb_OPTION_BUGS( l );
+       break;
+@@ -3445,6 +3448,7 @@
+    case C_OPTION_ZONE:
+       r = bwb_OPTION_ZONE( l );
+       break;
++#endif
+    case C_PAUSE:
+       r = bwb_PAUSE( l );
+       break;
+diff -urN basic/bwbasic.h newbasic/bwbasic.h
+--- basic/bwbasic.h	Sat Apr 20 10:48:46 2024
++++ newbasic/bwbasic.h	Sat Apr 20 10:11:03 2024
+@@ -1918,6 +1918,7 @@
+ extern LineType *bwb_ON_TIMER (LineType * l);
+ extern LineType *bwb_OPEN (LineType * l);
+ extern LineType *bwb_OPTION (LineType * l);
++#ifndef NO_OPTION
+ extern LineType *bwb_OPTION_ANGLE (LineType * l);
+ extern LineType *bwb_OPTION_ANGLE_DEGREES (LineType * l);
+ extern LineType *bwb_OPTION_ANGLE_GRADIANS (LineType * l);
+@@ -1927,7 +1928,9 @@
+ extern LineType *bwb_OPTION_ARITHMETIC_FIXED (LineType * l);
+ extern LineType *bwb_OPTION_ARITHMETIC_NATIVE (LineType * l);
+ extern LineType *bwb_OPTION_PUNCT_AT (LineType * l);
++#endif
+ extern LineType *bwb_OPTION_BASE (LineType * l);
++#ifndef NO_OPTION
+ extern LineType *bwb_OPTION_BUGS (LineType * l);
+ extern LineType *bwb_OPTION_BUGS_BOOLEAN (LineType * l);
+ extern LineType *bwb_OPTION_BUGS_OFF (LineType * l);
+@@ -2015,6 +2018,7 @@
+ extern LineType *bwb_OPTION_USING_PLUS (LineType * l);
+ extern LineType *bwb_OPTION_VERSION (LineType * l);
+ extern LineType *bwb_OPTION_ZONE (LineType * l);
++#endif
+ extern LineType *bwb_PAUSE (LineType * l);
+ extern LineType *bwb_PDEL (LineType * l);
+ extern LineType *bwb_POP (LineType * l);
+@@ -2074,8 +2078,10 @@
+ extern LineType *bwb_WEND (LineType * l);
+ extern LineType *bwb_WHILE (LineType * l);
+ extern LineType *bwb_WRITE (LineType * l);
++#ifndef NO_OPTION
+ extern LineType *bwb_OPTION_PUNCT (LineType * l);
+ extern LineType *bwb_OPTION_EXTENSION (LineType * l);
++#endif
+ 
+ /*-------------------------------------------------------------
+                         INTERNALS
+diff -urN basic/bwd_cmd.c newbasic/bwd_cmd.c
+--- basic/bwd_cmd.c	Sat Apr 20 10:48:46 2024
++++ newbasic/bwd_cmd.c	Sat Apr 20 10:13:25 2024
+@@ -1701,6 +1701,7 @@
+   "OPTION",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_OPTION
+ {
+   C_OPTION_ANGLE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1779,6 +1780,7 @@
+   "OPTION ARITHMETIC NATIVE",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_OPTION_BASE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1788,6 +1790,7 @@
+   "OPTION BASE",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_OPTION
+ {
+   C_OPTION_BUGS,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2633,6 +2636,7 @@
+   "OPTION ZONE",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_PAUSE,  /* UniqueID */
+ #ifndef NO_HELP
+diff -urN basic/bwd_six.h newbasic/bwd_six.h
+--- basic/bwd_six.h	Sat Apr 20 10:48:46 2024
++++ newbasic/bwd_six.h	Sat Apr 20 10:27:44 2024
+@@ -286,6 +286,7 @@
+ #define bwb_ON_TIMER                     X000EC
+ #define bwb_OPEN                         X000ED
+ #define bwb_OPTION                       X000EE
++#ifndef NO_OPTION
+ #define bwb_OPTION_ANGLE                 X000EF
+ #define bwb_OPTION_ANGLE_DEGREES         X000F0
+ #define bwb_OPTION_ANGLE_GRADIANS        X000F1
+@@ -294,7 +295,9 @@
+ #define bwb_OPTION_ARITHMETIC_DECIMAL    X000F4
+ #define bwb_OPTION_ARITHMETIC_FIXED      X000F5
+ #define bwb_OPTION_ARITHMETIC_NATIVE     X000F6
++#endif
+ #define bwb_OPTION_BASE                  X000F7
++#ifndef NO_OPTION
+ #define bwb_OPTION_BUGS                  X000F8
+ #define bwb_OPTION_BUGS_BOOLEAN          X000F9
+ #define bwb_OPTION_BUGS_OFF              X000FA
+@@ -384,6 +387,7 @@
+ #define bwb_OPTION_USING_PLUS            X0014E
+ #define bwb_OPTION_VERSION               X0014F
+ #define bwb_OPTION_ZONE                  X00150
++#endif
+ #define bwb_PAUSE                        X00151
+ #define bwb_PDEL                         X00152
+ #define bwb_POP                          X00153
