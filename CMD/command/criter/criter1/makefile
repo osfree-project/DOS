@@ -14,7 +14,7 @@ srcfiles = $(p)criter$(e)
 ADD_ASMOPT = &
   -dNDEBUG &
   -ml -dAUTO_FAIL -dMODEL=l -i=$(PATH)..$(SEP)..$(SEP)strings$(SEP)critstrs -i=$(PATH) -i=$(MYDIR)
-ADD_LINKOPT = # lib suppl.lib
+ADD_LINKOPT = op start=???start # lib suppl.lib
 DEST = none
 COM = 1
 NOLIBS = 1
@@ -36,12 +36,12 @@ TARGETS = $(PATH)context.def $(PATH)$(PROJ).com
 
 $(PATH)context.def: $(PORT_BASE)criter$(SEP)context.x
  @mkctxt.exe $<
- @$(CP) $(PORT_BASE)criter$(SEP)context.h_c $(PATH) $(BLACKHOLE)
- @$(CP) $(PORT_BASE)criter$(SEP)context.inc $(PATH) $(BLACKHOLE)
- @$(CP) $(PORT_BASE)criter$(SEP)context.def $(PATH) $(BLACKHOLE)
- @$(DC) $(PORT_BASE)criter$(SEP)context.h_c $(BLACKHOLE)
- @$(DC) $(PORT_BASE)criter$(SEP)context.inc $(BLACKHOLE)
- @$(DC) $(PORT_BASE)criter$(SEP)context.def $(BLACKHOLE)
+ $(verbose)$(CP) $(PORT_BASE)criter$(SEP)context.h_c $(PATH) $(BLACKHOLE)
+ $(verbose)$(CP) $(PORT_BASE)criter$(SEP)context.inc $(PATH) $(BLACKHOLE)
+ $(verbose)$(CP) $(PORT_BASE)criter$(SEP)context.def $(PATH) $(BLACKHOLE)
+ $(verbose)$(DC) $(PORT_BASE)criter$(SEP)context.h_c $(BLACKHOLE)
+ $(verbose)$(DC) $(PORT_BASE)criter$(SEP)context.inc $(BLACKHOLE)
+ $(verbose)$(DC) $(PORT_BASE)criter$(SEP)context.def $(BLACKHOLE)
 
 $(PATH)criter.obj: $(PATH)context.def $(PORT_BASE)criter$(SEP)criter.asm &
     $(PORT_BASE)criter$(SEP)dmy_cbrk.asm &

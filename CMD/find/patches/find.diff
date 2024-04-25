@@ -1,0 +1,11 @@
+diff -urwN find/src/find.c newfind/src/find.c
+--- find/src/find.c	Wed Apr 24 11:43:12 2024
++++ newfind/src/find.c	Wed Apr 24 11:42:38 2024
+@@ -44,6 +44,7 @@
+ 
+ #if defined(__WATCOMC__)
+ #include <io.h>				/* for findfirst, findnext */
++#include <direct.h>			/* for getcwd, chdir */
+ #endif
+ 
+ #if defined(__GNUC__)

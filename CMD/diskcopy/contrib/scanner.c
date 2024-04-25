@@ -495,7 +495,7 @@ EatKeyWord (int len)
 
   /* Read the rest from the .ini file. */
   for (; p != ScannerEnd; p++)
-    if ((*p = fgetc (ScanFilePtr)) == EOF)
+    if ((*p = fgetc (ScanFilePtr)) == (char)EOF)
       {
 	ScannerEnd = p;
 	done = TRUE;
@@ -549,7 +549,7 @@ SkipComment (void)
   if (c == '\r')
     {
       *(ScannerEnd - 1) = fgetc (ScanFilePtr);
-      if (*(ScannerEnd - 1) == EOF)
+      if (*(ScannerEnd - 1) == (char)EOF)
 	return TRUE;
       else if (*(ScannerEnd - 1) == '\n')
 	return EatKeyWord (LONGESTKEYWORD - 1);

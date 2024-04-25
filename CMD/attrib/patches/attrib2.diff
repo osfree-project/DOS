@@ -1,0 +1,12 @@
+diff -urwN attrib/attrib.c newattrib/attrib.c
+--- attrib/attrib.c	Wed Apr 24 10:52:15 2024
++++ newattrib/attrib.c	Wed Apr 24 10:51:36 2024
+@@ -51,7 +51,7 @@
+ 
+ LOCAL byte recurse = 0;
+ LOCAL ATTR useattr = ALL_FILE;
+-LOCAL ATTR attr_keep = ~0u, attr_set = 0;
++LOCAL ATTR attr_keep = ~0, attr_set = 0;
+ 
+ LOCAL ATTR findattr;
+ LOCAL char path [PATHLEN+4],			/* 4=strlen("\\*.*")	*/

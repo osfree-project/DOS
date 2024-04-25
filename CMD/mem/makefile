@@ -25,10 +25,12 @@ JWASM = 1
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc $(MYDIR)utilmd04.inc
 
 $(PATH)msg.inc: $(PATH)$(PROJ).txt
-  mkmsgf.exe $[@ $^@ -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc
+  $(verbose)$(SAY) MKMSGF   $^.
+  $(verbose)$(MC) $[@ $^@ -Q -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc
 
 $(PATH)$(PROJ).txt: $(PATH)$(PROJ).ext
-  msgextrt.exe $< $^@
+  $(verbose)$(SAY) MSGEXTRT $^.
+  $(verbose)$(ME) $< $^@
 
 $(PATH)$(PROJ).ext: .symbolic
  @%create $^@

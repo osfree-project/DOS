@@ -28,12 +28,12 @@ TARGETS = $(BLD)lib$(SEP)$(TGT)
 #$(BLD)lib$(SEP)strings.lib: .symbolic
 
 $(BLD)$(RELDIR)strings.h: $(PORT_BASE)strings$(SEP)DEFAULT.lng
- @$(CP) $(PORT_BASE)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR)
- @$(CP) $(PORT_BASE)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR)
- @$(CD) $(BLD)$(RELDIR) && $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)fixstrs$(SEP)fixstrs.exe /lib /dir $(BLD)$(RELDIR) $(LNG)
+ $(verbose)$(CP) $(PORT_BASE)strings$(SEP)DEFAULT.lng $(BLD)$(RELDIR) $(BLACKHOLE)
+ $(verbose)$(CP) $(PORT_BASE)strings$(SEP)$(LANG).lng $(BLD)$(RELDIR) $(BLACKHOLE)
+ $(verbose)$(CD) $(BLD)$(RELDIR) && $(BLD)host$(SEP)$(%HOST)$(SEP)$(RELDIR)fixstrs$(SEP)fixstrs.exe /lib /dir $(BLD)$(RELDIR) $(LNG)
 
 $(BLD)$(RELDIR)$(TGT): $(BLD)$(RELDIR)makefile.mk
- @$(MAKE) $(MAKEOPT) -f $< lib
+ $(verbose)$(MAKE) $(MAKEOPT) -f $< lib
 
 $(BLD)lib$(SEP)$(TGT): $(BLD)$(RELDIR)strings.h subdirs $(BLD)$(RELDIR)$(TGT)
- $(verbose)$(CP) $(BLD)$(RELDIR)$(TGT) $^@
+ $(verbose)$(CP) $(BLD)$(RELDIR)$(TGT) $^@ $(BLACKHOLE)

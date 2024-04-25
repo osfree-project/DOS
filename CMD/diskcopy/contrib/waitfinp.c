@@ -37,7 +37,7 @@
    **  0 if no button pressed.
  */
 
-static int
+int
 AnyButtonPressed ()
 {
   int presses, x, y;
@@ -58,7 +58,7 @@ ClrKbd ()
 /*
    ** Clears the mouse from any presses.
  */
-static void
+void
 ClearMouse ()
 {
   int i, x, y, pressreleases;

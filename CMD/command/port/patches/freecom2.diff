@@ -1,0 +1,24 @@
+diff -urwN freecom/criter/criter.asm newfreecom/criter/criter.asm
+--- freecom/criter/criter.asm	Thu Apr 25 09:50:26 2024
++++ newfreecom/criter/criter.asm	Thu Apr 25 09:26:45 2024
+@@ -128,7 +128,7 @@
+ endif
+ 
+ _TEXT  segment word public 'CODE'  use16
+-
++	public ???start
+ ???start:
+ 
+ ifdef COMPILE_COM
+diff -urwN freecom/shell/cswap.asm newfreecom/shell/cswap.asm
+--- freecom/shell/cswap.asm	Thu Apr 25 09:50:26 2024
++++ newfreecom/shell/cswap.asm	Thu Apr 25 08:44:08 2024
+@@ -89,7 +89,7 @@
+ 
+ 	public _canexit
+ _canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+-canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
++;canexit	DB 0		; 1 -> can exit; _else_ --> cannot exit
+ filler  DB 0
+ 
+     public mySS, mySP

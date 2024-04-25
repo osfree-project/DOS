@@ -17,16 +17,18 @@ ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
 
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
-$(PATH)msg.inc: $(PATH)graftabl.txt
-  mkmsgf.exe -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc $[@ $^@
+$(PATH)msg.inc: $(PATH)$(PROJ).txt
+  $(verbose)$(SAY) MKMSGF   $^.
+  $(verbose)$(MC) -Q -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc $[@ $^@
 
-$(PATH)graftabl.txt: $(PATH)graftabl.ext
-  msgextrt.exe $< $^@
+$(PATH)$(PROJ).txt: $(PATH)$(PROJ).ext
+  $(verbose)$(SAY) MSGEXTRT $^.
+  $(verbose)$(ME) $< $^@
 
 #$(PATH)graftabl.ext: graftabl.asm
 #  msgprof graftabl.asm > graftabl.ext
 
-$(PATH)graftabl.ext: .symbolic
+$(PATH)$(PROJ).ext: .symbolic
  @%create $^@
  @%append $^@ >graftabl.asm
  @%append $^@ <$(%ROOT)build$(SEP)bin$(SEP)os2$(SEP)system$(SEP)oso001.msg

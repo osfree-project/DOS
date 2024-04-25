@@ -30,6 +30,9 @@
 #include <string.h>
 #include <dos.h>
 #include <direct.h>
+#ifdef __WATCOMC__
+#include <tcc2wat.h>
+#endif
 
 #include "io95.h"
 

@@ -51,7 +51,7 @@ FILE *fdopen(int fd, const char mode[])
 FILE *fopen95(const char fnam[], const char mode[])
 {	FILE *h;
 	int fd;
-	int omode, amode;
+	long omode, amode;
 	const char *p;
 
 	assert(fnam);

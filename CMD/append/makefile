@@ -18,10 +18,12 @@ ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
 $(PATH)msg.inc: $(PATH)append.txt
-  mkmsgf.exe -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc $[@ $^@
+  $(verbose)$(SAY) MKMSGF   $^.
+  $(verbose)$(MC) -Q -A -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)inc $[@ $^@
 
 $(PATH)append.txt: $(PATH)append.ext
-  msgextrt.exe $< $^@
+  $(verbose)$(SAY) MSGEXTRT $^.
+  $(verbose)$(ME) $< $^@
 
 #$(PATH)append.ext: append.asm
 #  msgprof append.asm > append.ext

@@ -4,5 +4,6 @@ PORT_NAME = dos$(SEP)find
 PORT_TYPE = git
 PORT_URL  = https://github.com/FDOS/find
 PORT_REV  = 
+PORT_PATCHES = find.diff
 
 !include $(%ROOT)tools/mk/port.mk

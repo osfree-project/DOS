@@ -19,5 +19,5 @@ PLATFORM =
 .err: $(PATH)
 
 $(PATH)strings.err: $(PORT_BASE)strings$(SEP)DEFAULT.err
- @$(CP) $[@ $(PATH) $(BLACKHOLE)
- @$(CD) $(PATH) && critstrs.exe $(LNG) $(BLACKHOLE)
+ $(verbose)$(CP) $[@ $(PATH) $(BLACKHOLE)
+ $(verbose)$(CD) $(PATH) && critstrs.exe $(LNG) $(BLACKHOLE)

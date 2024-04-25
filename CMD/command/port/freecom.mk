@@ -4,6 +4,6 @@ PORT_NAME = dos$(SEP)freecom
 PORT_TYPE = git
 PORT_URL  = https://github.com/FDOS/freecom
 PORT_REV  = com085a
-PORT_PATCHES  = freecom.diff
+PORT_PATCHES  = freecom.diff freecom2.diff
 
 !include $(%ROOT)tools/mk/port.mk
