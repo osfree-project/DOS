@@ -1,0 +1,2922 @@
+diff -urN basic/bwb_cmd.c newbasic2/bwb_cmd.c
+--- basic/bwb_cmd.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwb_cmd.c	Wed May 01 13:09:16 2024
+@@ -57,11 +57,13 @@
+ #endif
+ static void CommandUniqueID (int i, char *UniqueID);
+ static void CommandVector (int i, char *Vector);
++#ifndef NO_NONMS
+ static VariableType *find_variable_by_type (char *name, int dimensions,
+                                             char VariableTypeCode);
+ static void FixUp (char *Name);
+ static LineType *H14_RENAME (LineType * l);
+ static int line_read_matrix_redim (LineType * l, VariableType * v);
++#endif
+ #ifndef NO_HELP
+ static void ProcessEscapeChars (const char *Input, char *Output);
+ #endif
+@@ -182,6 +184,8 @@
+   return bwx_run (Line, My->OptionRenumString);
+ }
+ 
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_RENUMBER (LineType * Line)
+ {
+@@ -195,6 +199,8 @@
+   return bwx_run (Line, My->OptionRenumString);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                REM
+@@ -217,6 +223,7 @@
+   return L;
+ }
+ 
++#ifndef NO_NONMS
+ /* 
+ --------------------------------------------------------------------------------------------
+                                IMAGE
+@@ -236,6 +243,8 @@
+   return L;
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                LET
+@@ -432,6 +441,8 @@
+   return L;
+ }
+ 
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_DEC (LineType * L)
+ {
+@@ -568,7 +579,7 @@
+   return L;
+ }
+ 
+-
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -637,6 +648,7 @@
+ --------------------------------------------------------------------------------------------
+ */
+ 
++#ifndef NO_NONMS
+ 
+ LineType *
+ bwb_BUILD (LineType * L)
+@@ -651,6 +663,8 @@
+   return bwb_AUTO (L);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_AUTO (LineType * L)
+ {
+@@ -709,6 +723,8 @@
+   return L;
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                BREAK
+@@ -791,6 +807,9 @@
+   return (l);
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -842,6 +861,7 @@
+   return (l);
+ }
+ 
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -920,6 +940,7 @@
+       return (l);
+     }
+   }
++#ifndef NO_NONMS
+   else if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* GOTO line [,...] ON expression */
+@@ -955,6 +976,7 @@
+     }
+     line_skip_eol (l);
+   }
++#endif
+   else
+   {
+     WARN_SYNTAX_ERROR;
+@@ -1076,6 +1098,7 @@
+       return (l);
+     }
+   }
++#ifndef NO_NONMS
+   else if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* GOSUB line [,...] ON expression */
+@@ -1111,6 +1134,7 @@
+     }
+     line_skip_eol (l);
+   }
++#endif
+   else
+   {
+     WARN_SYNTAX_ERROR;
+@@ -1188,6 +1212,7 @@
+   assert (My->CurrentVersion != NULL);
+   assert (My->StackHead != NULL);
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* RETURN [comment] */
+@@ -1215,6 +1240,7 @@
+     }
+   }
+   else
++#endif
+   {
+     /* RETURN exits the first GOSUB */
+ 
+@@ -1242,6 +1268,8 @@
+   return My->StackHead->line;
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                POP
+@@ -1283,6 +1311,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                ON
+@@ -1469,11 +1499,13 @@
+   pstring = My->ConsoleOutput;
+   tbuf = My->ConsoleInput;
+   tlen = MAX_LINE_LENGTH;
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* PAUSE [comment] */
+     line_skip_eol (l);
+   }
++#endif
+   sprintf (pstring, "PAUSE AT %d\n", l->number);
+   bwx_input (pstring, FALSE, tbuf, tlen);
+   return (l);
+@@ -1497,11 +1529,13 @@
+   assert (My != NULL);
+   assert (My->CurrentVersion != NULL);
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* STOP [comment] */
+     line_skip_eol (l);
+   }
++#endif
+   My->ContinueLine = l->next;
+   bwx_STOP (TRUE);
+   return bwb_END (l);
+@@ -1525,11 +1559,13 @@
+   assert (My != NULL);
+   assert (My->CurrentVersion != NULL);
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* END [comment] */
+     line_skip_eol (l);
+   }
++#endif
+   My->ContinueLine = l->next;
+   bwx_STOP (FALSE);
+   return My->EndMarker;
+@@ -1725,6 +1761,8 @@
+   return current;
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CONT
+@@ -1741,6 +1779,8 @@
+   return bwb_CONT (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_CONT (LineType * l)
+ {
+@@ -1884,6 +1924,7 @@
+   assert (My->CurrentVersion != NULL);
+ 
+   bwb_new ();
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (D64 | G65 | G67 | G74))
+   {
+     if (line_is_eol (l))
+@@ -1935,6 +1976,7 @@
+     }
+   }
+   else
++#endif
+   {
+     /* ignore any parameters */
+     line_skip_eol (l);
+@@ -1942,6 +1984,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                SCRATCH
+@@ -2030,6 +2074,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ /* 
+ ============================================================================================
+                                SYSTEM and so on
+@@ -2052,6 +2098,8 @@
+   return (l);                        /* never reached */
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                BYE
+@@ -2152,6 +2200,8 @@
+   return bwb_system (l);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                SYSTEM
+@@ -2335,6 +2385,8 @@
+   return bwb_load (l, "MERGE FILE NAME:", FALSE);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                OLD
+@@ -2367,6 +2419,10 @@
+   return bwb_load (Line, "TLOAD FILE NAME:", TRUE);
+ }
+ 
++#endif
++
++
++#ifndef NO_NONMS
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -2493,6 +2549,7 @@
+   return (l);
+ }
+ 
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -2500,6 +2557,8 @@
+ --------------------------------------------------------------------------------------------
+ */
+ 
++#ifndef NO_NONMS
++
+ extern void
+ Determinant (VariableType * v)
+ {
+@@ -2627,6 +2686,10 @@
+   }
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ int
+ InvertMatrix (VariableType * vOut, VariableType * vIn)
+ {
+@@ -2824,6 +2887,10 @@
+   return Result;
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ static int
+ line_read_matrix_redim (LineType * l, VariableType * v)
+ {
+@@ -4089,6 +4156,7 @@
+   return bwb_CSAVE8 (l);
+ }
+ 
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -4136,11 +4204,13 @@
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#ifndef NO_NONMS
+   if (line_read_matrix_redim (l, v) == FALSE)
+   {
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#endif
+   /* variable storage is a mess, we bypass that tradition here. */
+   t = v->array_units;
+   if (t <= 1)
+@@ -4167,6 +4237,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                RECALL
+@@ -4184,6 +4256,8 @@
+   return bwb_CLOAD8 (l);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CLOAD*
+@@ -4230,11 +4304,13 @@
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#ifndef NO_NONMS
+   if (line_read_matrix_redim (l, v) == FALSE)
+   {
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#endif
+   /* variable storage is a mess, we bypass that tradition here. */
+   t = v->array_units;
+   if (t <= 1)
+@@ -4409,6 +4485,8 @@
+   return bwb_save (l, "SAVE FILE NAME:");
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                TSAVE
+@@ -4426,6 +4504,7 @@
+   return bwb_save (Line, "TSAVE FILE NAME:");
+ }
+ 
++#endif
+ 
+ /* 
+ ============================================================================================
+@@ -4746,6 +4825,7 @@
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#ifndef NO_NONMS
+   else if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     /*
+@@ -4806,6 +4886,7 @@
+     /* OK */
+     return (l);
+   }
++#endif
+   else
+   {
+     /*
+@@ -4912,6 +4993,8 @@
+   return bwb_delete (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                PDEL
+@@ -4926,6 +5009,8 @@
+   return bwb_delete (l);
+ }
+ 
++#endif
++
+ #if FALSE                        /* keep the source to DONUM and DOUNNUM */
+ 
+ /* 
+@@ -5096,6 +5181,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                FILE
+@@ -5383,6 +5470,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                DELIMIT
+@@ -5555,6 +5644,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                USE
+@@ -5596,6 +5687,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CHAIN
+@@ -5651,6 +5744,7 @@
+   LineNumber = 0;
+   if (line_skip_seperator (l))
+   {
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+     {
+       /* CHAIN filename$, parameter$ */
+@@ -5677,6 +5771,7 @@
+       }
+     }
+     else
++#endif
+     {
+       /* CHAIN filename$, linenumber */
+       if (line_read_integer_expression (l, &LineNumber) == FALSE)
+@@ -5754,6 +5849,8 @@
+   return x;
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                APPEND
+@@ -5810,7 +5907,7 @@
+   return bwb_load (l, "APPEND FILE NAME:", FALSE);
+ }
+ 
+-
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -6240,6 +6337,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                               CMDS
+@@ -6284,6 +6383,10 @@
+   return (l);
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ static void
+ FixUp (char *Name)
+ {
+@@ -6341,7 +6444,6 @@
+   }
+ }
+ 
+-
+ static void
+ CommandUniqueID (int i, char *UniqueID)
+ {
+@@ -6353,6 +6455,8 @@
+   FixUp (UniqueID);
+ }
+ 
++#endif
++
+ #ifndef NO_MAINTAINER
+ 
+ static void
+@@ -6511,6 +6615,7 @@
+ #endif /* THE_PRICE_IS_RIGHT */
+ }
+ 
++#ifndef NO_NONMS
+ 
+ void
+ DumpAllCommandUniqueID (FILE * file)
+@@ -6546,6 +6651,8 @@
+   fflush (file);
+ }
+ 
++#endif
++
+ #ifndef NO_HELP
+ static void
+ ProcessEscapeChars (const char *Input, char *Output)
+@@ -8189,6 +8296,8 @@
+ 
+ #endif
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                FNCS
+@@ -8234,6 +8343,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ #ifndef NO_MAINTAINER
+ 
+ /* 
+@@ -9385,6 +9496,8 @@
+   return NULL;
+ }
+ 
++#ifndef NO_NONMS
++
+ static VariableType *
+ find_variable_by_type (char *name, int dimensions, char VariableTypeCode)
+ {
+@@ -9416,6 +9529,7 @@
+   return NULL;
+ }
+ 
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CHANGE
+@@ -9743,6 +9857,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ extern void
+ bwb_fclose (FILE * file)
+ {
+@@ -9767,6 +9883,9 @@
+     fclose (file);
+   }
+ }
++
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_LPT (LineType * l)
+ {
+@@ -9860,6 +9979,7 @@
+   return (l);
+ }
+ 
++
+ LineType *
+ bwb_PTR (LineType * l)
+ {
+@@ -9945,6 +10065,11 @@
+   return (l);
+ }
+ 
++#endif
++
++
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CREATE
+@@ -10090,6 +10215,7 @@
+   return (l);
+ }
+ 
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                COPY
+@@ -10262,6 +10388,8 @@
+   }
+   return (Line);
+ }
++
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+diff -urN basic/bwb_cnd.c newbasic2/bwb_cnd.c
+--- basic/bwb_cnd.c	Sun May 05 20:43:35 2024
++++ newbasic2/bwb_cnd.c	Wed May 01 12:45:51 2024
+@@ -206,6 +206,8 @@
+   return My->StackHead->line->next;
+ }
+ 
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_FNEND (LineType * l)
+ {
+@@ -214,6 +216,8 @@
+   return bwb_END_FUNCTION (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_FEND (LineType * l)
+ {
+@@ -438,6 +442,7 @@
+ 
+   assert(My != NULL);
+   assert(My->CurrentVersion != NULL);
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     /* sets a linenumber to branch to on EOF */
+@@ -480,6 +485,7 @@
+     My->CurrentFile->EOF_LineNumber = LineNumber;
+     return (l);
+   }
++#endif
+   /* branch to the line if we are currently at EOF */
+   return bwb_if_file (l, TRUE);
+ }
+diff -urN basic/bwb_dio.c newbasic2/bwb_dio.c
+--- basic/bwb_dio.c	Sun May 05 20:43:35 2024
++++ newbasic2/bwb_dio.c	Wed May 01 12:48:55 2024
+@@ -43,13 +43,14 @@
+ #include "bwbasic.h"
+ 
+ 
++#ifndef NO_NONMS
+ static LineType *C77_OPEN (LineType * l);
+ static LineType *D71_OPEN (LineType * l);
+ static LineType *H80_OPEN (LineType * l);
+ static LineType *M80_OPEN (LineType * l);
+ static LineType *S70_OPEN (LineType * l);
+ static LineType *T79_OPEN (LineType * l);
+-
++#endif
+ 
+ /***************************************************************
+   
+@@ -300,6 +301,7 @@
+ }
+ 
+ 
++#ifndef NO_NONMS
+ 
+ static LineType *
+ C77_OPEN (LineType * l)
+@@ -907,6 +909,7 @@
+   return (l);
+ }
+ 
++#endif
+ 
+ static LineType *
+ M80_OPEN (LineType * l)
+@@ -985,6 +988,7 @@
+     }
+   }
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (H14))
+   {
+     /*
+@@ -1025,6 +1029,7 @@
+       }
+     }
+   }
++#endif
+   /* 
+      --------------------------------------------- 
+      FILE NUMBER
+@@ -1035,6 +1040,7 @@
+     WARN_SYNTAX_ERROR;
+     return (l);
+   }
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (H14))
+   {
+     if (line_skip_word (l, "FILE"))
+@@ -1042,6 +1048,7 @@
+       /* OPTIONAL */
+     }
+   }
++#endif
+ 
+   if (line_skip_FilenumChar (l))
+   {
+@@ -1091,6 +1098,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ T79_OPEN (LineType * l)
+ {
+@@ -1186,6 +1195,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_OPEN (LineType * l)
+ {
+@@ -1194,6 +1205,7 @@
+   assert(My != NULL);
+   assert(My->CurrentVersion != NULL);
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     return S70_OPEN (l);
+@@ -1214,6 +1226,7 @@
+   {
+     return T79_OPEN (l);
+   }
++#endif
+   /* default */
+   return M80_OPEN (l);
+ }
+diff -urN basic/bwb_exp.c newbasic2/bwb_exp.c
+--- basic/bwb_exp.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwb_exp.c	Wed May 01 12:34:28 2024
+@@ -190,13 +190,13 @@
+ #ifndef NO_HELP
+    "X IMP Y", "Bitwise IMP",
+ #endif
+-   B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | T80
++   B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | M86 | T80
+    | H14},
+   {0x02, 0x03, BINARY, IS_ALPHA, "EQV", OP_EQV,
+ #ifndef NO_HELP
+  "X EQV Y", "Bitwise EQV",
+ #endif
+-   B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | T80
++   B15 | B93 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71 | M80 | M86 | T80
+    | H14},
+   {0x03, 0x04, BINARY, IS_ALPHA, "XOR", OP_XOR,
+ #ifndef NO_HELP
+@@ -204,31 +204,33 @@
+    "Bitwise Exclusive OR",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | M80 | T79 | R86 | T80 | H14},
++   | M80 | M86 | T79 | R86 | T80 | H14},
++#ifndef NO_NONMS
+   {0x03, 0x04, BINARY, IS_ALPHA, "XRA", OP_XOR,
+ #ifndef NO_HELP
+    "X XRA Y",
+    "Bitwise Exclusive OR",
+ #endif
+    HB2},
++#endif
+   {0x04, 0x05, BINARY, IS_ALPHA, "OR", OP_OR,
+ #ifndef NO_HELP
+   "X OR Y", "Bitwise OR",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x05, 0x06, BINARY, IS_ALPHA, "AND", OP_AND,
+ #ifndef NO_HELP
+    "X AND Y", "Bitwise AND",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x06, 0x06, UNARY, IS_ALPHA, "NOT", OP_NOT,
+ #ifndef NO_HELP
+   "NOT X", "Bitwise NOT",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+ /* RELATIONAL */
+   {0x07, 0x08, BINARY, IS_ALPHA, "NE", OP_NE,
+ #ifndef NO_HELP
+@@ -245,13 +247,13 @@
+   "X <> Y", "Not Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, NO_ALPHA, "><", OP_NE,
+ #ifndef NO_HELP
+   "X >< Y", "Not Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "GE", OP_GE,
+ #ifndef NO_HELP
+    "X GE Y",
+@@ -264,14 +266,14 @@
+    "Greater than or Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, NO_ALPHA, "=>", OP_GE,
+ #ifndef NO_HELP
+    "X => Y",
+    "Greater than or Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "LE", OP_LE,
+ #ifndef NO_HELP
+    "X LE Y", "Less than or Equal",
+@@ -282,13 +284,13 @@
+    "X <= Y", "Less than or Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, NO_ALPHA, "=<", OP_LE,
+ #ifndef NO_HELP
+    "X =< Y", "Less than or Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "EQ", OP_EQ,
+ #ifndef NO_HELP
+    "X EQ Y", "Equal",
+@@ -299,7 +301,7 @@
+    "X = Y", "Equal",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "LT", OP_LT,
+ #ifndef NO_HELP
+    "X LT Y", "Less than",
+@@ -310,7 +312,7 @@
+    "X < Y", "Less than",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "GT", OP_GT,
+ #ifndef NO_HELP
+    "X GT Y", "Greater than",
+@@ -321,7 +323,7 @@
+    "X > Y", "Greater than",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x07, 0x08, BINARY, IS_ALPHA, "LIKE", OP_LIKE,
+ #ifndef NO_HELP
+    "A$ LIKE B$",
+@@ -339,82 +341,88 @@
+ #endif
+    0},
+ /* CONCATENATION */
++#ifndef NO_NONMS
+   {0x08, 0x09, BINARY, NO_ALPHA, "&", OP_AMP,
+ #ifndef NO_HELP
+    "X & Y", "Concatenation",
+ #endif
+    B15 | B93 | HB2},
++#endif
+ /* ARITHMETIC */
+   {0x09, 0x0A, BINARY, NO_ALPHA, "+", OP_ADD,
+ #ifndef NO_HELP
+    "X + Y", "Addition",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x09, 0x0A, BINARY, NO_ALPHA, "-", OP_SUB,
+ #ifndef NO_HELP
+    "X - Y", "Subtraction",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x0A, 0x0B, BINARY, IS_ALPHA, "MOD", OP_MOD,
+ #ifndef NO_HELP
+    "X MOD Y", "Integer Modulus",
+ #endif
+-   B15 | B93 | HB1 | HB2 | D71 | M80 | R86 | T80 | H14},
++   B15 | B93 | HB1 | HB2 | D71 | M80 | M86 | R86 | T80 | H14},
+   {0x0B, 0x0C, BINARY, NO_ALPHA, "\\", OP_IDIV,
+ #ifndef NO_HELP
+    "X \\ Y", "Integer Division",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | E78 | E86 | M80 | T80 | H14},
++   | E78 | E86 | M80 | M86 | T80 | H14},
+   {0x0C, 0x0D, BINARY, NO_ALPHA, "*", OP_MUL,
+ #ifndef NO_HELP
+    "X * Y", "Multiplication",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x0C, 0x0D, BINARY, NO_ALPHA, "/", OP_DIV,
+ #ifndef NO_HELP
+    "X / Y", "Division",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x0D, 0x0D, UNARY, NO_ALPHA, "#", OP_POS,
+ #ifndef NO_HELP
+    "# X", "Posation",
+ #endif
+-   B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | C77 | D71 | E86 | M80 | T79
++   B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | C77 | D71 | E86 | M80 | M86 | T79
+    | R86 | T80 | H80 | H14},
+   {0x0D, 0x0D, UNARY, NO_ALPHA, "+", OP_POS,
+ #ifndef NO_HELP
+    "+ X", "Posation",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x0D, 0x0D, UNARY, NO_ALPHA, "-", OP_NEG,
+ #ifndef NO_HELP
+    "- X", "Negation",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | T80 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | T80 | H80 | V09 | H14},
+   {0x0E, 0x0F, BINARY, NO_ALPHA, "^", OP_EXP,
+ #ifndef NO_HELP
+    "X ^ Y", "Exponential",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+-   | D70 | D73 | E78 | E86 | M80 | T79 | R86 | H80 | V09 | H14},
++   | D70 | D73 | E78 | E86 | M80 | M86 | T79 | R86 | H80 | V09 | H14},
++#ifndef NO_NONMS
+   {0x0E, 0x0F, BINARY, NO_ALPHA, "[", OP_EXP,
+ #ifndef NO_HELP
+    "X [ Y", "Exponential",
+ #endif
+    B15 | HB1 | HB2 | T80},
++#endif
++#ifndef NO_NONMS
+   {0x0E, 0x0F, BINARY, NO_ALPHA, "**", OP_EXP,
+ #ifndef NO_HELP
+    "X ** Y", "Exponential",
+ #endif
+    B15 | B93 | HB1 | HB2 | D64 | G65 | G67 | G74 | S70 | I70 | I73 | C77 | D71
+    | D70 | D73 | E78},
++#endif
+ };
+ 
+ static const size_t NUM_OPERATORS =
+@@ -2759,10 +2767,12 @@
+           /* OK */
+           switch (Xbound)
+           {
++#ifndef NO_NONMS
+           case 'd':                /* DET() */
+             Determinant (v);
+             X->Number = My->LastDeterminant;
+             break;
++#endif
+           case 'D':                /* DIM() */
+             X->Number = v->dimensions;
+             break;
+diff -urN basic/bwb_fnc.c newbasic2/bwb_fnc.c
+--- basic/bwb_fnc.c	Sun May 05 20:43:35 2024
++++ newbasic2/bwb_fnc.c	Wed May 01 13:06:39 2024
+@@ -453,6 +453,7 @@
+       WARN_INTERNAL_ERROR;
+     }
+     break;
++#ifndef NO_NONMS
+   case F_ARGC_N:
+     /* N = ARGC */
+     {
+@@ -685,6 +686,7 @@
+       }
+     }
+     break;
++#endif
+   case F_BASE_N:
+     /* N = BASE */
+     {
+@@ -698,6 +700,7 @@
+       /* PNONE */
+       N = My->RESIDUE;                /* Residue of the last integer divide */
+     }
++#ifndef NO_NONMS
+   case F_DIGITS_X_N:
+     /* N = DIGITS( X ) */
+     {
+@@ -757,6 +760,7 @@
+       }
+     }
+     break;
++#endif
+   case F_ASC_A_N:
+   case F_ASCII_A_N:
+   case F_CODE_A_N:
+@@ -1277,6 +1281,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_FILEATTR_X_Y_N:
+     /* N = FILEATTR( X, Y ) */
+     {
+@@ -1313,6 +1318,7 @@
+       }
+     }
+     break;
++#endif
+   case F_CLOSE_X_N:
+     /* CLOSE X */
+     {
+@@ -1367,6 +1373,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_FREEFILE_N:
+     /* N = FREEFILE */
+     {
+@@ -1397,6 +1404,7 @@
+       N = x;
+     }
+     break;
++#endif
+   case F_GET_X_Y_N:
+     /* GET X, Y */
+     {
+@@ -2537,6 +2545,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_CLK_X_N:
+     /* N = CLK( X ) ' value of X is ignored */
+     {
+@@ -2632,6 +2641,7 @@
+       }
+     }
+     break;
++#endif
+   case F_COSH_X_N:
+   case F_CSH_X_N:
+   case F_HCS_X_N:
+@@ -2825,6 +2835,7 @@
+     }
+     break;
+ 
++#ifndef NO_NONMS
+ 
+   case F_COT_X_N:
+     /* N = COT( X ) ' = 1 / TAN( X ) */
+@@ -2898,6 +2909,7 @@
+       }
+     }
+     break;
++#endif
+   case F_UCASE4_A_S:
+   case F_UPPER4_A_S:
+     /* S$ = UCASE$( A$ ) */
+@@ -3279,6 +3291,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_FP_X_N:
+   case F_FRAC_X_N:
+     /* N = FP( X ) */
+@@ -3406,7 +3419,7 @@
+       N = MINDEV;
+     }
+     break;
+-
++#endif
+   case F_MOD_X_Y_N:
+     /* N = MOD( X, Y ) */
+     {
+@@ -3417,6 +3430,7 @@
+       N = X - (Y * IP);
+     }
+     break;
++#ifndef NO_NONMS
+   case F_REMAINDER_X_Y_N:
+     /* REMAINDER( X, Y ) */
+     {
+@@ -3429,6 +3443,7 @@
+       N = X - (Y * IP);
+     }
+     break;
++#endif
+   case F_ROUND_X_Y_N:
+     /* N = ROUND( X, Y ) == INT(X*10^Y+.5)/10^Y */
+     {
+@@ -3659,6 +3674,7 @@
+       N = cos (X);
+     }
+     break;
++#ifndef NO_NONMS
+   case F_COSD_X_N:
+     /* N = COSD( X ) */
+     {
+@@ -3673,6 +3689,7 @@
+       N = cos (X);
+     }
+     break;
++#endif
+   case F_EXP_X_N:
+     /* N = EXP( X ) */
+     {
+@@ -4225,6 +4242,7 @@
+       bwx_COLOR (X, Y);
+     }
+     break;
++#ifndef NO_NONMS
+   case F_SHELL_A_N:
+   case F_EXEC_A_N:
+     /* N = SHELL( A$ ) */
+@@ -4234,6 +4252,7 @@
+       N = system (A);
+     }
+     break;
++#endif
+   case F_FILES_N:
+   case F_CATALOG_N:
+     /* FILES */
+@@ -4414,8 +4433,10 @@
+     }
+     break;
+   case F_TRON_N:
++#ifndef NO_NONMS
+   case F_TRACE_N:
+   case F_FLOW_N:
++#endif
+     /* TRON */
+     /* TRACE */
+     /* FLOW */
+@@ -4428,8 +4449,10 @@
+     }
+     break;
+   case F_TROFF_N:
++#ifndef NO_NONMS
+   case F_NOTRACE_N:
+   case F_NOFLOW_N:
++#endif
+     /* TROFF */
+     /* NOTRACE */
+     /* NOFLOW */
+@@ -4491,6 +4514,7 @@
+       N = 0;
+     }
+     break;
++#ifndef NO_NONMS
+   case F_LNO_X_N:
+     /* N = LNO( X, Y ) */
+     {
+@@ -4620,6 +4644,7 @@
+       }
+     }
+     break;
++#endif
+   case F_CIN_X_N:
+     /* N = CIN( X ) */
+     {
+diff -urN basic/bwb_inp.c newbasic2/bwb_inp.c
+--- basic/bwb_inp.c	Sun May 05 20:44:02 2024
++++ newbasic2/bwb_inp.c	Wed May 01 09:53:41 2024
+@@ -55,10 +55,14 @@
+ static ResultType file_data (VariableType * Variable, char *tbuf, int tlen);
+ static LineType *file_if_end (LineType * Line);
+ static LineType *file_input (LineType * Line);
++#ifndef NO_NONMS
+ static LineType *file_read_matrix (LineType * Line);
++#endif
+ static LineType *file_restore (LineType * Line);
+ static LineType *H14_GET (LineType * Line);
++#ifndef NO_NONMS
+ static ResultType input_data (VariableType * Variable, char *tbuf, int tlen);
++#endif
+ static ResultType parse_number (char *buffer, int *position, VariantType * X,
+                                 int IsConsoleInput);
+ static ResultType parse_string (char *buffer, int *position, VariantType * X);
+@@ -289,6 +293,7 @@
+   return FALSE;
+ }
+ 
++#ifndef NO_NONMS
+ 
+ extern LineType *
+ bwb_BACKSPACE (LineType * Line)
+@@ -445,7 +450,7 @@
+   return (Line);
+ }
+ 
+-
++#endif
+ 
+ 
+ /***************************************************************
+@@ -2797,6 +2802,8 @@
+   return (Line);
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ file_read_matrix (LineType * Line)
+ {
+@@ -2984,6 +2991,10 @@
+   return (Line);
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ extern LineType *
+ bwb_MAT_GET (LineType * Line)
+ {
+@@ -3148,6 +3159,10 @@
+   return file_read_matrix (Line);
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ static ResultType
+ input_data (VariableType * Variable, char *tbuf, int tlen)
+ {
+@@ -3285,6 +3300,10 @@
+   return RESULT_UNPARSED;
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ extern LineType *
+ bwb_MAT_INPUT (LineType * Line)
+ {
+@@ -3525,5 +3544,7 @@
+   while (line_skip_seperator (Line));
+   return (Line);
+ }
++
++#endif
+ 
+ /* EOF */
+diff -urN basic/bwb_int.c newbasic2/bwb_int.c
+--- basic/bwb_int.c	Sun May 05 20:43:35 2024
++++ newbasic2/bwb_int.c	Wed May 01 11:44:47 2024
+@@ -182,6 +182,7 @@
+ }
+ #endif
+ 
++
+ extern int
+ buff_peek_EqualChar (char *buffer, int *position)
+ {
+@@ -197,6 +198,7 @@
+   return buff_peek_char (buffer, position, '=');
+ }
+ 
++
+ extern int
+ line_peek_EqualChar (LineType * line)
+ {
+@@ -1233,6 +1235,8 @@
+   return v;
+ }
+ 
++#ifndef NO_NONMS
++
+ extern VariableType *
+ line_read_matrix (LineType * line)
+ {
+@@ -1240,6 +1244,8 @@
+   assert (line != NULL);
+   return buff_read_matrix (line->buffer, &(line->position));
+ }
++
++#endif
+ 
+ extern int
+ buff_read_line_number (char *buffer, int *position, int *linenum)
+diff -urN basic/bwb_prn.c newbasic2/bwb_prn.c
+--- basic/bwb_prn.c	Sun May 05 20:43:35 2024
++++ newbasic2/bwb_prn.c	Wed May 01 09:51:00 2024
+@@ -49,7 +49,9 @@
+ static void CleanNumericString (char *prnbuf, int RemoveDot);
+ static int CountDigits (char *Buffer);
+ static LineType *D71_PUT (LineType * l);
++#ifndef NO_NONMS
+ static LineType *file_write_matrix (LineType * l, char delimit);
++#endif
+ static LineType *H14_PUT (LineType * Line);
+ static void internal_print (LineType * l, int IsCSV);
+ static int is_magic_number (char *buffer);
+@@ -2520,6 +2522,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ file_write_matrix (LineType * l, char delimit)
+ {
+@@ -2799,6 +2803,10 @@
+   return (l);
+ }
+ 
++#endif
++
++#ifndef NO_NONMS
++
+ extern LineType *
+ bwb_MAT_PUT (LineType * l)
+ {
+@@ -2968,6 +2976,6 @@
+   return bwb_mat_dump (l, FALSE);
+ }
+ 
+-
++#endif
+ 
+ /*  EOF  */
+diff -urN basic/bwb_var.c newbasic2/bwb_var.c
+--- basic/bwb_var.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwb_var.c	Wed May 01 13:07:27 2024
+@@ -641,6 +641,8 @@
+   
+ ***********************************************************/
+ 
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_DEFBYT (LineType * l)
+ {
+@@ -665,6 +667,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ LineType *
+ bwb_DEFDBL (LineType * l)
+ {
+@@ -770,6 +774,8 @@
+   return (l);
+ }
+ 
++#ifndef NO_NONMS
++
+ LineType *
+ bwb_TRACE (LineType * l)
+ {
+@@ -809,6 +815,8 @@
+   return (l);
+ }
+ 
++#endif
++
+ int
+ VarTypeIndex (char C)
+ {
+@@ -4502,6 +4510,8 @@
+   return NULL;
+ }
+ 
++#ifndef NO_NONMS
++
+ /***************************************************************
+   
+         FUNCTION:       bwb_vars()
+@@ -4560,6 +4570,7 @@
+   return (l);
+ }
+ 
++#endif
+ /***************************************************************
+   
+         FUNCTION:       bwb_field()
+diff -urN basic/bwbasic.c newbasic2/bwbasic.c
+--- basic/bwbasic.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwbasic.c	Wed May 01 13:08:55 2024
+@@ -232,6 +232,7 @@
+   {
+     fputc ('\n', My->SYSOUT->cfp);
+     ResetConsoleColumn ();
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (C77))
+     {
+       if (is_empty_string (My->ProgramFilename) == FALSE)
+@@ -239,6 +240,7 @@
+         fprintf (My->SYSOUT->cfp, "FILE:%s, ", My->ProgramFilename);
+       }
+     }
++#endif
+     fprintf (My->SYSOUT->cfp, "Program interrupted");
+     if (My->ThisLine)                /* break_mes */
+     {
+@@ -2712,27 +2714,35 @@
+    case C_DEF8LBL:
+       r = bwb_DEF8LBL( l );
+       break;
++#ifndef NO_NONMS
+    case C_APPEND:
+       r = bwb_APPEND( l );
+       break;
++#endif
+    case C_AS:
+       r = bwb_AS( l );
+       break;
+    case C_AUTO:
+       r = bwb_AUTO( l );
+       break;
++#ifndef NO_NONMS
+    case C_BACKSPACE:
+       r = bwb_BACKSPACE( l );
+       break;
++#endif
++#ifndef NO_NONMS
+    case C_BREAK:
+       r = bwb_BREAK( l );
+       break;
++#endif
++#ifndef NO_NONMS
+    case C_BUILD:
+       r = bwb_BUILD( l );
+       break;
+    case C_BYE:
+       r = bwb_BYE( l );
+       break;
++#endif
+    case C_CALL:
+       r = bwb_CALL( l );
+       break;
+@@ -2745,9 +2755,11 @@
+    case C_CHAIN:
+       r = bwb_CHAIN( l );
+       break;
++#ifndef NO_NONMS
+    case C_CHANGE:
+       r = bwb_CHANGE( l );
+       break;
++#endif
+    case C_CLEAR:
+       r = bwb_CLEAR( l );
+       break;
+@@ -2763,21 +2775,26 @@
+    case C_CLR:
+       r = bwb_CLR( l );
+       break;
++#ifndef NO_NONMS
+    case C_CMDS:
+       r = bwb_CMDS( l );
+       break;
++#endif
+    case C_COMMON:
+       r = bwb_COMMON( l );
+       break;
++#ifndef NO_NONMS
+    case C_CONSOLE:
+       r = bwb_CONSOLE( l );
+       break;
++#endif
+    case C_CONST:
+       r = bwb_CONST( l );
+       break;
+    case C_CONT:
+       r = bwb_CONT( l );
+       break;
++#ifndef NO_NONMS
+    case C_CONTINUE:
+       r = bwb_CONTINUE( l );
+       break;
+@@ -2787,6 +2804,7 @@
+    case C_CREATE:
+       r = bwb_CREATE( l );
+       break;
++#endif
+    case C_CSAVE:
+       r = bwb_CSAVE( l );
+       break;
+@@ -2796,18 +2814,22 @@
+    case C_DATA:
+       r = bwb_DATA( l );
+       break;
++#ifndef NO_NONMS
+    case C_DEC:
+       r = bwb_DEC( l );
+       break;
++#endif
+    case C_DEF:
+       r = bwb_DEF( l );
+       break;
++#ifndef NO_NONMS
+    case C_DEFBYT:
+       r = bwb_DEFBYT( l );
+       break;
+    case C_DEFCUR:
+       r = bwb_DEFCUR( l );
+       break;
++#endif
+    case C_DEFDBL:
+       r = bwb_DEFDBL( l );
+       break;
+@@ -2832,6 +2854,7 @@
+    case C_DIM:
+       r = bwb_DIM( l );
+       break;
++#ifndef NO_NONMS
+    case C_DISPLAY:
+       r = bwb_DISPLAY( l );
+       break;
+@@ -2844,6 +2867,7 @@
+    case C_DSP:
+       r = bwb_DSP( l );
+       break;
++#endif
+    case C_EDIT:
+       r = bwb_EDIT( l );
+       break;
+@@ -2901,12 +2925,15 @@
+    case C_FIELD:
+       r = bwb_FIELD( l );
+       break;
++#ifndef NO_NONMS
+    case C_FILE:
+       r = bwb_FILE( l );
+       break;
++#endif
+    case C_FILES:
+       r = bwb_FILES( l );
+       break;
++#ifndef NO_NONMS
+    case C_FLEX:
+       r = bwb_FLEX( l );
+       break;
+@@ -2916,6 +2943,7 @@
+    case C_FNEND:
+       r = bwb_FNEND( l );
+       break;
++#endif
+    case C_FOR:
+       r = bwb_FOR( l );
+       break;
+@@ -2934,9 +2962,11 @@
+    case C_GO_TO:
+       r = bwb_GO_TO( l );
+       break;
++#ifndef NO_NONMS
+    case C_GOODBYE:
+       r = bwb_GOODBYE( l );
+       break;
++#endif
+    case C_GOSUB:
+       r = bwb_GOSUB( l );
+       break;
+@@ -2960,12 +2990,14 @@
+    case C_IF8THEN:
+       r = bwb_IF8THEN( l );
+       break;
++#ifndef NO_NONMS
+    case C_IMAGE:
+       r = bwb_IMAGE( l );
+       break;
+    case C_INC:
+       r = bwb_INC( l );
+       break;
++#endif
+    case C_INPUT:
+       r = bwb_INPUT( l );
+       break;
+@@ -3002,12 +3034,16 @@
+    case C_LPRINT:
+       r = bwb_LPRINT( l );
+       break;
++#ifndef NO_NONMS
+    case C_LPRINTER:
+       r = bwb_LPRINTER( l );
+       break;
++#endif
++#ifndef NO_NONMS
+    case C_LPT:
+       r = bwb_LPT( l );
+       break;
++#endif
+    case C_LSET:
+       r = bwb_LSET( l );
+       break;
+@@ -3070,6 +3106,7 @@
+    case C_MARGIN:
+       r = bwb_MARGIN( l );
+       break;
++#ifndef NO_NONMS
+    case C_MAT:
+       r = bwb_MAT( l );
+       break;
+@@ -3091,15 +3128,18 @@
+    case C_MAT_WRITE:
+       r = bwb_MAT_WRITE( l );
+       break;
++#endif
+    case C_MERGE:
+       r = bwb_MERGE( l );
+       break;
+    case C_MID4:
+       r = bwb_MID4( l );
+       break;
++#ifndef NO_NONMS
+    case C_MON:
+       r = bwb_MON( l );
+       break;
++#endif
+    case C_NAME:
+       r = bwb_NAME( l );
+       break;
+@@ -3112,9 +3152,11 @@
+    case C_OF:
+       r = bwb_OF( l );
+       break;
++#ifndef NO_NONMS
+    case C_OLD:
+       r = bwb_OLD( l );
+       break;
++#endif
+    case C_ON:
+       r = bwb_ON( l );
+       break;
+@@ -3452,45 +3494,57 @@
+    case C_PAUSE:
+       r = bwb_PAUSE( l );
+       break;
++#ifndef NO_NONMS
+    case C_PDEL:
+       r = bwb_PDEL( l );
+       break;
+    case C_POP:
+       r = bwb_POP( l );
+       break;
++#endif
+    case C_PRINT:
+       r = bwb_PRINT( l );
+       break;
++#ifndef NO_NONMS
+    case C_PTP:
+       r = bwb_PTP( l );
+       break;
+    case C_PTR:
+       r = bwb_PTR( l );
+       break;
++#endif
+    case C_PUT:
+       r = bwb_PUT( l );
+       break;
++#ifndef NO_NONMS
+    case C_QUIT:
+       r = bwb_QUIT( l );
+       break;
++#endif
+    case C_READ:
+       r = bwb_READ( l );
+       break;
++#ifndef NO_NONMS
+    case C_RECALL:
+       r = bwb_RECALL( l );
+       break;
++#endif
+    case C_REM:
+       r = bwb_REM( l );
+       break;
++#ifndef NO_NONMS
+    case C_RENAME:
+       r = bwb_RENAME( l );
+       break;
++#endif
+    case C_RENUM:
+       r = bwb_RENUM( l );
+       break;
++#ifndef NO_NONMS
+    case C_RENUMBER:
+       r = bwb_RENUMBER( l );
+       break;
++#endif
+    case C_REPEAT:
+       r = bwb_REPEAT( l );
+       break;
+@@ -3521,9 +3575,11 @@
+    case C_SAVE:
+       r = bwb_SAVE( l );
+       break;
++#ifndef NO_NONMS
+    case C_SCRATCH:
+       r = bwb_SCRATCH( l );
+       break;
++#endif
+    case C_SELECT:
+       r = bwb_SELECT( l );
+       break;
+@@ -3536,9 +3592,11 @@
+    case C_STOP:
+       r = bwb_STOP( l );
+       break;
++#ifndef NO_NONMS
+    case C_STORE:
+       r = bwb_STORE( l );
+       break;
++#endif
+    case C_SUB:
+       r = bwb_SUB( l );
+       break;
+@@ -3578,12 +3636,15 @@
+    case C_TIMER_STOP:
+       r = bwb_TIMER_STOP( l );
+       break;
++#ifndef NO_NONMS
+    case C_TLOAD:
+       r = bwb_TLOAD( l );
+       break;
++#endif
+    case C_TO:
+       r = bwb_TO( l );
+       break;
++#ifndef NO_NONMS
+    case C_TRACE:
+       r = bwb_TRACE( l );
+       break;
+@@ -3605,15 +3666,18 @@
+    case C_TTY_OUT:
+       r = bwb_TTY_OUT( l );
+       break;
++#endif
+    case C_UNTIL:
+       r = bwb_UNTIL( l );
+       break;
++#ifndef NO_NONMS
+    case C_USE:
+       r = bwb_USE( l );
+       break;
+    case C_VARS:
+       r = bwb_VARS( l );
+       break;
++#endif
+    case C_WEND:
+       r = bwb_WEND( l );
+       break;
+diff -urN basic/bwbasic.h newbasic2/bwbasic.h
+--- basic/bwbasic.h	Sun May 05 20:44:04 2024
++++ newbasic2/bwbasic.h	Wed May 01 12:49:13 2024
+@@ -1566,6 +1566,7 @@
+ typedef struct VersionStructure VersionType;
+ extern VersionType bwb_vertable[ /* NUM_VERSIONS  */ ];        /* table of predefined versions  */
+ extern const size_t NUM_VERSIONS;        /* upto 32 BASIC dialects */
++
+ /* OptionVersionValue */
+ #define B15 (1UL<< 0)                /* Bywater       */
+ #define S70 (1UL<< 1)                /* CALL/360      */
+@@ -1769,13 +1770,19 @@
+ /*-------------------------------------------------------------
+                         BASIC COMMANDS
+ -------------------------------------------------------------*/
++#ifndef NO_NONMS
+ extern LineType *bwb_APPEND (LineType * l);
++#endif
+ extern LineType *bwb_AS (LineType * L);
+ extern LineType *bwb_AUTO (LineType * L);
++#ifndef NO_NONMS
+ extern LineType *bwb_BACKSPACE (LineType * Line);
++#endif
+ extern LineType *bwb_BREAK (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_BUILD (LineType * L);
+ extern LineType *bwb_BYE (LineType * l);
++#endif
+ extern LineType *bwb_CALL (LineType * l);
+ extern LineType *bwb_CASE (LineType * l);
+ extern LineType *bwb_CASE_ELSE (LineType * l);
+@@ -1791,17 +1798,23 @@
+ extern LineType *bwb_CONSOLE (LineType * l);
+ extern LineType *bwb_CONST (LineType * L);
+ extern LineType *bwb_CONT (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_CONTINUE (LineType * l);
++#endif
+ extern LineType *bwb_COPY (LineType * Line);
+ extern LineType *bwb_CREATE (LineType * l);
+ extern LineType *bwb_CSAVE (LineType * Line);
+ extern LineType *bwb_CSAVE8 (LineType * l);
+ extern LineType *bwb_DATA (LineType * Line);
++#ifndef NO_NONMS
+ extern LineType *bwb_DEC (LineType * L);
++#endif
+ extern LineType *bwb_DEF (LineType * l);
+ extern LineType *bwb_DEF8LBL (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_DEFBYT (LineType * l);
+ extern LineType *bwb_DEFCUR (LineType * l);
++#endif
+ extern LineType *bwb_DEFDBL (LineType * l);
+ extern LineType *bwb_DEFINT (LineType * l);
+ extern LineType *bwb_DEFLNG (LineType * l);
+@@ -1810,10 +1823,12 @@
+ extern LineType *bwb_DELETE (LineType * l);
+ extern LineType *bwb_DELIMIT (LineType * l);
+ extern LineType *bwb_DIM (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_DISPLAY (LineType * Line);
+ extern LineType *bwb_DO (LineType * l);
+ extern LineType *bwb_DOS (LineType * l);
+ extern LineType *bwb_DSP (LineType * l);
++#endif
+ extern LineType *bwb_EDIT (LineType * Line);
+ extern LineType *bwb_ELSE (LineType * l);
+ extern LineType *bwb_ELSEIF (LineType * l);
+@@ -1835,14 +1850,18 @@
+ extern LineType *bwb_FIELD (LineType * l);
+ extern LineType *bwb_FILE (LineType * l);
+ extern LineType *bwb_FILES (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_FLEX (LineType * l);
+ extern LineType *bwb_FNCS (LineType * l);
+ extern LineType *bwb_FNEND (LineType * l);
++#endif
+ extern LineType *bwb_FOR (LineType * l);
+ extern LineType *bwb_FUNCTION (LineType * l);
+ extern LineType *bwb_GET (LineType * Line);
+ extern LineType *bwb_GO (LineType * L);
++#ifndef NO_NONMS
+ extern LineType *bwb_GOODBYE (LineType * l);
++#endif
+ extern LineType *bwb_GOSUB (LineType * l);
+ extern LineType *bwb_GOTO (LineType * l);
+ extern LineType *bwb_GO_SUB (LineType * l);
+@@ -1892,6 +1911,7 @@
+ extern LineType *bwb_MAINTAINER_STACK (LineType * l);
+ #endif
+ extern LineType *bwb_MARGIN (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_MAT (LineType * l);
+ extern LineType *bwb_MAT_GET (LineType * Line);
+ extern LineType *bwb_MAT_INPUT (LineType * Line);
+@@ -1899,9 +1919,12 @@
+ extern LineType *bwb_MAT_PUT (LineType * l);
+ extern LineType *bwb_MAT_READ (LineType * Line);
+ extern LineType *bwb_MAT_WRITE (LineType * l);
++#endif
+ extern LineType *bwb_MERGE (LineType * l);
+ extern LineType *bwb_MID4 (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_MON (LineType * l);
++#endif
+ extern LineType *bwb_NAME (LineType * l);
+ extern LineType *bwb_NEW (LineType * l);
+ extern LineType *bwb_NEXT (LineType * l);
+@@ -2020,15 +2043,19 @@
+ extern LineType *bwb_OPTION_ZONE (LineType * l);
+ #endif
+ extern LineType *bwb_PAUSE (LineType * l);
++#ifndef NO_NONMS
+ extern LineType *bwb_PDEL (LineType * l);
+ extern LineType *bwb_POP (LineType * l);
++#endif
+ extern LineType *bwb_PRINT (LineType * l);
+ extern LineType *bwb_PTP (LineType * l);
+ extern LineType *bwb_PTR (LineType * l);
+ extern LineType *bwb_PUT (LineType * Line);
+ extern LineType *bwb_QUIT (LineType * l);
+ extern LineType *bwb_READ (LineType * Line);
++#ifndef NO_NONMS
+ extern LineType *bwb_RECALL (LineType * l);
++#endif
+ extern LineType *bwb_REM (LineType * L);
+ extern LineType *bwb_RENAME (LineType * l);
+ extern LineType *bwb_RENUM (LineType * Line);
+@@ -2068,9 +2095,11 @@
+ extern LineType *bwb_TRACE_OFF (LineType * l);
+ extern LineType *bwb_TRACE_ON (LineType * l);
+ extern LineType *bwb_TSAVE (LineType * Line);
++#ifndef NO_NONMS
+ extern LineType *bwb_TTY (LineType * l);
+ extern LineType *bwb_TTY_IN (LineType * l);
+ extern LineType *bwb_TTY_OUT (LineType * l);
++#endif
+ extern LineType *bwb_UNTIL (LineType * l);
+ extern LineType *bwb_USE (LineType * l);
+ extern LineType *bwb_VARS (LineType * l);
+diff -urN basic/bwd_cmd.c newbasic2/bwd_cmd.c
+--- basic/bwd_cmd.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwd_cmd.c	Wed May 01 11:58:54 2024
+@@ -45,6 +45,7 @@
+ 
+ CommandType IntrinsicCommandTable[ /* NUM_COMMANDS */ ] =
+ {
++#ifndef NO_NONMS
+ {
+   C_APPEND,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -66,6 +67,7 @@
+   "APPEND",  /* Name */
+   D64 | G74 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_AS,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -90,6 +92,7 @@
+   "AUTO",  /* Name */
+   B15 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_BACKSPACE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -189,6 +192,7 @@
+   "CASE ELSE",  /* Name */
+   B15 | B93 | E86 | H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_CHAIN,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -199,6 +203,7 @@
+   "CHAIN",  /* Name */
+   B15 | B93 | S70 | C77 | G74 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_CHANGE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -217,6 +222,7 @@
+   "CHANGE",  /* Name */
+   B15 | D64 | G74 | HB2 | G65 | G67 | D71  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_CLEAR,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -252,8 +258,9 @@
+   "Closes all files.",  /* Description */
+ #endif
+   "CLOSE",  /* Name */
+-  S70 | I70 | I73  /* OptionVersionBitmask */
++  S70 | I70 | I73 | M86 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_CLOSE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -263,6 +270,7 @@
+   "CLOSE",  /* Name */
+   S70 | I70 | I73  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_CLOSE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -270,8 +278,9 @@
+   "Closes a file.",  /* Description */
+ #endif
+   "CLOSE",  /* Name */
+-  S70 | I70 | I73  /* OptionVersionBitmask */
++  S70 | I70 | I73 | M86 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_CLR,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -291,6 +300,7 @@
+   "CMDS",  /* Name */
+   B15 | B93  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_COMMON,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -300,6 +310,7 @@
+   "COMMON",  /* Name */
+   B15 | B93 | C77 | E86 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_CONSOLE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -320,6 +331,7 @@
+   "CONST",  /* Name */
+   B15  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_CONT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -330,6 +342,7 @@
+   "CONT",  /* Name */
+   B15 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_CONTINUE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -361,6 +374,7 @@
+   "CREATE",  /* Name */
+   C77  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_CSAVE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -388,6 +402,7 @@
+   "DATA",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DEC,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -397,6 +412,7 @@
+   "DEC",  /* Name */
+   H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_DEF,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -417,6 +433,7 @@
+   "DEF",  /* Name */
+   B15 | S70 | G74 | HB1 | HB2 | H80 | G67 | D73 | D70 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DEFBYT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -435,6 +452,7 @@
+   "DEFCUR",  /* Name */
+   B15  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_DEFDBL,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -453,6 +471,7 @@
+   "DEFINT",  /* Name */
+   B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DEFLNG,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -462,6 +481,7 @@
+   "DEFLNG",  /* Name */
+   B15  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_DEFSNG,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -480,6 +500,7 @@
+   "DEFSTR",  /* Name */
+   B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DELETE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -489,6 +510,7 @@
+   "DELETE",  /* Name */
+   C77  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_DELETE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -501,6 +523,7 @@
+   "DELETE",  /* Name */
+   B15 | B93 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DELIMIT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -510,6 +533,7 @@
+   "DELIMIT",  /* Name */
+   G74 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_DIM,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -522,6 +546,7 @@
+   "DIM",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_DISPLAY,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -579,6 +604,7 @@
+   "DSP",  /* Name */
+   B15 | HB1 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_EDIT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -617,6 +643,7 @@
+   "END",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_END_FUNCTION,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -626,6 +653,7 @@
+   "END FUNCTION",  /* Name */
+   B15 | B93 | E86 | H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_END_IF,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -635,6 +663,7 @@
+   "END IF",  /* Name */
+   B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_END_SELECT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -653,6 +682,7 @@
+   "END SUB",  /* Name */
+   B15 | B93 | E86 | H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_ERASE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -662,6 +692,7 @@
+   "ERASE",  /* Name */
+   B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_EXCHANGE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -744,6 +775,7 @@
+   "FEND",  /* Name */
+   C77  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_FIELD,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -755,6 +787,7 @@
+   "FIELD",  /* Name */
+   B15 | B93 | H14 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_FILE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -812,6 +845,7 @@
+   "FNEND",  /* Name */
+   B15 | S70 | G74 | HB1 | HB2 | H80 | G67 | D73 | D70 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_FOR,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -823,6 +857,7 @@
+   "FOR",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_FUNCTION,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -834,6 +869,7 @@
+   "FUNCTION",  /* Name */
+   B15 | B93 | E86 | H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_GET,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -908,6 +944,7 @@
+   "GO TO",  /* Name */
+   B15 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_GOODBYE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -917,6 +954,7 @@
+   "GOODBYE",  /* Name */
+   B15 | D64 | G74 | HB2 | G65 | G67 | D71  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_GOSUB,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -973,6 +1011,7 @@
+   "IF END",  /* Name */
+   C77 | D64 | G74 | G65 | G67  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_IF_MORE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -985,6 +1024,7 @@
+   "IF MORE",  /* Name */
+   D64 | G74 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_IF8THEN,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -997,6 +1037,7 @@
+   "IF*THEN",  /* Name */
+   B15 | B93 | C77 | E86 | H14 | HB1 | HB2 | H80 | M80 | M86 | D73 | D70 | R86 | D71 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_IMAGE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1015,6 +1056,7 @@
+   "INC",  /* Name */
+   H14  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_INPUT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1186,6 +1228,7 @@
+   "LPRINT",  /* Name */
+   B15 | S70 | E78 | E86 | H14 | HB2 | M80 | M86 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_LPRINTER,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1206,6 +1249,7 @@
+   "LPT",  /* Name */
+   D73  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_LSET,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1393,6 +1437,7 @@
+   "MARGIN",  /* Name */
+   B15 | D64 | G74 | HB2 | G65 | G67  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_MAT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1458,6 +1503,7 @@
+   "MAT WRITE",  /* Name */
+   D64 | G74 | H14 | HB1 | HB2 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_MERGE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1478,6 +1524,7 @@
+   "MID$",  /* Name */
+   B15 | B93 | C77 | H14 | H80 | M80 | M86 | D71 | T80  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_MON,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1487,6 +1534,7 @@
+   "MON",  /* Name */
+   R86  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_NAME,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1523,6 +1571,7 @@
+   "OF",  /* Name */
+   B15 | S70 | C77 | D64 | E78 | E86 | G74 | HB1 | HB2 | G65 | G67 | M80 | M86 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_OLD,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -1532,6 +1581,7 @@
+   "OLD",  /* Name */
+   D64 | G74 | H80 | G65 | G67 | D73 | D70 | D71  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_ON,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2637,6 +2687,7 @@
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
+ #endif
++#ifndef NO_NONMS
+ {
+   C_PAUSE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2668,6 +2719,7 @@
+   "POP",  /* Name */
+   B15 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_PRINT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2686,6 +2738,7 @@
+   "PRINT",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_PTP,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2706,6 +2759,7 @@
+   "PTR",  /* Name */
+   D73  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_PUT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2742,6 +2796,7 @@
+   "PUT",  /* Name */
+   H14  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_QUIT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2751,6 +2806,7 @@
+   "QUIT",  /* Name */
+   B15 | S70 | C77 | D64 | E78 | E86 | G74 | G65 | G67 | D71 | I70 | I73  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_READ,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2760,6 +2816,7 @@
+   "READ",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_RECALL,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2769,6 +2826,7 @@
+   "RECALL",  /* Name */
+   B15 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_REM,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2806,6 +2864,7 @@
+   "RENUM",  /* Name */
+   B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_RENUMBER,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2815,6 +2874,7 @@
+   "RENUMBER",  /* Name */
+   HB1 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_REPEAT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2824,6 +2884,7 @@
+   "REPEAT",  /* Name */
+   B15 | H14 | HB2  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_REPLACE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2833,6 +2894,7 @@
+   "REPLACE",  /* Name */
+   H80  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_RESET,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2979,6 +3041,7 @@
+   "SAVE",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_SCRATCH,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -2989,6 +3052,7 @@
+   "SCRATCH",  /* Name */
+   G74 | HB2 | H80 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_SELECT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3027,6 +3091,7 @@
+   "STOP",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_STORE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3036,6 +3101,7 @@
+   "STORE",  /* Name */
+   B15 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_SUB,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3106,6 +3172,7 @@
+   "SYSTEM",  /* Name */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | G65 | G67 | M80 | M86 | D71 | I70 | I73 | T80 | V09  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_TEXT,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3115,6 +3182,7 @@
+   "TEXT",  /* Name */
+   HB1 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_THEN,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3163,6 +3231,7 @@
+   "TIMER STOP",  /* Name */
+   B15  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_TLOAD,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3172,6 +3241,7 @@
+   "TLOAD",  /* Name */
+   B15 | HB2  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_TO,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3208,6 +3278,7 @@
+   "TRACE ON",  /* Name */
+   G74 | HB1 | HB2 | G67  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_TSAVE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3248,6 +3319,7 @@
+   "TTY OUT",  /* Name */
+   D73  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_UNTIL,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3258,6 +3330,7 @@
+   "UNTIL",  /* Name */
+   B15 | H14 | HB2  /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   C_USE,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -3276,6 +3349,7 @@
+   "VARS",  /* Name */
+   B15 | B93  /* OptionVersionBitmask */
+ },
++#endif
+ {
+   C_WEND,  /* UniqueID */
+ #ifndef NO_HELP
+diff -urN basic/bwd_fun.c newbasic2/bwd_fun.c
+--- basic/bwd_fun.c	Sun May 05 20:44:04 2024
++++ newbasic2/bwd_fun.c	Wed May 01 12:37:55 2024
+@@ -86,6 +86,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | S70 | HB2 | I70 | I73 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_ACSD_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -229,6 +230,7 @@
+   P1INT, /* ParameterTests */
+   B15 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_ASC_A_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -382,6 +384,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | HB2 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_BASE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -395,6 +398,7 @@
+   PNONE, /* ParameterTests */
+   B15 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_BIN4_X_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -422,6 +426,7 @@
+   P1INT | P2BYT, /* ParameterTests */
+   H14 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_CATALOG_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -461,6 +466,7 @@
+   P1CUR, /* ParameterTests */
+   B15 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_CDBL_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -737,6 +743,7 @@
+   P1INT | P2INT, /* ParameterTests */
+   H80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_CODE_A_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -751,6 +758,7 @@
+   P1BYT, /* ParameterTests */
+   B15 | H14 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_COLOR_X_Y_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -765,6 +773,7 @@
+   P1BYT | P2BYT, /* ParameterTests */
+   B15 | H14 | M80 | M86 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_COMMAND4_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -796,6 +805,7 @@
+   P1BYT, /* ParameterTests */
+   B15 | C77 | H14 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_COS_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -848,6 +858,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | E86 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_COT_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -900,6 +911,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_CSNG_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1119,6 +1131,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | HB2 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_DET_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1132,6 +1145,8 @@
+   PNONE, /* ParameterTests */
+   B15 | S70 | G74 | H14 | HB2 | G67 | D71 | I70 | I73 /* OptionVersionBitmask */
+ },
++#endif
++#ifndef NO_NONMS
+ {
+   F_DIGITS_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1220,6 +1235,7 @@
+   P1ANY | P2INT, /* ParameterTests */
+   H14 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_ENVIRON_A_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1261,6 +1277,7 @@
+   P1INT, /* ParameterTests */
+   B15 | B93 | H14 | H80 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_EPS_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1280,6 +1297,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | E86 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_ERL_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1384,6 +1402,7 @@
+   PNONE, /* ParameterTests */
+   B15 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_EXAM_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1424,6 +1443,7 @@
+   PNONE, /* ParameterTests */
+   D70 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_EXP_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1440,6 +1460,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_FALSE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1453,6 +1474,8 @@
+   PNONE, /* ParameterTests */
+   H14 /* OptionVersionBitmask */
+ },
++#endif
++#ifndef NO_NONMS
+ {
+   F_FETCH_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1466,6 +1489,7 @@
+   P1LNG, /* ParameterTests */
+   HB1 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_FILEATTR_X_Y_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1506,6 +1530,7 @@
+   P1BYT, /* ParameterTests */
+   B15 | B93 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_FILL_X_Y_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1519,6 +1544,7 @@
+   P1LNG | P2BYT, /* ParameterTests */
+   HB1 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_FIX_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1547,6 +1573,7 @@
+   P1ANY, /* ParameterTests */
+   C77 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_FLOW_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -1586,6 +1613,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | H14 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_FRE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -3964,6 +3992,7 @@
+   P1LEN | P2BYT, /* ParameterTests */
+   B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_STRIP4_A_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -3990,6 +4019,7 @@
+   P1LNG | P2BYT, /* ParameterTests */
+   HB1 | HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_TAB_X_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4017,6 +4047,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_TAND_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4120,6 +4151,7 @@
+   P1BYT, /* ParameterTests */
+   G74 | HB1 | HB2 | G65 | G67 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_TIME_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4199,6 +4231,7 @@
+   PNONE, /* ParameterTests */
+   B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_TOP_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4214,6 +4247,7 @@
+   PNONE, /* ParameterTests */
+   HB2 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_TRACE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4281,6 +4315,7 @@
+   PNONE, /* ParameterTests */
+   B15 | B93 | E86 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_TRUE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4323,6 +4358,7 @@
+   PNONE, /* ParameterTests */
+   B15 | E86 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_UCASE4_A_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4338,6 +4374,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | C77 | E86 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_UNLOCK_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4379,6 +4416,7 @@
+   P1ANY, /* ParameterTests */
+   H14 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_USR_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4522,6 +4560,7 @@
+   PNONE, /* ParameterTests */
+   M80 | M86 | R86 | T80 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_UUF_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4535,6 +4574,7 @@
+   PNONE, /* ParameterTests */
+   D73 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_VAL_A_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4567,6 +4607,7 @@
+   PNONE, /* ParameterTests */
+   M80 | M86 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_VTAB_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4595,6 +4636,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | HB1 | HB2 | D71 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_WAIT_X_Y_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4653,6 +4695,7 @@
+   P1INT | P2BYT, /* ParameterTests */
+   B15 | B93 | H14 | HB1 | HB2 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_ZONE_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -4679,6 +4722,7 @@
+   P1INT | P2INT, /* ParameterTests */
+   H14 /* OptionVersionBitmask */
+ },
++#endif
+ };
+ 
+ const size_t NUM_FUNCTIONS =

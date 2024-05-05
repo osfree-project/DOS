@@ -1,0 +1,4 @@
+Info based on IBM Personal Computer BASIC 1.10 Manual second edition
+
+DS:30h DS:31h - Start of BASIC program
+DS:358h DS:359h - Start of nonstring variables
