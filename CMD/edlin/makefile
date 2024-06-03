@@ -13,6 +13,6 @@ COM       = 1
 !include $(%ROOT)tools/mk/appsdos.mk
 !include $(MYDIR)edlin.mk
 
-.c: $(PORT_BASE)edlin-2.23
+.c: $(PORT_BASE)edlin-2.24
 
-.h: $(PORT_BASE)edlin-2.23
+.h: $(PORT_BASE)edlin-2.24
