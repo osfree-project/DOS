@@ -20,6 +20,6 @@ ADD_COPT = -dLINUX
 ADD_COPT += -dMODEL=l -i=$(BLD)$(RELDIR) -i=$(MYDIR)..$(SEP)..$(SEP)..$(SEP)include &
   -i=$(PORT_BASE)include -i=$(MYDIR)..$(SEP)..$(SEP)include &
   -i=$(PORT_BASE)suppl
-ADD_LINKOPT = #debug all
+ADD_LINKOPT = disable 1008 #debug all
 
 .c: $(PORT_BASE)strings
