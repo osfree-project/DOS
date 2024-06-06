@@ -1,0 +1,13 @@
+diff -urN edit/source/edit/qbasic.c newedit/source/edit/qbasic.c
+--- edit/source/edit/qbasic.c	Wed Jun 05 22:24:43 2024
++++ newedit/source/edit/qbasic.c	Wed Jun 05 22:24:09 2024
+@@ -43,6 +43,9 @@
+ 
+ #include "bwbasic.h"
+ 
++// Things, not exported by DFlat+
++void SetScreenHeight(int);
++
+ static void break_handler (void);
+ void break_mes (int x);
+ int bwb_init (void);

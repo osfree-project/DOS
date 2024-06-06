@@ -1,0 +1,52 @@
+diff -urN edit/source/edit/config.c newedit/source/edit/config.c
+--- edit/source/edit/config.c	Wed Jun 05 22:21:03 2024
++++ newedit/source/edit/config.c	Wed Jun 05 22:19:54 2024
+@@ -1,6 +1,7 @@
+ /* ------------- config.c ------------- */
+ 
+ #include <stdlib.h>
++#include <unistd.h>
+ #include "dflatp.h"
+ #include "config.h"
+ 
+@@ -28,7 +29,7 @@
+ 
+ extern BOOL ConfigLoaded;
+ 
+-void BuildFileName(char *path, const char *fn, const char *ext)
++void CfgBuildFileName(char *path, const char *fn, const char *ext)
+ {
+     char *cp = path;
+ 
+@@ -48,7 +49,7 @@
+ FILE *OpenConfig(char *mode)
+ {
+ 	char path[64];
+-	BuildFileName(path, DFlatApplication, ".cfg");
++	CfgBuildFileName(path, DFlatApplication, ".cfg");
+ 	return fopen(path, mode);
+ }
+ 
+@@ -69,7 +70,7 @@
+         	}
+         	else	{
+ 				char path[64];
+-				BuildFileName(path, DFlatApplication, ".cfg");
++				CfgBuildFileName(path, DFlatApplication, ".cfg");
+ 	        	fclose(fp);
+ 				unlink(path);
+            	strcpy(cfg.version, ProgramVersion);
+diff -urN edit/source/edit/edit.c newedit/source/edit/edit.c
+--- edit/source/edit/edit.c	Wed Jun 05 22:21:03 2024
++++ newedit/source/edit/edit.c	Wed Jun 05 22:15:11 2024
+@@ -32,6 +32,10 @@
+ 
+ #include "bwbasic.h"
+ 
++// Things, not exported by DFlat+
++void SetScreenHeight(int);
++void AboutBox ( MODULE m, BOOL BasedOnDFlat );
++
+ /* G L O B A L S ///////////////////////////////////////////////////////// */
+ 
+ 
