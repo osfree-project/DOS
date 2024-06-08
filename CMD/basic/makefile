@@ -27,8 +27,7 @@ $(p)bwd_fun$(e) &
 $(p)bwx_tty$(e)
 
 # defines additional options for C compiler
-ADD_COPT = -bc -ml -zc -ox -q -wx -za -DHAVE_MSDOS -D__WATCOM__ -3 -DNO_HELP -DNO_MAINTAINER -DNO_OPTION -DNO_NONMS
-
+ADD_COPT = -bc -ml -zc -ox -q -wx  -DHAVE_MSDOS -D__WATCOM__ -3 -DNO_HELP -DNO_MAINTAINER -DNO_OPTION -DNO_NONMS
 
 # additions to install target
 INSTALL_ADD = 1
@@ -39,8 +38,6 @@ INSTALL_ADD = 1
 install_add: $(DEST)$(SEP)$(PROJ).com &
              $(DEST)$(SEP)$(PROJ)a.com &
              $(DEST)$(SEP)gw$(PROJ).exe .SYMBOLIC
-
-#$(PATH)$(PROJ1).com:
 
 $(DEST)$(SEP)$(PROJ).com: $(PATH)$(PROJ).exe
  @$(SAY) INST     $^. $(LOG)

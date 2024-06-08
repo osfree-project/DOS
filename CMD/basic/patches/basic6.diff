@@ -1,0 +1,1731 @@
+diff -urN basic/bwb_cmd.c newbasic/bwb_cmd.c
+--- basic/bwb_cmd.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_cmd.c	Sat Jun 08 13:30:23 2024
+@@ -223,6 +223,260 @@
+   return L;
+ }
+ 
++LineType *
++bwb_KEY (LineType * L)
++{
++   
++  assert (L != NULL);
++  WARN_SYNTAX_ERROR;
++  return L;
++}
++
++LineType *
++bwb_KEY_ON (LineType * L)
++{
++  
++  assert (L != NULL);
++
++  My->ShowKeys = 1;
++
++  return L;
++}
++
++LineType *
++bwb_KEY_OFF (LineType * L)
++{
++  char col=0, row=0;
++  
++  assert (L != NULL);
++
++  My->ShowKeys = 0;
++
++      setbuf(stdout, NULL);
++	__asm {
++		mov bh, 0
++		mov ah, 3
++		int 10h
++		mov row, dh
++		mov col, dl
++		mov dh, 24
++		mov dl, 0
++		mov bh, 0
++		mov ah, 2
++		int 10h
++	};
++	printf("%79s", " ");
++	__asm {
++		mov dh, row
++		mov dl, col
++		mov bh, 0
++		mov ah, 2
++		int 10h
++	};
++
++  return L;
++}
++
++LineType *
++bwb_BEEP (LineType * l)
++{
++  assert (l != NULL);
++  putc(0x7, stdout);
++  return l;
++}
++
++typedef
++  struct _HEADER
++  {
++    char magic;
++    unsigned short segment;
++    unsigned short offset;
++    unsigned short size;
++  } HEADER;
++
++LineType *
++bwb_BLOAD (LineType * l)
++{
++  char *Value;
++  char far * p;
++  FILE *stream;
++  int numread;
++  HEADER header;
++  unsigned short segment;
++  unsigned short offset;
++
++  assert (l != NULL);
++
++  /* Get an argument for filename */
++
++  Value = NULL;
++  if (line_read_string_expression (l, &Value) == FALSE)
++  {
++    WARN_SYNTAX_ERROR;
++    return (l);
++  }
++  if (is_empty_string (Value))
++  {
++    WARN_BAD_FILE_NAME;
++    return (l);
++  }
++
++
++  // Open for read (will fail if file "crt_fopen.c" does not exist)
++  if( (stream  = fopen( Value, "rb" )) == NULL ) // C4996
++  // Note: fopen is deprecated; consider using fopen_s instead
++     printf( "The file 'crt_fopen.c' was not opened\n" );
++  else
++     printf( "The file 'crt_fopen.c' was opened\n" );
++
++  numread = fread(&header, 1, 7, stream);
++
++  segment=My->DefaultSegment;
++  offset=header.offset;
++
++  p=MK_FP(segment, offset);
++
++  numread = fread(p, 1, header.size, stream);
++   // Close stream if it is not NULL
++  if( stream)
++  {
++     if ( fclose( stream ) )
++     {
++        printf( "The file 'crt_fopen.c' was not closed\n" );
++     }
++  }
++
++  return l;
++}
++
++LineType *
++bwb_BSAVE (LineType * l)
++{
++  char *Value;
++  char far * p;
++  FILE *stream;
++  int numwrite;
++  HEADER header;
++  unsigned short segment;
++  unsigned short offset;
++  unsigned short length;
++  VariantType x;
++  VariantType *X;
++   
++  assert (l != NULL);
++  X = &x;
++  CLEAR_VARIANT (X);
++
++  /* Get an argument for filename */
++
++  Value = NULL;
++  if (line_read_string_expression (l, &Value) == FALSE)
++  {
++    WARN_SYNTAX_ERROR;
++    return (l);
++  }
++  if (is_empty_string (Value))
++  {
++    WARN_BAD_FILE_NAME;
++    return (l);
++  }
++
++  if (line_skip_CommaChar (l))
++  {
++    /* save the value */
++    if (line_is_eol (l) == FALSE)
++    {
++      WARN_SYNTAX_ERROR;
++      return l;
++    }
++  }
++
++  if (line_read_expression (l, X))
++  {
++    /* save the value */
++    if (line_is_eol (l) == FALSE)
++    {
++      WARN_SYNTAX_ERROR;
++      return l;
++    }
++    offset=(int) bwb_rint (X->Number);
++  }
++
++  if (line_skip_CommaChar (l))
++  {
++    /* save the value */
++    if (line_is_eol (l) == FALSE)
++    {
++      WARN_SYNTAX_ERROR;
++      return l;
++    }
++  }
++
++  CLEAR_VARIANT (X);
++
++  if (line_read_expression (l, X))
++  {
++    /* save the value */
++    if (line_is_eol (l) == FALSE)
++    {
++      WARN_SYNTAX_ERROR;
++      return l;
++    }
++    length=(int) bwb_rint (X->Number);
++  }
++
++  // Open for read (will fail if file "crt_fopen.c" does not exist)
++  if( (stream  = fopen( Value, "wb" )) == NULL ) // C4996
++  // Note: fopen is deprecated; consider using fopen_s instead
++     printf( "The file 'crt_fopen.c' was not opened\n" );
++  else
++     printf( "The file 'crt_fopen.c' was opened\n" );
++
++
++  segment=My->DefaultSegment;
++
++  p=MK_FP(segment, offset);
++
++
++  numwrite = fwrite(&header, 1, sizeof(header), stream);
++  numwrite = fwrite(p, 1, length, stream);
++
++   // Close stream if it is not NULL
++  if( stream)
++  {
++     if ( fclose( stream ) )
++     {
++        printf( "The file 'crt_fopen.c' was not closed\n" );
++     }
++  }
++
++  return l;
++}
++
++LineType *
++bwb_DEFSEG (LineType * l)
++{
++  VariantType x;
++  VariantType *X;
++   
++  assert (l != NULL);
++  X = &x;
++  CLEAR_VARIANT (X);
++  My->DefaultSegment=0; /* @todo default BASIC data segment */
++  if (line_skip_EqualChar (l))
++  if (line_read_expression (l, X))
++  {
++    /* save the value */
++    if (line_is_eol (l) == FALSE)
++    {
++      WARN_SYNTAX_ERROR;
++      return l;
++    }
++    My->DefaultSegment=(int) bwb_rint (X->Number);
++  }
++  return (l);
++}
++
+ #ifndef NO_NONMS
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -672,37 +926,50 @@
+      SYNTAX:     AUTO
+      SYNTAX:     AUTO start
+      SYNTAX:     AUTO start , increment
++@todo AUTO .,increment line_skip_char
+    */
++  int c, a;
+    
+   assert (L != NULL);
+   assert( My != NULL );
+ 
+-  My->AutomaticLineNumber = 0;
+-  My->AutomaticLineIncrement = 0;
+-
+   if (line_is_eol (L))
+   {
+-    /* AUTO                   */
++    /* AUTO             */
+     My->AutomaticLineNumber = 10;
+     My->AutomaticLineIncrement = 10;
+     return L;
+   }
+-  if (line_read_line_number (L, &My->AutomaticLineNumber))
++
++  /* AUTO . ...*/
++  /* AUTO ### ...*/
++  /* AUTO , ...*/
++  c=line_peek_char(L, ',');
++  a=line_peek_char(L, '.');
++  if (line_skip_char(L, '.') || line_read_line_number (L, &My->AutomaticLineNumber) || c)
+   {
+-    /* AUTO ### ... */
+-    if (My->AutomaticLineNumber < MINLIN || My->AutomaticLineNumber > MAXLIN)
++    if (a) 
+     {
+-      WARN_UNDEFINED_LINE;
+-      return L;
++      My->AutomaticLineNumber=My->AutomaticLastLineNumber;
+     }
+-    if (line_is_eol (L))
++    if (c) 
+     {
+-      /* AUTO start             */
+-      My->AutomaticLineIncrement = 10;
+-      return L;
++      My->AutomaticLineNumber=10;
+     }
+-    else if (line_skip_seperator (L))
++    if (My->AutomaticLineNumber < MINLIN || My->AutomaticLineNumber > MAXLIN)
+     {
++      WARN_UNDEFINED_LINE;
++      return L;
++    }
++  } 
++  else
++  {
++    WARN_SYNTAX_ERROR;
++    return L;
++  }
++
++  if (line_skip_CommaChar (L))
++  {
+       /* AUTO ### ,  ... */
+       if (line_read_line_number (L, &My->AutomaticLineIncrement))
+       {
+@@ -714,10 +981,21 @@
+           return L;
+         }
+         return L;
++      } 
++      else if (line_is_eol (L))
++      {
++         My->AutomaticLineIncrement = 10;
++         return L;
+       }
+-    }
+   }
+-  My->AutomaticLineNumber = 0;
++  else if (line_is_eol (L))
++  {
++     My->AutomaticLineIncrement = 10;
++     return L;
++  }
++
++
++/*  My->AutomaticLineNumber = 0; */
+   My->AutomaticLineIncrement = 0;
+   WARN_SYNTAX_ERROR;
+   return L;
+@@ -2337,6 +2615,8 @@
+   return (Line);
+ }
+ 
++#ifndef NO_NONMS
++
+ /* 
+ --------------------------------------------------------------------------------------------
+                                CLOAD
+@@ -2352,6 +2632,7 @@
+   assert (Line != NULL);
+   return bwb_load (Line, "CLOAD FILE NAME:", TRUE);
+ }
++#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -4256,7 +4537,6 @@
+   return bwb_CLOAD8 (l);
+ }
+ 
+-#endif
+ 
+ /* 
+ --------------------------------------------------------------------------------------------
+@@ -4350,6 +4630,7 @@
+   return (l);
+ }
+ 
++#endif
+ 
+ 
+ 
+@@ -5196,6 +5477,7 @@
+   assert( My != NULL );
+   assert( My->CurrentVersion != NULL );
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     /* 
+@@ -5369,6 +5651,7 @@
+     /* OK */
+     return (l);
+   }
++#endif
+   if (line_skip_FilenumChar (l))
+   {
+     /*
+@@ -9447,6 +9730,7 @@
+   assert(My != NULL);
+   assert(My->CurrentVersion != NULL);
+ 
++
+   /* search INTRINSIC functions */
+ #if THE_PRICE_IS_RIGHT
+   /* start with the closest function, without going over */
+@@ -9475,7 +9759,6 @@
+         if (f->ParameterTypes == ParameterTypes)
+         {
+           int result;
+-
+           result = bwb_stricmp (f->Name, name);
+ 
+           if (result == 0)
+diff -urN basic/bwb_exp.c newbasic/bwb_exp.c
+--- basic/bwb_exp.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_exp.c	Thu Jun 06 23:27:04 2024
+@@ -1057,11 +1057,13 @@
+       DoubleType N;
+ 
+       N = bwb_rint (X->Number / Y->Number);
++#ifndef NO_NONMS
+       if (My->CurrentVersion->OptionVersionValue & (R86))
+       {
+         /* for RBASIC's RESIDUE function */
+         My->RESIDUE = bwb_rint (X->Number - N * Y->Number);
+       }
++#endif
+       X->Number = N;
+ 
+     }
+@@ -2410,6 +2412,7 @@
+ 
+   p = *position;
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* IBM System/360 and System/370 BASIC dialects */
+@@ -2451,6 +2454,7 @@
+       }
+     }
+   }
++#endif
+   /* NOT FOUND */
+   return RESULT_UNPARSED;
+ }
+@@ -2655,11 +2659,13 @@
+           }
+           else if (bwb_stricmp (name, "SIZE") == 0)
+           {
++#ifndef NO_NONMS
+             if (My->CurrentVersion->OptionVersionValue & (C77))
+             {
+               /* N = SIZE( filename ) is handled by F_SIZE_A_N */
+             }
+             else
++#endif
+             {
+               /* N = SIZE( varname ) */
+               /* return total number of elements */
+@@ -2810,6 +2816,7 @@
+         argv = var_chain (NULL);        /* RETURN variable */
+         argn = NULL;
+ 
++
+         if (buff_skip_LparenChar (buffer, &p))
+         {
+           if (buff_skip_RparenChar (buffer, &p))
+@@ -2957,7 +2964,6 @@
+         {
+           /* INTRINSIC */
+           IntrinsicFunctionType *f;
+-
+           f =
+             IntrinsicFunction_find_exact (name, ParameterCount,
+                                           ParameterTypes);
+diff -urN basic/bwb_fnc.c newbasic/bwb_fnc.c
+--- basic/bwb_fnc.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_fnc.c	Fri Jun 07 08:47:22 2024
+@@ -158,6 +158,7 @@
+   assert(My->SYSIN != NULL);
+   assert(My->SYSIN->cfp != NULL);
+ 
++
+   S = NULL;
+   s = 0;
+   N = 0;
+@@ -687,6 +688,7 @@
+     }
+     break;
+ #endif
++#ifndef NO_NONMS
+   case F_BASE_N:
+     /* N = BASE */
+     {
+@@ -700,6 +702,7 @@
+       /* PNONE */
+       N = My->RESIDUE;                /* Residue of the last integer divide */
+     }
++#endif
+ #ifndef NO_NONMS
+   case F_DIGITS_X_N:
+     /* N = DIGITS( X ) */
+@@ -1047,11 +1050,14 @@
+           FILE *fp;
+           fp = F->cfp;
+           N = ftell (fp);
++#ifndef NO_NONMS
+           if (My->CurrentVersion->OptionVersionValue & (G65 | G67 | G74))
+           {
+             /* byte position, regardless of 'mode' */
+           }
+-          else if (F->DevMode == DEVMODE_RANDOM)
++          else 
++#endif
++	  if (F->DevMode == DEVMODE_RANDOM)
+           {
+             /* record number */
+             if (F->width == 0)
+@@ -1474,6 +1480,7 @@
+     }
+     break;
+   case F_GET_X_N:
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (D73))
+     {
+       /* GET( X ) == ASC(INKEY$), X is ignored */
+@@ -1484,6 +1491,7 @@
+       N = c;
+     }
+     else
++#endif
+     {
+       /* GET X */
+       /* P1INT */
+@@ -1602,6 +1610,7 @@
+     }
+     break;
+   case F_PUT_X_N:
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (D73))
+     {
+       /* PUT( X ) == PRINT CHR$(X); */
+@@ -1610,6 +1619,7 @@
+       N = x;
+     }
+     else
++#endif
+     {
+       /* PUT X */
+       /* P1INT */
+@@ -2283,14 +2293,15 @@
+       }
+     }
+     break;
+-  case F_CHR_X_S:
++//  case F_CHR_X_S:
+   case F_CHR4_X_S:
+-  case F_CHAR4_X_S:
++//  case F_CHAR4_X_S:
+     /* S$ = CHR( X ) */
+     /* S$ = CHR$( X ) */
+     /* S$ = CHAR$( X ) */
+ 
+     /* P1ANY */
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+     {
+       /* IBM System/360 & System/370 BASIC dialects: the opposite of N = NUM( A$ ) */
+@@ -2298,6 +2309,7 @@
+       s = bwb_strlen (S);
+     }
+     else
++#endif
+     {
+       if (x < MINBYT || x > MAXBYT)
+       {
+@@ -2310,6 +2322,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_CHAR_X_Y_S:
+     /* S$ = CHAR( X, Y ) ' same as STRING$(Y,X) */
+     {
+@@ -2325,6 +2338,7 @@
+       }
+     }
+     break;
++#endif
+   case F_LEN_A_N:
+     /* N = LEN( A$ ) */
+     {
+@@ -2523,6 +2537,7 @@
+       /* PNONE */
+       time (&t);
+       lt = localtime (&t);
++#ifndef NO_NONMS
+       if (My->CurrentVersion->OptionVersionValue & (G67 | G74))
+       {
+         N = lt->tm_hour;
+@@ -2535,6 +2550,7 @@
+         /* elapsed run time */
+       }
+       else
++#endif
+       {
+         N = lt->tm_hour;
+         N *= 60;
+@@ -2569,6 +2585,7 @@
+       time (&t);
+       lt = localtime (&t);
+ 
++#ifndef NO_NONMS
+       if (My->CurrentVersion->OptionVersionValue & (G65 | G67 | G74))
+       {
+         /* value of 'X' is ignored */
+@@ -2582,6 +2599,7 @@
+         /* elapsed run time */
+       }
+       else
++#endif
+       {
+         switch (x)
+         {
+@@ -3040,6 +3058,7 @@
+     /* N = DEGREE( X ) */
+     {
+       /* P1ANY */
++#ifndef NO_NONMS
+       if (My->CurrentVersion->OptionVersionValue & (R86))
+       {
+         if (x == 0)
+@@ -3057,6 +3076,7 @@
+         N = 0;
+       }
+       else
++#endif
+       {
+         N = FromRadiansToDegrees (X);
+       }
+@@ -3468,6 +3488,7 @@
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_TRUNCATE_X_Y_N:
+     /* N = TRUNCATE( X, Y ) == INT(X*10^Y)/10^Y */
+     {
+@@ -3492,6 +3513,7 @@
+       }
+     }
+     break;
++#endif
+   case F_MAXLEN_A_N:
+   case F_MAXLEN_N:
+     /* N = MAXLEN( A$ ) */
+@@ -3578,6 +3600,7 @@
+       /* a non-existing file returns 0 */
+     }
+     break;
++#ifndef NO_NONMS
+   case F_REPEAT4_X_Y_S:
+     /* S$ = REPEAT$( X, Y ) ' X is count, Y is code */
+     {
+@@ -3593,6 +3616,7 @@
+       }
+     }
+     break;
++#endif
+   case F_REPEAT4_X_A_S:
+     /* S$ = REPEAT$( X, A$ ) ' X is count, A$ is code */
+     {
+@@ -3629,8 +3653,8 @@
+     }
+     break;
+   case F_ATN_X_N:
+-  case F_ATAN_X_N:
+-  case F_ARCTAN_X_N:
++//  case F_ATAN_X_N:
++//  case F_ARCTAN_X_N:
+     /* N = ATN( X ) */
+     /* N = ATAN( X ) */
+     /* N = ARCTAN( X ) */
+@@ -3646,6 +3670,7 @@
+       }
+     }
+     break;
++#ifndef NO_NOMS
+   case F_ATND_X_N:
+     /* N = ATND( X ) */
+     {
+@@ -3660,6 +3685,7 @@
+       N = FromRadiansToGradians (N);
+     }
+     break;
++#endif
+   case F_COS_X_N:
+     /* N = COS( X ) */
+     {
+@@ -4212,6 +4238,7 @@
+       bwx_LOCATE (x, y);
+     }
+     break;
++#ifndef NO_NONMS
+   case F_CUR_X_Y_S:
+     /* CUR X, Y */
+     {
+@@ -4232,6 +4259,7 @@
+       bwx_LOCATE (x, 1);
+     }
+     break;
++#endif
+   case F_COLOR_X_Y_N:
+     /* COLOR X, Y */
+     {
+@@ -4265,10 +4293,28 @@
+       }
+       else
+       {
+-        N = system (My->OptionFilesString);
++    struct find_t   fileinfo;
++    unsigned        rc;          /* return code */
++	int i=0;
++
++    /* Display name and size of "*.c" files */
++    rc = _dos_findfirst( "*.*", _A_NORMAL, &fileinfo );
++    while( rc == 0 ) {
++        printf( "%-12s ", fileinfo.name);
++        rc = _dos_findnext( &fileinfo );
++	i++;
++	if (i==6){
++	  printf("\n\r");
++	  i=0;
++	}
++    }
++	  printf("\n\r");
++//        N = system (My->OptionFilesString);
++	N=0;
+       }
+     }
+     break;
++#ifndef NO_NONMS
+   case F_FILES_A_N:
+   case F_CATALOG_A_N:
+     /* FILES A$ */
+@@ -4302,6 +4348,7 @@
+       }
+     }
+     break;
++#endif
+   case F_CHDIR_A_N:
+     /* CHDIR A$ */
+     {
+diff -urN basic/bwb_inp.c newbasic/bwb_inp.c
+--- basic/bwb_inp.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_inp.c	Thu Jun 06 13:37:14 2024
+@@ -43,11 +43,13 @@
+ #include "bwbasic.h"
+ 
+ 
++#ifndef NO_NONMS
+ static LineType *C77_file_input (LineType * Line, int FileNumber);
+ static LineType *C77_file_input_finish (LineType * Line);
+ static LineType *C77_file_input_line (LineType * Line);
+ static LineType *C77_user_input_line (LineType * Line, char *Prompt,
+                                       int IsDisplayQuestionMark);
++#endif
+ static void CleanTextInput (char *buffer);
+ static LineType *D71_GET (LineType * Line);
+ static LineType *data_if_end (LineType * Line);
+@@ -178,6 +180,7 @@
+   
+ ***************************************************************/
+ 
++
+ extern int
+ bwx_input (char *prompt, int IsDisplayQuestionMark, char *answer, int MaxLen)
+ {
+@@ -189,9 +192,36 @@
+   assert(My->SYSIN != NULL);
+   assert(My->SYSIN->cfp != NULL);
+ 
+-// save position
+-// write status line
+-// restore position
++if (My->ShowKeys)
++{
++        int i;
++	char col=0, row=0;
++      setbuf(stdout, NULL);
++	__asm {
++		mov bh, 0
++		mov ah, 3
++		int 10h
++		mov row, dh
++		mov col, dl
++		mov dh, 24
++		mov dl, 0
++		mov bh, 0
++		mov ah, 2
++		int 10h
++	};
++	for(i=0;i<10;i++)
++	{
++		printf("%d%-6.6s", (i==9)?0:(i+1), My->KEYS[i]);
++		if (i<9) printf(" ");
++	}
++	__asm {
++		mov dh, row
++		mov dl, col
++		mov bh, 0
++		mov ah, 2
++		int 10h
++	};
++}
+ 
+   if (prompt != NULL)
+   {
+@@ -215,6 +245,7 @@
+       prompt++;
+     }
+   }
++
+   if (IsDisplayQuestionMark)
+   {
+     fputs ("? ", My->SYSOUT->cfp);
+@@ -464,6 +495,8 @@
+   
+ ***************************************************************/
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ C77_file_input (LineType * Line, int FileNumber)
+ {
+@@ -550,6 +583,8 @@
+   return file_input (Line);
+ }
+ 
++#endif
++
+ static LineType *
+ data_if_end (LineType * Line)
+ {
+@@ -702,10 +737,12 @@
+     WARN_SYNTAX_ERROR;
+     return (Line);
+   }
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     return C77_file_input (Line, FileNumber);
+   }
++#endif
+   /* 
+      SERIAL file reads:
+      READ # FileNumber   
+@@ -1076,12 +1113,14 @@
+   {
+     return file_restore (Line);
+   }
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     /* RESTORE [comment] */
+     line_skip_eol (Line);
+     /* fall-thru */
+   }
++#endif
+   return data_restore (Line);
+ }
+ 
+@@ -1097,6 +1136,8 @@
+   
+ ***************************************************************/
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ S70_GET (LineType * Line)
+ {
+@@ -1680,6 +1721,8 @@
+   return (Line);
+ }
+ 
++#endif
++
+ extern LineType *
+ bwb_GET (LineType * Line)
+ {
+@@ -1688,6 +1731,7 @@
+   assert(My != NULL);
+   assert(My->CurrentVersion != NULL);
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     return S70_GET (Line);
+@@ -1700,6 +1744,7 @@
+   {
+     return H14_GET (Line);
+   }
++#endif
+   WARN_INTERNAL_ERROR;
+   return (Line);
+ }
+@@ -1803,6 +1848,8 @@
+   return RESULT_UNPARSED;
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ C77_file_input_line (LineType * Line)
+ {
+@@ -1868,6 +1915,7 @@
+   return (Line);
+ }
+ 
++
+ static LineType *
+ C77_file_input_finish (LineType * Line)
+ {
+@@ -1900,6 +1948,7 @@
+   return (Line);
+ }
+ 
++#endif
+ 
+ static LineType *
+ file_if_end (LineType * Line)
+@@ -1946,6 +1995,7 @@
+ 
+   tbuf = My->ConsoleInput;
+   tlen = MAX_LINE_LENGTH;
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     if (line_skip_word (Line, "LINE"))
+@@ -1953,6 +2003,7 @@
+       return C77_file_input_line (Line);
+     }
+   }
++#endif
+ 
+   if (My->CurrentFile->width > 0 && My->CurrentFile->buffer != NULL)
+   {
+@@ -1982,11 +2033,13 @@
+   }
+   while (line_skip_seperator (Line));
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77)
+       && My->CurrentFile->DevMode & DEVMODE_RANDOM)
+   {
+     return C77_file_input_finish (Line);
+   }
++#endif
+   return (Line);
+ }
+ 
+@@ -2385,6 +2438,8 @@
+   return RESULT_UNPARSED;
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ C77_user_input_line (LineType * Line, char *Prompt, int IsDisplayQuestionMark)
+ {
+@@ -2438,6 +2493,8 @@
+   return (Line);
+ }
+ 
++#endif
++
+ static LineType *
+ user_input_loop (LineType * Line)
+ {
+@@ -2490,12 +2547,14 @@
+     }
+   }
+ 
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77)
+       && line_skip_word (Line, "LINE"))
+   {
+     /* INPUT "prompt" ; LINE variable$ */
+     return C77_user_input_line (Line, Prompt, IsDisplayQuestionMark);
+   }
++#endif
+   /* 
+    **
+    ** Step 2. Verify all variables exist and are not CONST
+diff -urN basic/bwb_int.c newbasic/bwb_int.c
+--- basic/bwb_int.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_int.c	Thu Jun 06 18:26:35 2024
+@@ -172,7 +172,7 @@
+   return FALSE;
+ }
+ 
+-#if FALSE /* keep this ... */
++#if TRUE /* keep this ... */
+ extern int
+ line_peek_char (LineType * line, char find)
+ {
+@@ -575,6 +575,7 @@
+     return TRUE;                                /* always allowed */
+   }
+   /* dialect specific */
++#ifndef NO_NONMS
+   switch (C)
+   {
+   case '@':
+@@ -587,6 +588,7 @@
+     }
+     break;
+   }
++#endif
+   /* NOT FOUND */
+   return FALSE;
+ }
+@@ -618,6 +620,7 @@
+       return TRUE;
+     }
+     break;
++#ifndef NO_NONMS
+   case '@':
+   case '#':
+   case '$':
+@@ -626,6 +629,7 @@
+       return TRUE;                            
+     }
+     break;
++#endif
+   }
+   /* NOT FOUND */
+   return FALSE;
+@@ -1325,11 +1329,12 @@
+   p = *position;
+   buff_skip_spaces (buffer, &p);        /* keep this */
+   c = '-';
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (D70 | H80))
+   {
+     c = ',';
+   }
+-
++#endif
+   if (buff_skip_char (buffer, &p, c) /* line sequence seperator */ )
+   {
+     /* - ... */
+@@ -2295,6 +2300,7 @@
+        ** CLASSIC vs STRUCTURED
+        **
+        */
++#ifndef NO_NONMS
+       if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73 | D71))
+       {
+         /*
+@@ -2304,7 +2310,9 @@
+          */
+         /* OPEN filenum, filename$, INPUT | OUTPUT */
+       }
+-      else if (GetKeyword (l, " AS "))
++      else
++#endif
++ if (GetKeyword (l, " AS "))
+       {
+         /*
+          **
+diff -urN basic/bwb_prn.c newbasic/bwb_prn.c
+--- basic/bwb_prn.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_prn.c	Thu Jun 06 13:00:09 2024
+@@ -645,6 +645,7 @@
+ 
+   assert( My != NULL );
+   assert( My->CurrentVersion != NULL );
++#ifndef NO_NONMS
+   if (My->CurrentVersion->OptionVersionValue & (C77))
+   {
+     /* 
+@@ -721,6 +722,7 @@
+     }
+     return TRUE;
+   }
++#endif
+   /* 
+      SERIAL file writes:
+      PRINT # file_number   
+@@ -973,6 +975,7 @@
+       return;
+     }
+     assert( My->CurrentVersion != NULL );
++#ifndef NO_NONMS
+     if (My->CurrentVersion->OptionVersionValue & (C77)
+         && My->CurrentFile->FileNumber > 0)
+     {
+@@ -988,6 +991,7 @@
+        */
+       IsCSV = TRUE;
+     }
++#endif
+     OutputCR = TRUE;
+   }
+   else if (line_skip_AtChar (l))
+@@ -1001,6 +1005,7 @@
+     }
+     OutputCR = TRUE;
+   }
++#ifndef NO_NONMS
+   else if (My->CurrentVersion->OptionVersionValue & (B15|T80|HB1|HB2) 
+   &&  line_skip_word (l, "AT"))
+   {
+@@ -1013,6 +1018,7 @@
+     }
+     OutputCR = TRUE;
+   }
++#endif
+   assert( My->CurrentFile != NULL );
+ 
+   while (line_is_eol (l) == FALSE)
+@@ -1978,7 +1984,6 @@
+   
+ ***************************************************************/
+ 
+-
+ static void
+ xputc2 (char c)
+ {
+@@ -1989,6 +1994,9 @@
+ 
+   if (c == '\n')
+   {
++
++#ifndef NO_NONMS
++
+     /*
+      **
+      ** CBASIC-II: RANDOM files are padded on the right with spaces 
+@@ -2009,6 +2017,7 @@
+             My->CurrentFile->col++;
+           }
+         }
++#endif
+     /*
+      **
+      ** output the character 
+@@ -2063,6 +2072,8 @@
+   My->SYSOUT->col = 1;
+ }
+ 
++#ifndef NO_NONMS
++
+ static LineType *
+ S70_PUT (LineType * l)
+ {
+@@ -2468,7 +2479,7 @@
+   WARN_BAD_FILE_MODE;
+   return (Line);
+ }
+-
++#endif
+ 
+ extern LineType *
+ bwb_PUT (LineType * Line)
+@@ -2478,6 +2489,8 @@
+   assert( My != NULL );
+   assert( My->CurrentVersion != NULL );
+ 
++#ifndef NO_NONMS
++
+   if (My->CurrentVersion->OptionVersionValue & (S70 | I70 | I73))
+   {
+     return S70_PUT (Line);
+@@ -2490,6 +2503,8 @@
+   {
+     return H14_PUT (Line);
+   }
++#endif
++
+   WARN_INTERNAL_ERROR;
+   return (Line);
+ }
+diff -urN basic/bwb_tbl.c newbasic/bwb_tbl.c
+--- basic/bwb_tbl.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwb_tbl.c	Thu Jun 06 11:43:38 2024
+@@ -43,6 +43,7 @@
+ #include "bwbasic.h"
+ VersionType bwb_vertable[ /* NUM_VERSIONS */ ] =
+ {
++#ifndef NO_NONMS
+   {
+    "BYWATER",                        /* Name */
+    B15,                                /* OptionVersionBitmask */
+@@ -1195,6 +1196,8 @@
+    '\\',                        /* OptionUsingLength */
+    }
+   ,
++#endif // NO_NONMS
++
+   {
+    "GW-BASIC",                        /* Name */
+    M86,                                /* OptionVersionBitmask */
+diff -urN basic/bwbasic.c newbasic/bwbasic.c
+--- basic/bwbasic.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwbasic.c	Sat Jun 08 10:44:46 2024
+@@ -65,15 +65,11 @@
+ GlobalType *My = NULL;
+ 
+ static char *Banner[] = {
+-  "Bywater BASIC Interpreter, version 3.23                                       ",
+-  "Copyright (c) 1993, Ted A. Campbell                                           ",
+-  "Copyright (c) 1995-1997, Jon B. Volkoff                                       ",
+-  "Copyright (c) 2014-2017, Howard Wulf, AF5NE                                   ",
+-  "Copyright (c) 2024, osFree                                                    ",
+-  "                                                                              ",
++  "osFree BASIC Interpreter, version 0.23                                       ",
+   NULL
+ };
+ 
++
+ #define NUM_WARNINGS 80
+ 
+ static char *ERROR4[NUM_WARNINGS];
+@@ -171,7 +167,7 @@
+    */
+   assert( My != NULL );
+ 
+-  My->AutomaticLineNumber = 0;
++  /* Stop AUTO mode */
+   My->AutomaticLineIncrement = 0;
+ 
+   if (My->IsInteractive)
+@@ -184,13 +180,11 @@
+ 
+     My->ERR = -1;                /* in break_handler() */
+ 
+-
+     /* reset the break handler */
+     signal (SIGINT, break_mes);
+ 
+     longjmp (My->mark, -1);
+ 
+-
+     return;
+   }
+   /* NOT INTERACTIVE:  terminate immediately */
+@@ -490,8 +484,7 @@
+   {
+     return FALSE;
+   }
+-
+-  My->CurrentVersion = &bwb_vertable[0];
++  My->CurrentVersion = &bwb_vertable[0]; // check also OptionVersionSet (...) bellow!!
+   My->IsInteractive = TRUE;
+   My->OptionSleepDouble = 1;
+   My->OptionIndentInteger = 2;
+@@ -580,6 +573,18 @@
+     My->COMMAND4[n] = NULL;
+   }
+ 
++  My->ShowKeys = 1;	 /* Show status line with keys */
++  strcpy(My->KEYS[0],"LIST");
++  strcpy(My->KEYS[1],"RUN");
++  strcpy(My->KEYS[2],"LOAD\"");
++  strcpy(My->KEYS[3],"SAVE\"");
++  strcpy(My->KEYS[4],"CONT");
++  strcpy(My->KEYS[5],",\"LPT1:\"");
++  strcpy(My->KEYS[6],"TRON");
++  strcpy(My->KEYS[7],"TROFF");
++  strcpy(My->KEYS[8],"KEY ");
++  strcpy(My->KEYS[9],"SCREEN 0,0,0");
++
+   /* initialize tables of variables, functions */
+   bwb_initialize_warnings ();
+   SortAllCommands ();
+@@ -588,7 +593,7 @@
+   var_init ();
+   IntrinsicFunction_init ();
+   UserFunction_init ();
+-  OptionVersionSet (24);
++  OptionVersionSet (0);
+   /* OK */
+   return TRUE;
+ }
+@@ -874,6 +879,7 @@
+     My->program_run = 0;
+     signal (SIGINT, break_mes);
+     setjmp (My->mark);
++
+     if (My->program_run > 0)
+     {
+       /* error in console mode */
+@@ -916,7 +922,7 @@
+   tlen = MAX_LINE_LENGTH;
+   My->NextValidLineNumber = MINLIN;
+   /* take input from keyboard */
+-  if (My->AutomaticLineNumber > 0 && My->AutomaticLineIncrement > 0)
++  if (My->AutomaticLineIncrement > 0)
+   {
+     /* AUTO 100, 10 */
+     char *zbuf;                        /* end of the prompt, start of the response */
+@@ -948,41 +954,19 @@
+     CleanLine (zbuf);                /* JBV */
+     if (is_empty_string (zbuf))
+     {
+-      /* empty response */
+-      if (LineExists == '*')
+-      {
+-        /*
+-           An empty response with an existing line,
+-           causes AUTO to continue with the next line,
+-           leaving the current line intact.
+-         */
+-        My->AutomaticLineNumber += My->AutomaticLineIncrement;
+-      }
+-      else
+-      {
+-        /* 
+-           An empty response with a non-existing line,
+-           causes AUTO to terminate.
+-         */
+-        My->AutomaticLineNumber = 0;
+-        My->AutomaticLineIncrement = 0;
+-      }
++      /*
++         An empty response with an existing line,
++         causes AUTO to continue with the next line,
++         leaving the current line intact.
++      */
++      My->AutomaticLineNumber += My->AutomaticLineIncrement;
+     }
+     else
+     {
+-      /* non-empty response */
+-      if (bwb_stricmp (zbuf, "MAN") == 0)
+-      {
+-        /* MAN terminates AUTO mode */
+-        My->AutomaticLineNumber = 0;
+-        My->AutomaticLineIncrement = 0;
+-      }
+-      else
+-      {
+-        /* overwrite any existing line */
+-        bwb_ladd (tbuf, My->StartMarker, FALSE);
+-        My->AutomaticLineNumber += My->AutomaticLineIncrement;
+-      }
++      /* overwrite any existing line */
++      bwb_ladd (tbuf, My->StartMarker, FALSE);
++      My->AutomaticLineNumber += My->AutomaticLineIncrement;
++      My->AutomaticLastLineNumber=My->AutomaticLineNumber;
+     }
+   }
+   else
+@@ -2532,7 +2516,7 @@
+       }
+     }
+ 
+-    My->AutomaticLineNumber = 0;
++/*    My->AutomaticLineNumber = 0;*/
+     My->AutomaticLineIncrement = 0;
+ 
+     if (My->IsInteractive)
+@@ -2730,6 +2714,15 @@
+       r = bwb_BACKSPACE( l );
+       break;
+ #endif
++   case C_BEEP:
++      r = bwb_BEEP( l );
++      break;
++   case C_BLOAD:
++      r = bwb_BLOAD( l );
++      break;
++   case C_BSAVE:
++      r = bwb_BSAVE( l );
++      break;
+ #ifndef NO_NONMS
+    case C_BREAK:
+       r = bwb_BREAK( l );
+@@ -2763,12 +2756,14 @@
+    case C_CLEAR:
+       r = bwb_CLEAR( l );
+       break;
++#ifndef NO_NONMS
+    case C_CLOAD:
+       r = bwb_CLOAD( l );
+       break;
+    case C_CLOAD8:
+       r = bwb_CLOAD8( l );
+       break;
++#endif
+    case C_CLOSE:
+       r = bwb_CLOSE( l );
+       break;
+@@ -2839,6 +2834,9 @@
+    case C_DEFLNG:
+       r = bwb_DEFLNG( l );
+       break;
++   case C_DEFSEG:
++      r = bwb_DEFSEG( l );
++      break;
+    case C_DEFSNG:
+       r = bwb_DEFSNG( l );
+       break;
+@@ -3003,6 +3001,15 @@
+       break;
+    case C_INPUT_LINE:
+       r = bwb_INPUT_LINE( l );
++      break;
++   case C_KEY:
++      r = bwb_KEY( l );
++      break;
++   case C_KEY_ON:
++      r = bwb_KEY_ON( l );
++      break;
++   case C_KEY_OFF:
++      r = bwb_KEY_OFF( l );
+       break;
+    case C_LET:
+       r = bwb_LET( l );
+diff -urN basic/bwbasic.h newbasic/bwbasic.h
+--- basic/bwbasic.h	Sat Jun 08 14:10:52 2024
++++ newbasic/bwbasic.h	Sat Jun 08 10:44:20 2024
+@@ -58,7 +58,8 @@
+ #include         <stdlib.h>
+ #include         <string.h>
+ #include         <time.h>
+-
++#include <dos.h>
++#include <io.h> 
+ 
+ /***************************************************************
+   
+@@ -1654,6 +1655,7 @@
+   int SCREEN_ROWS;                     /* CONSOLE_FILE_NUMBER */
+   int AutomaticLineNumber;             /* AUTO */
+   int AutomaticLineIncrement;          /* AUTO */
++  int AutomaticLastLineNumber;         /* AUTO */
+   int LastInputCount;                  /* 0 == none */
+   int LastLineNumber;                  /* LIST, LLIST */
+   int LastFileNumber;                  /* 0 == none */
+@@ -1710,6 +1712,9 @@
+ #endif                                 /* THE_PRICE_IS_RIGHT */
+   char *COMMAND4[10];                  /* command line parameters, COMMAND$(0-9) */
+   char *ProgramFilename;               /* last BASIC program filename */
++  int ShowKeys;				/* Show status line with first 10 keys */
++  char KEYS[10][15];
++  unsigned int DefaultSegment;		/* Segment, defined by DEF SEG */
+ };
+ typedef struct GlobalStruct GlobalType;
+ extern GlobalType *My;
+@@ -1778,6 +1783,9 @@
+ #ifndef NO_NONMS
+ extern LineType *bwb_BACKSPACE (LineType * Line);
+ #endif
++extern LineType *bwb_BEEP (LineType * l);
++extern LineType *bwb_BLOAD (LineType * l);
++extern LineType *bwb_BSAVE (LineType * l);
+ extern LineType *bwb_BREAK (LineType * l);
+ #ifndef NO_NONMS
+ extern LineType *bwb_BUILD (LineType * L);
+@@ -1810,6 +1818,7 @@
+ extern LineType *bwb_DEC (LineType * L);
+ #endif
+ extern LineType *bwb_DEF (LineType * l);
++extern LineType *bwb_DEFSEG (LineType * l);
+ extern LineType *bwb_DEF8LBL (LineType * l);
+ #ifndef NO_NONMS
+ extern LineType *bwb_DEFBYT (LineType * l);
+@@ -1877,6 +1886,9 @@
+ extern LineType *bwb_INC (LineType * L);
+ extern LineType *bwb_INPUT (LineType * Line);
+ extern LineType *bwb_INPUT_LINE (LineType * Line);
++extern LineType *bwb_KEY (LineType * L);
++extern LineType *bwb_KEY_ON (LineType * L);
++extern LineType *bwb_KEY_OFF (LineType * L);
+ extern LineType *bwb_LET (LineType * L);
+ extern LineType *bwb_LINE (LineType * Line);
+ extern LineType *bwb_LINE_INPUT (LineType * Line);
+@@ -2306,7 +2318,7 @@
+ #if FALSE /* kepp this ... */
+ extern int line_peek_array_dimensions (LineType * line, int *n_params);
+ #endif
+-#if FALSE /* kepp this ... */
++#if TRUE /* kepp this ... */
+ extern int line_peek_char (LineType * line, char find);
+ #endif
+ extern int line_peek_EqualChar (LineType * line);
+@@ -2701,6 +2713,16 @@
+ 
+ #define C_OPTION_TERMINAL_PC           301 /* OPTION TERMINAL PC             */
+ 
++
++#define C_KEY                          302 /* KEY ON                         */
++#define C_KEY_OFF                      303 /* KEY OFF                        */
++#define C_KEY_ON                       304 /* KEY ON                         */
++
++#define C_BEEP                         305 /* BEEP                           */
++#define C_BLOAD                        306 /* BLOAD                          */
++#define C_BSAVE                        307 /* BSAVE                          */
++
++#define C_DEFSEG                       308 /* DEF SEG                        */
+ 
+ /*-------------------------------------------------------------
+                         FUNCTIONS (FunctionID)
+diff -urN basic/bwd_cmd.c newbasic/bwd_cmd.c
+--- basic/bwd_cmd.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwd_cmd.c	Sat Jun 08 11:08:59 2024
+@@ -102,6 +102,35 @@
+   "BACKSPACE",  /* Name */
+   D64 | G74 | G65 | G67  /* OptionVersionBitmask */
+ },
++#endif
++{
++  C_BEEP,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "BEEP",  /* Name */
++  M86  /* OptionVersionBitmask */
++},
++{
++  C_BLOAD,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "BLOAD",  /* Name */
++  M86  /* OptionVersionBitmask */
++},
++{
++  C_BSAVE,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "BSAVE",  /* Name */
++  M86  /* OptionVersionBitmask */
++},
++#ifndef NO_NONMS
+ {
+   C_BREAK,  /* UniqueID */
+ #ifndef NO_HELP
+@@ -433,6 +462,15 @@
+   "DEF",  /* Name */
+   B15 | S70 | G74 | HB1 | HB2 | H80 | G67 | D73 | D70 | D71 | I70 | I73 | T80  /* OptionVersionBitmask */
+ },
++{
++  C_DEFSEG,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "DEF SEG",  /* Name */
++  M86 /* OptionVersionBitmask */
++},
+ #ifndef NO_NONMS
+ {
+   C_DEFBYT,  /* UniqueID */
+@@ -1111,6 +1149,33 @@
+ #endif
+   "INPUT LINE",  /* Name */
+   B15 | H80 | M80 | M86 | R86 | D71 | T80 | T79  /* OptionVersionBitmask */
++},
++{
++  C_KEY,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "KEY",  /* Name */
++  M86/* OptionVersionBitmask */
++},
++{
++  C_KEY_OFF,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "KEY OFF",  /* Name */
++  M86/* OptionVersionBitmask */
++},
++{
++  C_KEY_ON,  /* UniqueID */
++#ifndef NO_HELP
++  "",  /* Syntax */
++  "",  /* Description */
++#endif
++  "KEY ON",  /* Name */
++  M86/* OptionVersionBitmask */
+ },
+ {
+   C_LET,  /* UniqueID */
+diff -urN basic/bwd_fun.c newbasic/bwd_fun.c
+--- basic/bwd_fun.c	Sat Jun 08 14:10:52 2024
++++ newbasic/bwd_fun.c	Fri Jun 07 08:48:23 2024
+@@ -58,6 +58,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_ACOS_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -86,7 +87,6 @@
+   P1ANY, /* ParameterTests */
+   B15 | S70 | HB2 | I70 | I73 /* OptionVersionBitmask */
+ },
+-#ifndef NO_NONMS
+ {
+   F_ACSD_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -356,6 +356,7 @@
+   P1ANY, /* ParameterTests */
+   B15 | B93 | S70 | C77 | D64 | E78 | E86 | G74 | H14 | HB1 | HB2 | H80 | G65 | G67 | M80 | M86 | D73 | D70 | R86 | D71 | I70 | I73 | T80 | V09 | T79 /* OptionVersionBitmask */
+ },
++#ifndef NO_NOMS
+ {
+   F_ATND_X_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -384,7 +385,6 @@
+   P1ANY, /* ParameterTests */
+   B15 | HB2 /* OptionVersionBitmask */
+ },
+-#ifndef NO_NONMS
+ {
+   F_BASE_N, /* UniqueID */
+ #ifndef NO_HELP
+@@ -533,6 +533,7 @@
+   P1BYT, /* ParameterTests */
+   B15 | B93 | H14 | M80 | M86 | D71 | T80 /* OptionVersionBitmask */
+ },
++#ifndef NO_NONMS
+ {
+   F_CHR_X_S, /* UniqueID */
+ #ifndef NO_HELP
+@@ -560,6 +561,7 @@
+   P1ANY, /* ParameterTests */
+   S70 | I70 | I73 /* OptionVersionBitmask */
+ },
++#endif
+ {
+   F_CHR4_X_S, /* UniqueID */
+ #ifndef NO_HELP
+diff -urN basic/bwx_tty.c newbasic/bwx_tty.c
+--- basic/bwx_tty.c	Sat Jun 08 14:10:51 2024
++++ newbasic/bwx_tty.c	Thu Jun 06 14:28:33 2024
+@@ -59,23 +59,7 @@
+     WARN_ILLEGAL_FUNCTION_CALL;
+     return;
+   }
+-  switch (My->OptionTerminalType)
+-  {
+-  case C_OPTION_TERMINAL_NONE:
+-    break;
+-  case C_OPTION_TERMINAL_ADM:
+-    fprintf (My->SYSOUT->cfp, "%c=%c%c", 27, Row + 32, Col + 32);
+-    break;
+-  case C_OPTION_TERMINAL_ANSI:
+-    fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
+-    break;
+-  case C_OPTION_TERMINAL_PC:
+-    fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
+-    break;
+-  default:
+-    WARN_ADVANCED_FEATURE;
+-    break;
+-  }
++  fprintf (My->SYSOUT->cfp, "%c[%d;%dH", 27, Row, Col);
+   fflush (My->SYSOUT->cfp);
+   My->SYSOUT->row = Row;
+   My->SYSOUT->col = Col;
+@@ -88,23 +72,9 @@
+   assert (My != NULL);
+   assert (My->SYSOUT != NULL);
+   assert (My->SYSOUT->cfp != NULL);
+-  switch (My->OptionTerminalType)
+-  {
+-  case C_OPTION_TERMINAL_NONE:
+-    break;
+-  case C_OPTION_TERMINAL_ADM:
+-    fprintf (My->SYSOUT->cfp, "%c", 26);
+-    break;
+-  case C_OPTION_TERMINAL_ANSI:
+-    fprintf (My->SYSOUT->cfp, "%c[2J", 27);
+-    break;
+-  case C_OPTION_TERMINAL_PC:
+-    fprintf (My->SYSOUT->cfp, "%c[2J", 27);
+-    break;
+-  default:
+-    WARN_ADVANCED_FEATURE;
+-    break;
+-  }
++
++  fprintf (My->SYSOUT->cfp, "%c[2J", 27);
++
+   bwx_LOCATE (1, 1);
+ }
+ 
+@@ -122,22 +92,7 @@
+     WARN_ILLEGAL_FUNCTION_CALL;
+     return;
+   }
+-  switch (My->OptionTerminalType)
+-  {
+-  case C_OPTION_TERMINAL_NONE:
+-    break;
+-  case C_OPTION_TERMINAL_ADM:
+-    break;
+-  case C_OPTION_TERMINAL_ANSI:
+-    fprintf (My->SYSOUT->cfp, "%c[%d;%dm", 27, 30 + Fore, 40 + Back);
+-    break;
+-  case C_OPTION_TERMINAL_PC:
+-    fprintf (My->SYSOUT->cfp, "%c[%d;%dm", 27, 30 + Fore, 40 + Back);
+-    break;
+-  default:
+-    WARN_ADVANCED_FEATURE;
+-    break;
+-  }
++  fprintf (My->SYSOUT->cfp, "%c[%d;%dm", 27, 30 + Fore, 40 + Back);
+   fflush (My->SYSOUT->cfp);
+ }
+ 

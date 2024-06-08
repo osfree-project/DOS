@@ -4,6 +4,6 @@ PORT_NAME = dos$(SEP)basic
 PORT_TYPE = git
 PORT_URL  = https://github.com/nerun/bwbasic/
 PORT_REV  = 
-PORT_PATCHES  = basic.diff basic2.diff basic3.diff basic4.diff basic5.diff
+PORT_PATCHES  = basic.diff basic2.diff basic3.diff basic4.diff basic5.diff basic6.diff
 
 !include $(%ROOT)tools/mk/port.mk
