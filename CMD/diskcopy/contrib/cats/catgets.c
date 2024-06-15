@@ -35,7 +35,7 @@
 #include "db.h"
 #include "catgets.h"
 
-#include "..\lfnapi.h"
+#include "../lfnapi.h"
 
 #define UNUSED(x) x=x
 

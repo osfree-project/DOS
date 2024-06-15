@@ -22,7 +22,7 @@ $(PATH)asgn_asc.c: $(PATH)..$(SEP)tsr$(SEP)asgn_tsr.com
 
 $(PATH)msg.inc: $(PATH)$(PROJ).txt
   $(verbose)$(SAY) MKMSGF   $^.
-  $(verbose)$(MC) $[@ $(PATH)msg.inc /Q /C /I$(MYDIR)$(PS)$(%OS2TK)$(SEP)h
+  $(verbose)$(MC) $[@ $(PATH)msg.inc -Q -C -I$(MYDIR)$(PS)$(%OS2TK)$(SEP)h
 
 $(PATH)$(PROJ).txt: $(PATH)$(PROJ).ext
   $(verbose)$(SAY) MSGEXTRT $^.

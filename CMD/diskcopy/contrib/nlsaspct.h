@@ -34,7 +34,7 @@
 ** seperation of concerns.
 */
 
-#include "cats\catgets.h"
+#include "cats/catgets.h"
 
 #define DISKCOPY_NLS_FILE_BASE "diskcopy"
 

@@ -167,7 +167,7 @@ diff -urwN basic/bwb_cmd.c newbasic/bwb_cmd.c
    {
 diff -urwN basic/bwb_tbl.c newbasic/bwb_tbl.c
 --- basic/bwb_tbl.c	Mon Apr 15 14:33:59 2024
-+++ newbasic/bwb_tbl.c	Mon Apr 15 14:30:35 2024
++++ newbasic/bwb_tbl.c	Mon Apr 15 14:30:35 202
 @@ -47,12 +47,14 @@
     "BYWATER",                        /* Name */
     B15,                                /* OptionVersionBitmask */

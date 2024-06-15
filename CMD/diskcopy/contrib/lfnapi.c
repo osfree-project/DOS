@@ -35,7 +35,7 @@
 #endif
 #include <stdio.h>
 
-#include "io95\io95.h"
+#include "io95/io95.h"
 #include "lfnapi.h"
 #include "drive.h"
 #include "diskcopy.h"
