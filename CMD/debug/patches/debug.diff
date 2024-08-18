@@ -1,17 +1,27 @@
 diff -urwN debug/src/debug.asm debug-new/src/debug.asm
---- debug/src/debug.asm	2024-03-25 17:42:33.606630798 +0000
-+++ debug-new/src/debug.asm	2024-03-25 17:41:46.603223510 +0000
-@@ -1402,7 +1402,7 @@
- 		db 0a6h,0aeh				;REPE/REPNE (CMPSB, SCASB)
- N_REPALL equ $ - replist
+--- debug/src/debug.asm	Mon Aug 19 01:28:07 2024
++++ debug-new/src/debug.asm	Mon Aug 19 01:26:51 2024
+@@ -1831,7 +1831,7 @@
+ 	ret
+ setdbgexc0d0e endp
  
--	include <DEBUGTBL.INC>
-+	include <debugtbl.inc>
+-	include <TRAPD.INC>
++	include <trapd.inc>
  
- opindex label byte
- 	.radix 16t
-@@ -9810,7 +9810,7 @@
- 	include <TRAPP.INC>
+ if CATCHINT21
+ intr21pm proc
+@@ -8340,14 +8340,14 @@
+ 
+ if RING0
+  if LMODE
+-	include <TRAPPL.INC>
++	include <trappl.inc>
+  elseif V86M
+-	include <TRAPPV.INC>
++	include <trappv.inc>
+  else
+-	include <TRAPP.INC>
++	include <trapp.inc>
   endif
  else
 -	include <TRAPR.INC>
@@ -19,7 +29,7 @@ diff -urwN debug/src/debug.asm debug-new/src/debug.asm
  endif
  
  ;--- fall thru
-@@ -11521,7 +11521,7 @@
+@@ -10259,7 +10259,7 @@
  
  ;--- disassembler code
  
@@ -28,3 +38,48 @@ diff -urwN debug/src/debug.asm debug-new/src/debug.asm
  
  ;   SHOWMACH - Return strings 
  ;           "[needs _86]" or "[needs _87]",
+@@ -10476,7 +10476,7 @@
+  if RING0
+ 	.386
+  endif
+-	include <FPTOSTR.INC>
++	include <fptostr.inc>
+ endif
+ 
+ ;--- the layout for FSAVE/FRSTOR depends on mode and 16/32bit
+@@ -10983,9 +10983,9 @@
+ 	pushcontext cpu
+ 	.386
+  if RING0 and V86M
+-	include <DPRINTFR.INC>
++	include <dptrintfr.inc>
+  else
+-	include <DPRINTF.INC>
++	include <dprintf.inc>
+  endif
+ 	popcontext cpu
+ endif
+diff -urwN debug/src/disasm.inc debug-new/src/disasm.inc
+--- debug/src/disasm.inc	Mon Aug 19 01:28:07 2024
++++ debug-new/src/disasm.inc	Mon Aug 19 01:27:07 2024
+@@ -67,7 +67,7 @@
+ 
+ CONST segment
+ 
+-	include <DISTBL.INC>
++	include <distbl.inc>
+ 
+ ;--- table of obsolete-instruction values.
+ ;--- instructions are FENI, FDISI, FSETPM, MOV to/from TRx
+diff -urwN debug/src/lineasm.inc debug-new/src/lineasm.inc
+--- debug/src/lineasm.inc	Mon Aug 19 01:28:07 2024
++++ debug-new/src/lineasm.inc	Mon Aug 19 01:27:21 2024
+@@ -150,7 +150,7 @@
+ 		db 0a6h,0aeh				;REPE/REPNE (CMPSB, SCASB)
+ N_REPALL equ $ - replist
+ 
+-	include <ASMTBL.INC>
++	include <asmtbl.inc>
+ 
+ ;--- opindex array - help array to access operand list items (oplists);
+ ;--- needed because the operand list items differ in size.
