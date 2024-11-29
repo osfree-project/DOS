@@ -29,8 +29,9 @@ DIRS =   shared    &
          qbasic    &
          sort      &
          subst     &
-         xcopy
-
+         xcopy	&
+	expand	&
+	fastopen
 #         lxloader  &
 
 !include $(%ROOT)tools/mk/all.mk

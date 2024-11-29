@@ -26,3 +26,11 @@
 [submodule "CMD/graftabl/macrolib"]
 	path = CMD/graftabl/macrolib
 	url = https://github.com/osfree-project/MacroLib
+[submodule "CMD/expand"]
+	path = CMD/expand
+        url = https://github.com/osfree-project/expand
+        branch = main
+[submodule "CMD/fastopen"]
+	path = CMD/fastopen
+	url = https://github.com/osfree-project/fastopen
+	branch = main
