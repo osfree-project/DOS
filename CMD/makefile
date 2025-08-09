@@ -28,10 +28,10 @@ DIRS =   shared    &
          move      &
          qbasic    &
          sort      &
-         subst     &
          xcopy	&
 	expand	&
 	fastopen
+#         subst     &
 #         lxloader  &
 
 !include $(%ROOT)tools/mk/all.mk

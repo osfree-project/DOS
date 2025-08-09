@@ -4,6 +4,12 @@
 #define INCL_VDM
 #include <os2vdm.h> /* system header */
 
+/*
+
+Under  OS/2 VDM we user its JOIN/SUBST login. 
+
+*/
+
 APIRET syntax(void)
 {
 //   cmd_ShowSystemMessage(cmd_MSG_DISKCOPY_HELP,0L);
