@@ -1,5 +1,9 @@
+#ifndef APIRET
 #define APIRET short
-#define APIENTRY _System
+#endif
+#ifndef APIENTRY
+#define APIENTRY _pascal _far
+#endif
 #define CHAR char
 #define VOID void
 #define PVOID void far *
