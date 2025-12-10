@@ -20,4 +20,4 @@ PLATFORM =
 
 $(PATH)strings.err: $(PORT_BASE)strings$(SEP)DEFAULT.err
  $(verbose)$(CP) $[@ $(PATH) $(BLACKHOLE)
- $(verbose)$(CD) $(PATH) && critstrs.exe $(LNG) $(BLACKHOLE)
+ $(verbose)$(CD) $(PATH) && $(%INTERP)critstrs.exe $(LNG) $(BLACKHOLE)

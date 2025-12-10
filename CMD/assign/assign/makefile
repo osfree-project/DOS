@@ -18,7 +18,7 @@ $(PATH)assign.obj: assign.c $(PATH)asgn_asc.c
 
 $(PATH)asgn_asc.c: $(PATH)..$(SEP)tsr$(SEP)asgn_tsr.com
   $(verbose)$(SAY) BIN2C    $^.
-  $(verbose)bin2c.exe -A module $< > $^@
+  $(verbose)$(%INTERP)bin2c.exe -A module $< > $^@
 
 $(PATH)msg.inc: $(PATH)$(PROJ).txt
   $(verbose)$(SAY) MKMSGF   $^.
