@@ -6,9 +6,6 @@
 
 # First directory must be SHARED which provides shared libs
 
-DIRS = shared doskrnl CMD WIN16
+DIRS = shared CMD WIN16 #doskrnl
 
 !include $(%ROOT)tools/mk/all.mk
-
-#TARGETS=subdirs
-#TARGET=all
