@@ -4,14 +4,14 @@
 # author, date
 #
 
-PROJ  = fixstrs
 DESC  = Control file attributes
-TRGT  = $(PROJ).exe
 #defines object file names in format objname.$(O)
-srcfiles = $(p)fixstrs$(e) # $(p)porting$(e)
+SOURCES = fixstrs # porting
 # defines additional options for C compiler
+TARGET_API = HOST
+TARGET_BITS = 32
 
-!include $(%ROOT)tools/mk/tools.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)..$(SEP)..$(SEP)port$(SEP)freecom.mk
 
 !ifeq %OS LINUX

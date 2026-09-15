@@ -3,14 +3,8 @@
 # Makefile for Watcom/LIBC interface layer
 
 PROJ      = dos_shared
-TRGT      = $(PROJ).lib
-#32_BITS = 0
 ADD_COPT  = -i=$(MYDIR)..$(SEP)include
-srcfiles  = $(p)os2vdm$(e)
+TARGET_API  = DOS
+TARGET_CLASS  = LIBRARY
 
-TARGETS  = $(PATH)$(TRGT)
-
-!include $(%ROOT)tools/mk/libsdos.mk
-
-$(TARGETS): $(OBJS)
- @$(MAKE) $(MAKEOPT) library=$(TARGETS) library
+!include $(%ROOT)tools/mk/build.mk

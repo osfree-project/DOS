@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include <dos.h>
-#include <os2\newexe.h>
+#include <os2/newexe.h>
 
 #ifndef WORD
 typedef unsigned short  WORD;
@@ -13,7 +13,7 @@ typedef unsigned short  WORD;
 typedef unsigned long  DWORD;
 #endif
 
-#include <os2\exe386.h>
+#include <os2/exe386.h>
 
 extern char _far *_LpPgmName;
 extern char _far *_LpCmdLine;

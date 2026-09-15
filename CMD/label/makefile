@@ -4,16 +4,12 @@
 # author, date
 #
 
-PROJ = label
-TRGT = $(PROJ).exe
 DESC = Change volume label
 #defines object file names in format $(p)objname$(e)
-srcfiles = $(p)label$(e) $(p)tnyprntf$(e) &
-$(p)kitten$(e)
+SOURCES = label tnyprntf kitten
+TARGET_API = DOS
 
-# defines additional options for C compiler
-
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)label.mk
 
 .c: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;

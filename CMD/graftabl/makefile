@@ -4,16 +4,15 @@
 # author, date
 #
 
-PROJ       = graftabl
-TRGT       = $(PROJ).com
 DESC       = Append directory to search path
-srcfiles   = $(p)graftabl2$(e) $(p)msg$(e)
+SOURCES    = graftabl2 msg
 NOLIBS     = 1
 COM        = 1
 JWASM      = 1
 ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
@@ -49,4 +48,3 @@ $(PATH)$(PROJ).ext: .symbolic
  @%append $^@ DOS2022
  @%append $^@ DOS2023
  @%append $^@ DOS2024
-

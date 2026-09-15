@@ -4,7 +4,7 @@
 # author, date
 #
 
-PROJ  = strings
+#PROJ  = strings
 DESC  = Control file attributes
 TGT  = $(PROJ).lib
 DIRS  = fixstrs critstrs
@@ -15,7 +15,7 @@ LNG = $(PORT_BASE)strings$(SEP)$(LANG).lng
 
 DEST = none
 
-!include $(%ROOT)tools/mk/all.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
 #PLATFORM =

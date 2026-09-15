@@ -1,3 +1,3 @@
 DIRS = tsr assign
 
-!include $(%ROOT)tools/mk/all.mk
+!include $(%ROOT)tools/mk/build.mk

@@ -4,35 +4,20 @@
 # author, date
 #
 
-PROJ = basic
-TRGT = $(PROJ).exe
 DESC = BASIC and BASICA programming language
 #defines object file names in format objname.$(O)
-srcfiles = &
-$(p)bwbasic$(e) &
-$(p)bwb_cmd$(e) &
-$(p)bwb_cnd$(e) &
-$(p)bwb_dio$(e) &
-$(p)bwb_exp$(e) &
-$(p)bwb_fnc$(e) &
-$(p)bwb_inp$(e) &
-$(p)bwb_int$(e) &
-$(p)bwb_prn$(e) &
-$(p)bwb_stc$(e) &
-$(p)bwb_str$(e) &
-$(p)bwb_tbl$(e) &
-$(p)bwb_var$(e) &
-$(p)bwd_cmd$(e) &
-$(p)bwd_fun$(e) &
-$(p)bwx_tty$(e)
+SOURCES = bwbasic bwb_cmd bwb_cnd bwb_dio bwb_exp bwb_fnc &
+     bwb_inp bwb_int bwb_prn bwb_stc bwb_str bwb_tbl bwb_var &
+     bwd_cmd bwd_fun bwx_tty
 
 # defines additional options for C compiler
 ADD_COPT = -bc -ml -zc -ox -q -wx  -DHAVE_MSDOS -D__WATCOM__ -3 -DNO_HELP -DNO_MAINTAINER -DNO_OPTION -DNO_NONMS
 
 # additions to install target
 INSTALL_ADD = 1
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)basic.mk
 
 install_add: $(DEST)$(SEP)$(PROJ).com &
@@ -54,4 +39,3 @@ $(DEST)$(SEP)gw$(PROJ).exe: $(PATH)$(PROJ).exe
 .c: $(PORT_BASE)
 
 .h: $(PORT_BASE)
-

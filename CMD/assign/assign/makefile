@@ -1,14 +1,11 @@
-PROJ = assign
-TRGT = $(PROJ).com
 DESC = ASSIGN
-#defines object file names in format $(p)objname$(e)
-srcfiles = $(p)assign$(e) $(p)msg$(e)
-# defines additional options for C compiler
+SOURCES = assign msg
 ADD_COPT = -ms -D__WATCOM__
 ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
 COM = 1
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 
 .c: $(PATH)
 
@@ -44,4 +41,3 @@ $(PATH)$(PROJ).ext: .symbolic
  @%append $^@ DOS3031
  @%append $^@ DOS3032
  @%append $^@ DOS3033
- 

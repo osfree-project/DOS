@@ -15,11 +15,11 @@ DIRS =   shared    &
          comp      &
          debug     &
          diskcomp  &
-		 diskcopy  &
+	 diskcopy  &
          edlin     &
          exit_vdm  &
          find      &
-		 graftabl  &
+	 graftabl  &
          help      &
          join      &
          label     &
@@ -28,10 +28,10 @@ DIRS =   shared    &
          move      &
          qbasic    &
          sort      &
-         xcopy	&
-	expand	&
-	fastopen
+         xcopy	   &
+	 expand	   &
+ 	 fastopen
 #         subst     &
 #         lxloader  &
 
-!include $(%ROOT)tools/mk/all.mk
+!include $(%ROOT)tools/mk/build.mk

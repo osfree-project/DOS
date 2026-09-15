@@ -4,16 +4,15 @@
 # author, date
 #
 
-PROJ       = append
-TRGT       = $(PROJ).com
-DESC       = Append directory to search path
-srcfiles   = $(p)segs$(e) $(p)environ$(e) $(p)cmdline$(e) $(p)int2f$(e) $(p)int21$(e) $(p)msg$(e) $(p)append$(e) 
+DESCRIPTION = Append directory to search path
+SOURCES     = segs environ cmdline int2f int21 msg append
 NOLIBS     = 1
 COM        = 1
 JWASM      = 1
 ADD_ASMOPT = -I=$(PATH)$(PS)$(MYDIR)macrolib
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 
 $(PATH)msg.obj: msg.asm $(PATH)msg.inc
 
@@ -39,4 +38,3 @@ $(PATH)append.ext: .symbolic
  @%append $^@ DOS2050
  @%append $^@ DOS2052
  @%append $^@ DOS3091
-

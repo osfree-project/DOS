@@ -4,18 +4,16 @@
 # author, date
 #
 
-PROJ = diskcomp
-TRGT = $(PROJ).exe
 DESC = Compare disks
 #defines object file names in format $(p)objname$(e)
-srcfiles = $(p)diskcomp$(e) $(p)drive$(e) $(p)md5$(e) $(p)misc$(e)
+SOURCES = diskcomp drive md5 misc
 # defines additional options for C compiler
 ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)diskcomp.mk
 
 .c: $(PORT_BASE)
 
 .h: $(PORT_BASE)
-

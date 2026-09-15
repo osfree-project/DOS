@@ -4,14 +4,12 @@
 # author, date
 #
 
-PROJ = find
-TRGT = $(PROJ).exe
 DESC = Find string in file
-#defines object file names in format $(p)objname$(e)
-srcfiles = $(p)find$(e) $(p)find_str$(e) $(p)kitten$(e) $(p)tnyprntf$(e)
+SOURCES = find find_str kitten tnyprntf
 # defines additional options for C compiler
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)find.mk
 
 .c: $(PORT_BASE)src;$(PORT_BASE)kitten;$(PORT_BASE)tnyprntf;

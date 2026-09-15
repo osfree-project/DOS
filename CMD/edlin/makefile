@@ -4,13 +4,12 @@
 # author, date
 #
 
-PROJ      = edlin
-TRGT      = $(PROJ).com
 DESC      = Line editor
-srcfiles  = $(p)defines$(e) $(p)dynstr$(e) $(p)edlib$(e) $(p)edlin$(e)
+SOURCES   = defines dynstr edlib edlin
+TARGET_API = DOS
 COM       = 1
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)edlin.mk
 
 .c: $(PORT_BASE)edlin-2.24

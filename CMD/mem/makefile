@@ -4,18 +4,17 @@
 # author, date
 #
 
-PROJ = mem
-TRGT = $(PROJ).exe
 DESC = Show memory information
 #defines object file names in format $(p)objname$(e)
-srcfiles = $(p)mem$(e) $(p)msg$(e) $(p)kitten$(e) $(p)prf$(e)
+SOURCES = mem msg kitten prf
 # defines additional options for C compiler
 # we use 80386 here because osFree at least requires 80386
 ADD_COPT  = -ms -oahls -j -s -0
 ADD_ASMOPT = -I=$(PATH)
 JWASM = 1
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)mem.mk
 
 .c: $(PORT_BASE)source$(SEP)mem

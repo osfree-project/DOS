@@ -4,19 +4,17 @@
 # author, date
 #
 
-PROJ      = debug
-TRGT      = $(PROJ).com
 DESC      = DOS debugger
-#defines object file names in format $(p)objname$(e)
-srcfiles  = $(p)debug$(e)
+SOURCES  = debug
 # defines additional options for C compiler
 ADD_ASMOPT  = -DPM=0 -DNASM=0
 ADD_LINKOPT = lib $(%WATCOM)$(SEP)lib286$(SEP)noemu87.lib
 COM = 1
 NOLIBS = 1
 JWASM  = 1
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)debug.mk
 
 # echo creating debug.com

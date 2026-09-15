@@ -5,13 +5,13 @@
 #
 
 PROJ = asgn_tsr
-TRGT = $(PROJ).com
 DESC = Assign TSR part
 srcfiles = $(p)asgn_tsr$(e)
 COM = 1
 NOLIBS = 1
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 
 
 

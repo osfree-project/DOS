@@ -3,14 +3,10 @@
 #
 
 PROJ      = doscmd_shared
-TRGT      = $(PROJ).lib
 ADD_COPT  = -ml -i=$(MYDIR)..$(SEP)include
-srcfiles  = $(p)tcc2wat$(e) $(p)kitten$(e) $(p)prf$(e)
+SOURCES   = tcc2wat kitten prf
 DIRS      = dflatp
+TARGET_API = DOS
+TARGET_CLASS = LIBRARY
 
-TARGETS  = $(PATH)$(TRGT)
-
-!include $(%ROOT)tools/mk/libsdos.mk
-
-$(TARGETS): $(OBJS)
- @$(MAKE) $(MAKEOPT) library=$(TARGETS) library
+!include $(%ROOT)tools/mk/build.mk

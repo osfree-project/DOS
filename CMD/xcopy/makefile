@@ -4,17 +4,15 @@
 # author, date
 #
 
-PROJ = xcopy
-TRGT = $(PROJ).exe
 DESC = Extended COPY tool
 #defines object file names in format $(p)objname$(e)
-srcfiles = $(p)xcopy$(e) $(p)kitten$(e) $(p)prf$(e)
+SOURCES = xcopy kitten prf
 # defines additional options for C compiler
+TARGET_API = DOS
 
-!include $(%ROOT)tools/mk/appsdos.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)xcopy.mk
 
 .c: $(PORT_BASE)source
 
 .h: $(PORT_BASE)source
-

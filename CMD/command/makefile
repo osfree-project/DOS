@@ -5,7 +5,7 @@
 #
 
 32_BITS = 0
-PROJ      = command
+#PROJ      = command
 #TRGT      = $(PROJ).com
 DESC      = DOS command interpreter
 
@@ -13,7 +13,7 @@ DIRS = port critstrs strings criter cmd suppl lib shell utils
 DEST = os2$(SEP)mdos
 #XMS_SWAP=1
 
-!include $(%ROOT)tools/mk/all.mk
+!include $(%ROOT)tools/mk/build.mk
 
 TARGETS=$(PATH)$(PROJ).com
 

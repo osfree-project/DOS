@@ -4,13 +4,13 @@
 # author, date
 #
 
-PROJ = critstrs
-TRGT = $(PROJ).exe
 DESC = Critical Error Strings compiler
-srcfiles = $(p)critstrs$(e)
+SOURCES = critstrs
 ADD_COPT = -i=$(PORT_BASE)include
+TARGET_API = HOST
+TARGET_BITS = 32
 
-!include $(%ROOT)tools/mk/tools.mk
+!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
 ADD_COPT = -i=$(PORT_BASE)include
