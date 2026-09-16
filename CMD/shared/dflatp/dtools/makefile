@@ -22,5 +22,3 @@ ADD_LINKOPT =
 
 .c: $(PORT_BASE)source$(SEP)dflatp
 
-$(PATH)$(PROJ).lib: $(OBJS)
- @$(MAKE) $(MAKEOPT) library=$(PATH)$(PROJ).lib library
