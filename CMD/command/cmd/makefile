@@ -18,6 +18,7 @@ srcfiles = $(p)alias$(e) $(p)beep$(e) $(p)break$(e) $(p)call$(e) $(p)cdd$(e) $(p
 # defines additional options for C compiler
 #DEBUG = all
 
+
 !include $(%ROOT)tools/mk/libsdos.mk
 !include $(MYDIR)..$(SEP)port$(SEP)freecom.mk
 
@@ -42,5 +43,7 @@ ADD_COPT = &
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)cmd.lib
 
-$(TARGETS): $(OBJS) $(PATH)..$(SEP)criter$(SEP)context.def
- @$(MAKE) $(MAKEOPT) library=$(TARGETS) library
+LIB_DEPS = $(PATH)..$(SEP)criter$(SEP)context.def
+
+#$(TARGETS): $(OBJS) $(PATH)..$(SEP)criter$(SEP)context.def
+# @$(MAKE) $(MAKEOPT) library=$(TARGETS) library

@@ -166,5 +166,5 @@ ADD_ASMOPT = &
 ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 TARGETS = $(PATH)lib.lib
 
-$(TARGETS): $(OBJS)
- @$(MAKE) $(MAKEOPT) library=$(TARGETS) library
+#$(TARGETS): $(OBJS)
+# @$(MAKE) $(MAKEOPT) library=$(TARGETS) library
