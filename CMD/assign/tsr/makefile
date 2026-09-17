@@ -1,3 +1,4 @@
+# DOS/CMD/assign/tsr/makefile
 #
 # A Makefile for ATTRIB
 # (c) osFree project,
@@ -6,10 +7,9 @@
 
 PROJ = asgn_tsr
 DESC = Assign TSR part
-srcfiles = $(p)asgn_tsr$(e)
+SOURCES = asgn_tsr
 COM = 1
 NOLIBS = 1
-TARGET_API = DOS
 
 !include $(%ROOT)tools/mk/build.mk
 
