@@ -1880,7 +1880,7 @@ diff -urwN -x .git -x .github xx-orig/strings/fixstrs.c freecom/strings/fixstrs.
 -.IF $(_COMPILER)==BC5\n\
 -CONFIGURATION += -RT- -x-\n\
 -.ENDIF\n\
-+TARGETS  = lib\n\
++#TARGETS  = lib\n\
  \n\
 -CONF_DBG =	$(MYCFLAGS_DBG)\n\
 -CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
@@ -1898,8 +1898,8 @@ diff -urwN -x .git -x .github xx-orig/strings/fixstrs.c freecom/strings/fixstrs.
  \n\
 -CONF_DBG =	$(MYCFLAGS_DBG)\n\
 -CONF_NDBG =	$(MYCFLAGS_NDBG)\n\
-+$(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\
-+ @$(MAKE) $(MAKEOPT) -f $(BLD)$(RELDIR)makefile.mk library=$(BLD)$(RELDIR)$(TRGT) library # install\n\
++#$(BLD)$(RELDIR)$(TRGT): $(OBJS)\n\
++# @$(MAKE) $(MAKEOPT) -f $(BLD)$(RELDIR)makefile.mk library=$(BLD)$(RELDIR)$(TRGT) library # install\n\
  \n\
 -.ENDIF\n\
 -.ENDIF\n", fdmake);
