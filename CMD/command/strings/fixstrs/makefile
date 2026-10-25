@@ -1,15 +1,12 @@
 #
-# A Makefile for ATTRIB
+# A Makefile for FIXSTRS
 # (c) osFree project,
 # author, date
 #
 
 DESC  = Control file attributes
-#defines object file names in format objname.$(O)
-SOURCES = fixstrs # porting
-# defines additional options for C compiler
+SOURCES = fixstrs 
 TARGET_API = HOST
-TARGET_BITS = 32
 
 !include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)..$(SEP)..$(SEP)port$(SEP)freecom.mk
