@@ -6,4 +6,3 @@ PORT_URL  = https://github.com/FDOS/attrib
 PORT_REV  = 
 PORT_PATCHES  = attrib.diff attrib2.diff
 
-!include $(%ROOT)tools/mk/port.mk

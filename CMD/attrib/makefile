@@ -13,8 +13,8 @@ TARGET_API = DOS
 ADD_COPT  = -ms -3 -ox
 #ADD_LINKOPT = lib $(BLD)lib$(SEP)doscmd_shared.lib
 
-!include $(%ROOT)tools/mk/build.mk
 !include $(MYDIR)attrib.mk
+!include $(%ROOT)tools/mk/build.mk
 
 .c: $(PORT_BASE)
 
